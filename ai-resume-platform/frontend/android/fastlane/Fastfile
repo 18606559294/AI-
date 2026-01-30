@@ -1,0 +1,197 @@
+# Fastfile - 自动化构建和发布流程
+# 使用方法：
+# 1. 安装Fastlane: gem install fastlane
+# 2. 初始化: fastlane init
+# 3. 运行lane: fastlane [lane_name]
+
+default_platform(:android)
+
+platform :android do
+  # ============================================
+  # 测试和构建
+  # ============================================
+  
+  desc "运行所有测试"
+  lane :test do
+    gradle(task: "test")
+  end
+
+  desc "构建Debug版本"
+  lane :build_debug do
+    gradle(
+      task: "assemble",
+      flavor: "debug",
+      properties: {
+        "android.injected.signing.store.file" => ENV["KEYSTORE_PATH"],
+        "android.injected.signing.store.password" => ENV["KEYSTORE_PASSWORD"],
+        "android.injected.signing.key.alias" => ENV["KEY_ALIAS"],
+        "android.injected.signing.key.password" => ENV["KEY_PASSWORD"]
+      }
+    )
+  end
+
+  desc "构建Release版本"
+  lane :build_release do
+    gradle(
+      task: "assemble",
+      flavor: "release",
+      properties: {
+        "android.injected.signing.store.file" => ENV["KEYSTORE_PATH"],
+        "android.injected.signing.store.password" => ENV["KEYSTORE_PASSWORD"],
+        "android.injected.signing.key.alias" => ENV["KEY_ALIAS"],
+        "android.injected.signing.key.password" => ENV["KEY_PASSWORD"]
+      }
+    )
+  end
+
+  # ============================================
+  # Flutter构建
+  # ============================================
+  
+  desc "构建Flutter Debug APK"
+  lane :flutter_build_debug do
+    Dir.chdir("../..") do
+      sh("flutter", "build", "apk", "--debug")
+    end
+  end
+
+  desc "构建Flutter Release APK"
+  lane :flutter_build_release do
+    Dir.chdir("../..") do
+      sh("flutter", "build", "apk", "--release")
+    end
+  end
+
+  desc "构建Flutter App Bundle"
+  lane :flutter_build_appbundle do
+    Dir.chdir("../..") do
+      sh("flutter", "build", "appbundle", "--release")
+    end
+  end
+
+  # ============================================
+  # 截图自动化
+  # ============================================
+  
+  desc "自动化截图"
+  lane :screenshots do
+    capture_android_screenshots(
+      locales: ["zh-CN", "en-US"],
+      clear_previous_screenshots: true
+    )
+  end
+
+  # ============================================
+  # Beta分发
+  # ============================================
+  
+  desc "上传到Firebase App Distribution"
+  lane :firebase_distribute do
+    firebase_app_distribution(
+      app: ENV["FIREBASE_APP_ID"],
+      service_credentials_file: ENV["FIREBASE_SERVICE_CREDENTIALS"],
+      groups: "beta-testers",
+      release_notes: "最新版本测试",
+      debug: true
+    )
+  end
+
+  desc "上传到Google Play Beta"
+  lane :upload_beta do
+    upload_to_play_store(
+      track: "beta",
+      aab: "../../build/app/outputs/bundle/release/app-release.aab",
+      skip_upload_metadata: true,
+      skip_upload_images: true,
+      skip_upload_screenshots: true
+    )
+  end
+
+  # ============================================
+  # 正式发布
+  # ============================================
+  
+  desc "上传到Google Play Production"
+  lane :upload_production do
+    upload_to_play_store(
+      track: "production",
+      aab: "../../build/app/outputs/bundle/release/app-release.aab",
+      release_status: "completed"
+    )
+  end
+
+  # ============================================
+  # 代码质量检查
+  # ============================================
+  
+  desc "运行代码质量检查"
+  lane :code_quality do
+    gradle(task: "lint")
+  end
+
+  # ============================================
+  # 完整CI/CD流程
+  # ============================================
+  
+  desc "完整的CI/CD流程"
+  lane :ci_cd do
+    # 1. 代码质量检查
+    code_quality
+    
+    # 2. 运行测试
+    test
+    
+    # 3. 构建Release版本
+    flutter_build_release
+    
+    # 4. 上传到Firebase测试
+    firebase_distribute
+    
+    # 5. 生成报告
+    notification(
+      title: "CI/CD构建成功",
+      message: "AI简历应用已成功构建并分发到Firebase"
+    )
+  end
+
+  # ============================================
+  # 错误处理
+  # ============================================
+  
+  error do |lane, exception|
+    notification(
+      title: "CI/CD构建失败",
+      message: "Lane #{lane} 失败: #{exception}"
+    )
+  end
+end
+
+/*
+环境变量配置（.env文件）：
+KEYSTORE_PATH=/path/to/your/keystore.jks
+KEYSTORE_PASSWORD=your_keystore_password
+KEY_ALIAS=your_key_alias
+KEY_PASSWORD=your_key_password
+FIREBASE_APP_ID=1:123456789:android:abcdef
+FIREBASE_SERVICE_CREDENTIALS=/path/to/service-account.json
+GOOGLE_PLAY_JSON_KEY_DATA='{"key": "value"}'
+
+使用示例：
+1. 构建Debug版本: fastlane android build_debug
+2. 构建Release版本: fastlane android flutter_build_release
+3. 运行测试: fastlane android test
+4. 上传到Firebase: fastlane android firebase_distribute
+5. 完整CI/CD流程: fastlane android ci_cd
+
+依赖安装：
+1. Ruby: brew install ruby (macOS) 或 sudo apt install ruby (Linux)
+2. Fastlane: gem install fastlane
+3. Flutter: 从 https://flutter.dev 下载
+4. Firebase CLI: npm install -g firebase-tools
+
+注意事项：
+- 确保所有环境变量已正确配置
+- 确保keystore文件安全存储
+- Firebase服务账号需要适当的权限
+- Google Play需要配置API密钥
+*/

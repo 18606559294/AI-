@@ -1,0 +1,1 @@
+{"platformName": "Android", "automationName": "UiAutomator2", "deviceName": "Android Emulator", "app": "/path/to/your/app/build/app/outputs/flutter-apk/app-release.apk", "appPackage": "com.example.ai_resume_app", "appActivity": ".MainActivity", "platformVersion": "13", "noReset": true, "fullReset": false, "newCommandTimeout": 300, "unicodeKeyboard": true, "resetKeyboard": true}

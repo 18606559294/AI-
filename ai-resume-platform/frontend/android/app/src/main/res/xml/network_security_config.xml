@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+网络安全配置 - Network Security Configuration
+
+功能:
+1. 开发环境: 支持Charles Proxy等抓包工具进行HTTPS解密
+2. 生产环境: 使用系统证书，确保安全性
+
+使用Charles Proxy抓包步骤:
+1. 在电脑上安装并启动Charles Proxy
+2. Help -> SSL Proxying -> Install Charles Root Certificate
+3. Help -> SSL Proxying -> Install Charles Root Certificate on a Mobile Device
+4. 在手机上配置代理: WiFi -> 长按 -> 修改网络 -> 高级选项 -> 代理 -> 手动
+5. 主机名填入电脑IP，端口8888
+6. 在手机浏览器访问 chls.pro/ssl 下载并安装证书
+-->
+<network-security-config>
+    <!-- Debug构建: 允许用户证书用于抓包调试 -->
+    <base-config cleartextTrafficPermitted="true">
+        <trust-anchors>
+            <certificates src="system" />
+            <certificates src="user" />
+        </trust-anchors>
+    </base-config>
+
+    <!-- 开发服务器配置 (本地开发) -->
+    <domain-config cleartextTrafficPermitted="true">
+        <domain includeSubdomains="true">localhost</domain>
+        <domain includeSubdomains="true">10.0.2.2</domain>
+        <domain includeSubdomains="true">192.168.1.1</domain>
+        <domain includeSubdomains="true">127.0.0.1</domain>
+        <trust-anchors>
+            <certificates src="system" />
+            <certificates src="user" />
+        </trust-anchors>
+    </domain-config>
+
+    <!-- 生产环境API服务器 (使用Let's Encrypt等公共CA) -->
+    <domain-config>
+        <domain includeSubdomains="true">api.example.com</domain>
+        <trust-anchors>
+            <certificates src="system" />
+        </trust-anchors>
+    </domain-config>
+
+    <!-- Debug专用: 允许所有证书 (仅用于测试) -->
+    <debug-overrides>
+        <trust-anchors>
+            <certificates src="system" />
+            <certificates src="user" />
+        </trust-anchors>
+    </debug-overrides>
+</network-security-config>
