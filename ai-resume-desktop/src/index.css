@@ -1,0 +1,2 @@
+// 复用网页版的 index.css
+export * from '@ai-resume/web/src/index.css';
