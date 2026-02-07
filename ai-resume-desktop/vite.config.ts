@@ -8,6 +8,7 @@ export default defineConfig({
     alias: {
       '@': path.resolve(__dirname, './src'),
       '@ai-resume/shared': path.resolve(__dirname, '../ai-resume-shared/src'),
+      '@ai-resume/web': path.resolve(__dirname, '../ai-resume-web/src'),
     },
   },
   // Tauri expects a fixed port, fail if that port is not available

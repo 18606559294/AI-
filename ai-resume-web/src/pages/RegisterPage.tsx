@@ -10,7 +10,9 @@ export default function RegisterPage() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [username, setUsername] = useState('');
   const [verificationCode, setVerificationCode] = useState('');
-    const [countdown, setCountdown] = useState(0);
+  const [countdown, setCountdown] = useState(0);
+  const [agreedToTerms, setAgreedToTerms] = useState(false);
+  const [passwordError, setPasswordError] = useState<string | null>(null);
 
   const validatePassword = (): string | null => {
     if (password.length < 6) return '密码长度至少6位';
@@ -20,6 +22,8 @@ export default function RegisterPage() {
   };
 
   const handleSendCode = async () => {
+    if (!email) return;
+
     // TODO: 实现发送验证码
     setCountdown(60);
 
@@ -42,10 +46,13 @@ export default function RegisterPage() {
       return;
     }
 
-    const passwordError = validatePassword();
-    if (passwordError) {
+    const validationError = validatePassword();
+    if (validationError) {
+      setPasswordError(validationError);
       return;
     }
+
+    setPasswordError(null);
 
     try {
       await register(email, password, {
@@ -57,6 +64,13 @@ export default function RegisterPage() {
       // Error handled by store
     }
   };
+
+  const canSubmit = password === confirmPassword &&
+    password.length > 0 &&
+    agreedToTerms &&
+    !isLoading;
+
+  const isPasswordValid = password.length === 0 || validatePassword() === null;
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary-50 to-primary-100 px-4 py-8">
@@ -113,12 +127,15 @@ export default function RegisterPage() {
                   type="button"
                   onClick={handleSendCode}
                   disabled={countdown > 0 || !email}
-                  className="btn btn-secondary whitespace-nowrap"
+                  className="btn btn-secondary whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed"
                   data-testid="send-code-button"
                 >
                   {countdown > 0 ? `${countdown}秒` : '发送验证码'}
                 </button>
               </div>
+              {!email && (
+                <p className="text-gray-400 text-xs mt-1">请先输入邮箱</p>
+              )}
             </div>
 
             <div>
@@ -144,12 +161,21 @@ export default function RegisterPage() {
                 id="password"
                 type="password"
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                onChange={(e) => {
+                  setPassword(e.target.value);
+                  setPasswordError(null);
+                }}
                 className="input"
                 placeholder="至少6位，包含字母和数字"
                 required
                 data-testid="register-password-input"
               />
+              {passwordError && !confirmPassword && (
+                <p className="text-red-500 text-sm mt-1" data-testid="password-error">{passwordError}</p>
+              )}
+              {password && !isPasswordValid && !confirmPassword && (
+                <p className="text-amber-500 text-sm mt-1">密码需至少6位，包含字母和数字</p>
+              )}
             </div>
 
             <div>
@@ -175,6 +201,8 @@ export default function RegisterPage() {
               <input
                 id="terms"
                 type="checkbox"
+                checked={agreedToTerms}
+                onChange={(e) => setAgreedToTerms(e.target.checked)}
                 required
                 className="mt-1"
                 data-testid="terms-checkbox"
@@ -193,8 +221,8 @@ export default function RegisterPage() {
 
             <button
               type="submit"
-              disabled={isLoading || password !== confirmPassword}
-              className="btn btn-primary w-full py-3"
+              disabled={!canSubmit}
+              className="btn btn-primary w-full py-3 disabled:opacity-50 disabled:cursor-not-allowed"
               data-testid="register-button"
             >
               {isLoading ? '注册中...' : '注册'}
