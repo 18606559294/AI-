@@ -11,10 +11,10 @@ import type {
   TemplateFilter,
   PaginatedResponse,
 } from '../types/index.js';
-import { ApiClient, createApiClient, getApiClient } from './client.js';
+import { ApiClient, createApiClient, getApiClient, initApiClient } from './client.js';
 
 // Re-export client functions
-export { ApiClient, createApiClient, getApiClient };
+export { ApiClient, createApiClient, getApiClient, initApiClient };
 
 /**
  * 认证 API

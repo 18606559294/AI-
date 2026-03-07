@@ -6,20 +6,18 @@ AI 驱动的简历智能生成平台，支持网页版和桌面版。
 
 ```
 ai_resume/
-├── AI-ai-resume-platform/    # Flutter 移动端应用
-├── ai-resume-shared/         # 共享代码（类型定义、API 客户端）
-├── ai-resume-web/            # React 网页版
-├── ai-resume-desktop/        # Tauri 桌面版
-└── start.bat                 # Windows 统一启动脚本
+├── PROJECT_MANAGEMENT/   # 项目文档和计划
+├── ai-resume-shared/     # 共享代码（类型定义、API 客户端）
+├── ai-resume-web/        # React 网页版 (支持响应式移动端视图)
+├── ai-resume-desktop/    # Tauri 桌面版
+└── start.bat             # Windows 统一启动脚本
 ```
 
 ## 技术栈
 
-### 移动端 (Flutter)
-- Flutter 3.x
-- Riverpod (状态管理)
-- Go Router (路由)
-- Dio (网络请求)
+### 移动端 (当前)
+- 响应式 Web Design (适配 iOS/Android 浏览器)
+- 原生 App 迁移计划见 `PROJECT_MANAGEMENT/plans/FLUTTER_MIGRATION_PLAN.md`
 
 ### 网页版 / 桌面版
 - React 18 + TypeScript
@@ -35,15 +33,21 @@ ai_resume/
 
 ## 快速开始
 
-### Windows 用户
+### Docker 部署 (推荐)
 
-双击运行 `start.bat` 选择对应操作：
+我们为网页版提供了 Docker 部署支持，包含 Nginx 服务器。
 
-1. 网页版开发
-2. 桌面版开发
-3. 网页版构建
-4. 桌面版构建
-5. 安装依赖
+1. 在项目根目录下构建镜像：
+   ```bash
+   docker build -f ai-resume-web/Dockerfile -t ai-resume-web .
+   ```
+
+2. 运行容器：
+   ```bash
+   docker run -d -p 3000:80 ai-resume-web
+   ```
+
+3. 访问 `http://localhost:3000`
 
 ### 手动启动
 
@@ -104,6 +108,16 @@ npm run tauri:build
 
 输出: `ai-resume-desktop/src-tauri/target/release/`
 
+## 测试
+
+本项目包含完整的 E2E 测试套件，覆盖 Web、移动端视图和桌面端逻辑。
+
+```bash
+# 运行网页版和移动端视图测试
+cd ai-resume-web
+npx playwright test
+```
+
 ## 功能特性
 
 - ✅ 用户注册/登录
@@ -114,6 +128,7 @@ npm run tauri:build
 - ✅ 个人中心
 - ✅ 设置管理
 - ✅ 多 AI 提供商支持 (OpenAI/DeepSeek/小米AI)
+- ✅ 本地文件存储 (桌面端专属)
 
 ## 许可证
 

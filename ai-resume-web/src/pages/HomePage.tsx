@@ -30,8 +30,17 @@ export default function HomePage() {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-8">
             <Link to="/" className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-sky-400 to-accent-500 flex items-center justify-center shadow-neon-blue">
-                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div 
+                className="w-10 h-10 rounded-xl bg-gradient-to-br from-sky-400 to-accent-500 flex items-center justify-center shadow-neon-blue"
+                style={{ width: '40px', height: '40px' }}
+              >
+                <svg 
+                  className="w-6 h-6 text-white" 
+                  fill="none" 
+                  stroke="currentColor" 
+                  viewBox="0 0 24 24"
+                  style={{ width: '24px', height: '24px' }}
+                >
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                 </svg>
               </div>
@@ -88,11 +97,19 @@ export default function HomePage() {
               AI 驱动的智能简历平台
             </div>
 
-            <h1 className="text-display font-bold mb-6">
+            <h1 className="text-3xl font-bold mb-4">
+              <span className="text-white">欢迎回来</span>
+            </h1>
+
+            <p className="text-xl text-slate-400 max-w-2xl mx-auto mb-6">
+              使用 AI 技术快速创建专业简历
+            </p>
+
+            <div className="text-display font-bold mb-6">
               <GradientText>打造你的</GradientText>
               <br />
               <span className="text-white">专业简历</span>
-            </h1>
+            </div>
 
             <p className="text-xl text-slate-400 max-w-2xl mx-auto mb-10">
               利用前沿 AI 技术，快速创建令人印象深刻的简历。
@@ -101,22 +118,26 @@ export default function HomePage() {
             </p>
 
             <div className="flex flex-wrap justify-center gap-4">
-              <Link to="/resumes/new">
-                <Button variant="primary" size="lg">
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                  </svg>
-                  创建新简历
-                </Button>
+              <Link
+                to="/resumes/new"
+                className="inline-flex items-center justify-center gap-2 px-8 py-4 font-semibold rounded-xl transition-all duration-300 cursor-pointer bg-gradient-to-r from-sky-500 to-accent-500 text-white hover:scale-105 shadow-lg shadow-sky-500/30 text-lg"
+                data-testid="create-resume-link"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                </svg>
+                创建新简历
               </Link>
-              <Link to="/templates">
-                <Button variant="secondary" size="lg">
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                  </svg>
-                  浏览模板
-                </Button>
+              <Link
+                to="/templates"
+                className="inline-flex items-center justify-center gap-2 px-8 py-4 font-semibold rounded-xl transition-all duration-300 cursor-pointer bg-white/10 backdrop-filter blur(10px) border border-white/20 text-white hover:bg-white/20 text-lg"
+                data-testid="templates-link"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                </svg>
+                浏览模板
               </Link>
             </div>
           </div>
@@ -245,13 +266,14 @@ export default function HomePage() {
             <p className="text-slate-400 mb-6 max-w-md mx-auto">
               创建你的第一份 AI 简历，开启求职之旅
             </p>
-            <Link to="/resumes/new">
-              <Button variant="primary">
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                </svg>
-                创建第一份简历
-              </Button>
+            <Link
+              to="/resumes/new"
+              className="inline-flex items-center justify-center gap-2 px-6 py-3 font-semibold rounded-xl transition-all duration-300 cursor-pointer bg-gradient-to-r from-sky-500 to-accent-500 text-white hover:scale-105 shadow-lg shadow-sky-500/30"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+              </svg>
+              创建第一份简历
             </Link>
           </Card>
         </div>
@@ -274,15 +296,17 @@ export default function HomePage() {
                 加入数万求职者的行列，使用 AI 技术快速创建令人印象深刻的简历
               </p>
               <div className="flex flex-wrap justify-center gap-4">
-                <Link to="/resumes/new">
-                  <Button variant="secondary" size="lg">
-                    立即开始
-                  </Button>
+                <Link
+                  to="/resumes/new"
+                  className="inline-flex items-center justify-center gap-2 px-8 py-4 font-semibold rounded-xl transition-all duration-300 cursor-pointer bg-white/10 backdrop-filter blur(10px) border border-white/20 text-white hover:bg-white/20 text-lg"
+                >
+                  立即开始
                 </Link>
-                <Link to="/templates">
-                  <Button variant="ghost" size="lg" className="!text-white !border-white/20 hover:!bg-white/10">
+                <Link
+                  to="/templates"
+                  className="inline-flex items-center justify-center gap-2 px-8 py-4 font-semibold rounded-xl transition-all duration-300 cursor-pointer text-slate-300 hover:text-white hover:bg-white/5 text-lg border border-transparent hover:border-white/10"
+                >
                   查看模板
-                  </Button>
                 </Link>
               </div>
             </div>

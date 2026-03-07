@@ -61,3 +61,60 @@ screen.png
 test_01_current.png
 screenshots/
 AI-/
+
+# Security - Environment files
+.env
+.env.local
+.env.production
+*.env
+.env.*
+
+# Log files
+logcat.txt
+*.txt
+logs/
+
+# Test scripts with sensitive data
+test_*.js
+test_*.ps1
+reset_password.js
+
+# Test reports
+*_TEST_*.md
+*_REPORT*.md
+*_GUIDE*.md
+playwright-report/
+test-reports/
+archive/reports/
+
+# Archive directory
+archive/
+
+# Temporary build scripts
+*.bat
+*.ps1
+*.sh
+*.vbs
+!*.sh.bak
+
+# Compliance documents (temporary)
+COMPLIANCE_*.md
+SECURITY_*.md
+
+# Legal and business documents
+AI_USAGE_*.md
+COMPANY_*.md
+CONTRIBUTING.md
+COOKIE_POLICY.md
+LEGAL_*.md
+REFUND_POLICY.md
+THIRD_PARTY_*.md
+
+# Temporary files in root directory
+AUTO_TEST.vbs
+RUN_TESTS.vbs
+EXECUTE_TEST.js
+
+# Chinese named files and directories
+测试状态报告.md
+请启动*

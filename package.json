@@ -1,0 +1,11 @@
+{
+  "name": "ai-resume",
+  "scripts": {
+    "build": "echo 'No build step required'",
+    "lint": "echo 'No lint step configured'",
+    "test": "echo 'No tests configured'"
+  },
+  "dependencies": {
+    "@playwright/test": "^1.58.2"
+  }
+}

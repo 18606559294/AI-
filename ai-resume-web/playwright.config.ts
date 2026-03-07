@@ -9,7 +9,7 @@ export default defineConfig({
   reporter: 'html',
   timeout: 120000, // 增加单个测试超时时间到120秒
   use: {
-    baseURL: 'http://localhost:3000/resume/',
+    baseURL: 'http://localhost:3000',
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
     actionTimeout: 30000, // 操作超时30秒
@@ -17,8 +17,8 @@ export default defineConfig({
   },
 
   webServer: {
-    command: 'node node_modules/vite/bin/vite.js',
-    url: 'http://localhost:3000/resume/',
+    command: 'npx vite preview --port 3000',
+    url: 'http://localhost:3000',
     reuseExistingServer: !process.env.CI,
     timeout: 180000, // 服务器启动超时3分钟
   },
@@ -29,25 +29,40 @@ export default defineConfig({
       name: 'chromium-desktop',
       use: { ...devices['Desktop Chrome'] },
     },
-    // iPhone 12 Pro 测试
+    // iPhone 12 Pro 测试 (using chromium for mobile simulation)
     {
       name: 'mobile-iphone',
       use: {
-        ...devices['iPhone 12 Pro'],
+        ...devices['Desktop Chrome'],
+        viewport: { width: 390, height: 844 },
+        deviceScaleFactor: 3,
+        isMobile: true,
+        hasTouch: true,
+        userAgent: 'Mozilla/5.0 (iPhone; CPU iPhone OS 14_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.0 Mobile/15E148 Safari/604.1',
       },
     },
-    // Pixel 5 测试
+    // Pixel 5 测试 (using chromium for mobile simulation)
     {
       name: 'mobile-android',
       use: {
-        ...devices['Pixel 5'],
+        ...devices['Desktop Chrome'],
+        viewport: { width: 393, height: 851 },
+        deviceScaleFactor: 2.625,
+        isMobile: true,
+        hasTouch: true,
+        userAgent: 'Mozilla/5.0 (Linux; Android 11) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.93 Mobile Safari/537.36',
       },
     },
-    // iPad 测试
+    // iPad 测试 (using chromium for tablet simulation)
     {
       name: 'tablet-ipad',
       use: {
-        ...devices['iPad Pro'],
+        ...devices['Desktop Chrome'],
+        viewport: { width: 1024, height: 1366 },
+        deviceScaleFactor: 2,
+        isMobile: true,
+        hasTouch: true,
+        userAgent: 'Mozilla/5.0 (iPad; CPU OS 14_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.0 Mobile/15E148 Safari/604.1',
       },
     },
   ],

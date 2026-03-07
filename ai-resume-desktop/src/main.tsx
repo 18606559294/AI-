@@ -1,11 +1,16 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { BrowserRouter, useLocation } from 'react-router-dom';
 import { appWindow } from '@tauri-apps/api/window';
 import { useEffect } from 'react';
+import { initApiClient } from '@ai-resume/shared/api';
+import { storage } from '@ai-resume/shared';
 import App from './App';
 import './index.css';
+
+// 初始化API客户端，配置token获取
+initApiClient(() => storage.getToken());
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -21,21 +26,18 @@ function AppWrapper() {
   const location = useLocation();
 
   useEffect(() => {
-    // Set window title based on route
     const titles: Record<string, string> = {
       '/': 'AI 简历 - 首页',
       '/login': 'AI 简历 - 登录',
       '/register': 'AI 简历 - 注册',
       '/resumes': 'AI 简历 - 我的简历',
-      '/templates': 'AI 简历 - 模板库',
+      '/templates': 'AI 简历 - 模板中心',
       '/profile': 'AI 简历 - 个人中心',
       '/settings': 'AI 简历 - 设置',
     };
 
-    const title = titles[location.pathname] || 'AI 简历智能生成平台';
+    const title = titles[location.pathname] || 'AI 简历';
     document.title = title;
-
-    // Update Tauri window title
     appWindow.setTitle(title).catch(console.error);
   }, [location]);
 

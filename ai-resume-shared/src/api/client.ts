@@ -21,7 +21,7 @@ export class ApiClient {
 
   constructor(config: ApiClientConfig = {}) {
     this.config = {
-      baseURL: config.baseURL ?? 'http://127.0.0.1:8000/api/v1',
+      baseURL: config.baseURL ?? 'http://192.168.8.6:8080/api',
       timeout: config.timeout ?? 30000,
     };
 
@@ -248,16 +248,39 @@ export class ApiClient {
 // 默认导出单例
 let defaultClient: ApiClient | null = null;
 
+// Token getter that can be configured
+let tokenGetter: (() => string | null) | null = null;
+
+export function setTokenGetter(getter: () => string | null): void {
+  tokenGetter = getter;
+  // Update existing client if it exists
+  if (defaultClient) {
+    defaultClient.setToken(tokenGetter() ?? '');
+  }
+}
+
 export function createApiClient(config?: ApiClientConfig): ApiClient {
   if (!defaultClient) {
-    defaultClient = new ApiClient(config);
+    defaultClient = new ApiClient({
+      ...config,
+      getToken: () => tokenGetter?.() ?? null,
+    });
   }
   return defaultClient;
 }
 
 export function getApiClient(): ApiClient {
   if (!defaultClient) {
-    defaultClient = new ApiClient();
+    defaultClient = new ApiClient({
+      getToken: () => tokenGetter?.() ?? null,
+    });
   }
   return defaultClient;
+}
+
+/**
+ * 初始化API客户端，配置token获取函数
+ */
+export function initApiClient(getToken: () => string | null): void {
+  setTokenGetter(getToken);
 }

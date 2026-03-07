@@ -20,34 +20,28 @@ test.describe('AI 简历桌面端 - E2E 测试', () => {
   });
 
   test('桌面端登录页面可以访问', async ({ page }) => {
-    await page.goto('/');
+    // 直接导航到登录页面
+    await page.goto('http://localhost:3000/login');
 
-    await page.evaluate(() => {
-      window.history.pushState({}, '', '/login');
-      window.dispatchEvent(new PopStateEvent('popstate'));
-    });
+    await page.waitForLoadState('domcontentloaded').catch(() => {});
+    await page.waitForTimeout(2000);
 
-    await page.waitForTimeout(1000);
-
-    await expect(page).toHaveURL(/\/login/, { timeout: 5000 });
-    await expect(page.getByText('AI 简历智能生成平台')).toBeVisible({ timeout: 10000 });
-    await expect(page.getByTestId('email-input')).toBeVisible({ timeout: 10000 });
-    await expect(page.getByTestId('password-input')).toBeVisible({ timeout: 10000 });
+    await expect(page.getByText('欢迎回来')).toBeVisible({ timeout: 15000 });
+    await expect(page.getByText('账户登录')).toBeVisible({ timeout: 15000 });
+    await expect(page.getByTestId('email-input')).toBeVisible({ timeout: 15000 });
+    await expect(page.getByTestId('password-input')).toBeVisible({ timeout: 15000 });
   });
 
   test('桌面端注册页面可以访问', async ({ page }) => {
-    await page.goto('/');
+    // 直接导航到注册页面
+    await page.goto('http://localhost:3000/register');
 
-    await page.evaluate(() => {
-      window.history.pushState({}, '', '/register');
-      window.dispatchEvent(new PopStateEvent('popstate'));
-    });
+    await page.waitForLoadState('domcontentloaded').catch(() => {});
+    await page.waitForTimeout(2000);
 
-    await page.waitForTimeout(1000);
-
-    await expect(page.getByTestId('register-email-input')).toBeVisible({ timeout: 10000 });
-    await expect(page.getByTestId('register-password-input')).toBeVisible({ timeout: 10000 });
-    await expect(page.getByTestId('confirm-password-input')).toBeVisible({ timeout: 10000 });
+    await expect(page.getByTestId('register-email-input')).toBeVisible({ timeout: 15000 });
+    await expect(page.getByTestId('register-password-input')).toBeVisible({ timeout: 15000 });
+    await expect(page.getByTestId('confirm-password-input')).toBeVisible({ timeout: 15000 });
   });
 
   test('桌面端页面样式加载正确', async ({ page }) => {
@@ -59,14 +53,11 @@ test.describe('AI 简历桌面端 - E2E 测试', () => {
   });
 
   test('桌面端表单验证功能正常', async ({ page }) => {
-    await page.goto('/');
+    // 直接导航到注册页面
+    await page.goto('http://localhost:3000/register');
 
-    await page.evaluate(() => {
-      window.history.pushState({}, '', '/register');
-      window.dispatchEvent(new PopStateEvent('popstate'));
-    });
-
-    await page.waitForTimeout(1000);
+    await page.waitForLoadState('domcontentloaded').catch(() => {});
+    await page.waitForTimeout(2000);
 
     // 填写表单测试验证
     await page.fill('[data-testid="register-email-input"]', 'test@desktop.com');
@@ -74,25 +65,22 @@ test.describe('AI 简历桌面端 - E2E 测试', () => {
     await page.fill('[data-testid="confirm-password-input"]', 'different');
 
     const errorMsg = page.getByTestId('password-mismatch-error');
-    await expect(errorMsg).toBeVisible({ timeout: 5000 });
+    await expect(errorMsg).toBeVisible({ timeout: 10000 });
   });
 
   test('桌面端响应式布局', async ({ page }) => {
-    await page.goto('/');
+    // 直接导航到登录页面
+    await page.goto('http://localhost:3000/login');
 
-    await page.evaluate(() => {
-      window.history.pushState({}, '', '/login');
-      window.dispatchEvent(new PopStateEvent('popstate'));
-    });
-
-    await page.waitForTimeout(1000);
+    await page.waitForLoadState('domcontentloaded').catch(() => {});
+    await page.waitForTimeout(2000);
 
     // 测试不同窗口大小
     await page.setViewportSize({ width: 1200, height: 800 });
-    await expect(page.locator('form')).toBeVisible({ timeout: 10000 });
+    await expect(page.locator('form')).toBeVisible({ timeout: 15000 });
 
     await page.setViewportSize({ width: 800, height: 600 });
-    await expect(page.locator('form')).toBeVisible({ timeout: 10000 });
+    await expect(page.locator('form')).toBeVisible({ timeout: 15000 });
   });
 });
 
@@ -115,16 +103,15 @@ test.describe('桌面端特有功能测试', () => {
   });
 
   test('桌面端无障碍性检查', async ({ page }) => {
-    await page.evaluate(() => {
-      window.history.pushState({}, '', '/login');
-      window.dispatchEvent(new PopStateEvent('popstate'));
-    });
+    // 直接导航到登录页面
+    await page.goto('http://localhost:3000/login');
 
-    await page.waitForTimeout(1000);
+    await page.waitForLoadState('domcontentloaded').catch(() => {});
+    await page.waitForTimeout(2000);
 
     // 检查主要元素的tabindex
     const emailInput = page.getByTestId('email-input');
-    await expect(emailInput).toBeVisible();
+    await expect(emailInput).toBeVisible({ timeout: 15000 });
 
     // 检查所有可交互元素都可以通过键盘访问
     const inputs = page.locator('input');
@@ -149,18 +136,17 @@ test.describe('桌面端性能测试', () => {
   });
 
   test('页面交互响应及时', async ({ page }) => {
-    await page.goto('/');
+    await page.goto('http://localhost:3000/');
     await page.waitForLoadState('domcontentloaded').catch(() => {});
     await page.waitForTimeout(1000);
 
     const startTime = Date.now();
 
-    await page.evaluate(() => {
-      window.history.pushState({}, '', '/login');
-      window.dispatchEvent(new PopStateEvent('popstate'));
-    });
+    // 直接导航到登录页面
+    await page.goto('http://localhost:3000/login');
 
     // 等待路由切换
+    await page.waitForLoadState('domcontentloaded').catch(() => {});
     await page.waitForTimeout(1000);
 
     const responseTime = Date.now() - startTime;

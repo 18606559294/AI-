@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../store/auth';
+import { Button, Input, GradientText, Orb } from '../components/UIComponents';
 
 export default function RegisterPage() {
   const navigate = useNavigate();
@@ -73,167 +74,220 @@ export default function RegisterPage() {
   const isPasswordValid = password.length === 0 || validatePassword() === null;
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary-50 to-primary-100 px-4 py-8">
-      <div className="max-w-md w-full">
-        <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            AI 简历智能生成平台
-          </h1>
-          <p className="text-gray-600">创建账号，开启智能简历之旅</p>
-        </div>
+    <div className="min-h-screen relative overflow-x-hidden flex flex-col justify-center bg-slate-950">
+      {/* Background Orbs - 桌面端优化 */}
+      <div className="fixed inset-0 pointer-events-none overflow-hidden">
+        <Orb color="primary" size={200} className="top-0 left-0 -translate-x-1/2 -translate-y-1/2 opacity-20" />
+        <Orb color="accent" size={150} className="bottom-0 right-0 translate-x-1/2 translate-y-1/2 opacity-10" />
+      </div>
 
-        <div className="card p-8">
-          <h2 className="text-xl font-semibold text-center mb-6">注册</h2>
+      {/* Background Grid */}
+      <div className="fixed inset-0 bg-grid pointer-events-none opacity-5" />
 
-          <form onSubmit={handleSubmit} className="space-y-4">
+      {/* Main Content */}
+      <div className="relative z-10 w-full max-w-md mx-auto px-4 py-12">
+        <div className="w-full">
+          {/* Logo & Title - 桌面端优化：缩小尺寸 */}
+          <div className="text-center mb-6 animate-fade-in">
+            <Link to="/" className="inline-flex items-center justify-center gap-2 mb-4">
+              <div 
+                className="w-12 h-12 rounded-xl bg-gradient-to-br from-sky-400 to-accent-500 flex items-center justify-center shadow-neon-blue animate-pulse-glow"
+                style={{ width: '48px', height: '48px' }}
+              >
+                <svg 
+                  className="w-7 h-7 text-white" 
+                  fill="none" 
+                  stroke="currentColor" 
+                  viewBox="0 0 24 24"
+                  style={{ width: '28px', height: '28px' }}
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+              </div>
+            </Link>
+
+            <h1 className="text-2xl font-bold mb-1">
+              <GradientText>创建账号</GradientText>
+            </h1>
+            <p className="text-slate-400 text-sm">创建账号，开启智能简历之旅</p>
+          </div>
+
+          {/* Register Form Card */}
+          <div className="card-glass animate-scale-in">
+            <div className="mb-5">
+              <h2 className="text-lg font-semibold text-white mb-1">用户注册</h2>
+              <p className="text-slate-400 text-xs">填写信息创建新账户</p>
+            </div>
+
             {error && (
-              <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-red-600 text-sm">
-                {error}
+              <div className="mb-4 p-3 rounded-lg bg-rose-500/10 border border-rose-500/50 text-rose-400 text-xs flex items-start gap-2 animate-shimmer">
+                <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <span>{error}</span>
               </div>
             )}
 
-            <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
-                邮箱 *
-              </label>
-              <input
-                id="email"
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <Input
+                id="register-email-input"
+                label="邮箱地址"
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="input"
-                placeholder="请输入邮箱"
+                placeholder="your@email.com"
                 required
+                icon={
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                  </svg>
+                }
                 data-testid="register-email-input"
               />
-            </div>
 
-            <div>
-              <label htmlFor="code" className="block text-sm font-medium text-gray-700 mb-1">
-                验证码
-              </label>
-              <div className="flex gap-2">
-                <input
-                  id="code"
-                  type="text"
-                  value={verificationCode}
-                  onChange={(e) => setVerificationCode(e.target.value)}
-                  className="input flex-1"
-                  placeholder="请输入验证码"
-                  maxLength={6}
-                  data-testid="code-input"
-                />
-                <button
-                  type="button"
-                  onClick={handleSendCode}
-                  disabled={countdown > 0 || !email}
-                  className="btn btn-secondary whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed"
-                  data-testid="send-code-button"
-                >
-                  {countdown > 0 ? `${countdown}秒` : '发送验证码'}
-                </button>
+              <div className="space-y-1">
+                <label htmlFor="code-input" className="block text-xs font-medium text-slate-300">
+                  验证码
+                </label>
+                <div className="flex gap-2">
+                  <Input
+                    id="code-input"
+                    type="text"
+                    value={verificationCode}
+                    onChange={(e) => setVerificationCode(e.target.value)}
+                    placeholder="请输入验证码"
+                    maxLength={6}
+                    className="flex-1"
+                    data-testid="code-input"
+                  />
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    size="sm"
+                    onClick={handleSendCode}
+                    disabled={countdown > 0 || !email}
+                    className="whitespace-nowrap min-w-[80px] text-xs"
+                    data-testid="send-code-button"
+                  >
+                    {countdown > 0 ? `${countdown}秒` : '发送验证码'}
+                  </Button>
+                </div>
+                {!email && (
+                  <p className="text-slate-500 text-xs">请先输入邮箱</p>
+                )}
               </div>
-              {!email && (
-                <p className="text-gray-400 text-xs mt-1">请先输入邮箱</p>
-              )}
-            </div>
 
-            <div>
-              <label htmlFor="username" className="block text-sm font-medium text-gray-700 mb-1">
-                用户名
-              </label>
-              <input
-                id="username"
+              <Input
+                id="username-input"
+                label="用户名（可选）"
                 type="text"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
-                className="input"
-                placeholder="请输入用户名（可选）"
+                placeholder="请输入用户名"
+                icon={
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                  </svg>
+                }
                 data-testid="username-input"
               />
-            </div>
 
-            <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
-                密码 *
-              </label>
-              <input
-                id="password"
+              <Input
+                id="register-password-input"
+                label="密码"
                 type="password"
                 value={password}
                 onChange={(e) => {
                   setPassword(e.target.value);
                   setPasswordError(null);
                 }}
-                className="input"
                 placeholder="至少6位，包含字母和数字"
                 required
+                icon={
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2m10 0V5a2 2 0 00-2-2H6a2 2 0 00-2 2v14a2 2 0 002 2h2a2 2 0 002-2V5a2 2 0 00-2-2H6a2 2 0 00-2 2v2" />
+                  </svg>
+                }
                 data-testid="register-password-input"
               />
               {passwordError && !confirmPassword && (
-                <p className="text-red-500 text-sm mt-1" data-testid="password-error">{passwordError}</p>
+                <p className="text-rose-400 text-xs" data-testid="password-error">{passwordError}</p>
               )}
               {password && !isPasswordValid && !confirmPassword && (
-                <p className="text-amber-500 text-sm mt-1">密码需至少6位，包含字母和数字</p>
+                <p className="text-amber-400 text-xs">密码需至少6位，包含字母和数字</p>
               )}
-            </div>
 
-            <div>
-              <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-1">
-                确认密码 *
-              </label>
-              <input
-                id="confirmPassword"
+              <Input
+                id="confirm-password-input"
+                label="确认密码"
                 type="password"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
-                className="input"
                 placeholder="请再次输入密码"
                 required
+                icon={
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                  </svg>
+                }
                 data-testid="confirm-password-input"
               />
               {confirmPassword && password !== confirmPassword && (
-                <p className="text-red-500 text-sm mt-1" data-testid="password-mismatch-error">两次输入的密码不一致</p>
+                <p className="text-rose-400 text-xs" data-testid="password-mismatch-error">两次输入的密码不一致</p>
               )}
-            </div>
 
-            <div className="flex items-start gap-2">
-              <input
-                id="terms"
-                type="checkbox"
-                checked={agreedToTerms}
-                onChange={(e) => setAgreedToTerms(e.target.checked)}
-                required
-                className="mt-1"
-                data-testid="terms-checkbox"
-              />
-              <label htmlFor="terms" className="text-sm text-gray-600">
-                我已阅读并同意{' '}
-                <Link to="/terms" className="text-primary-600 hover:underline">
-                  《用户协议》
+              <div className="flex items-start gap-2 p-3 rounded-lg bg-slate-800/50">
+                <input
+                  id="terms-checkbox"
+                  type="checkbox"
+                  checked={agreedToTerms}
+                  onChange={(e) => setAgreedToTerms(e.target.checked)}
+                  required
+                  className="mt-0.5 w-4 h-4 rounded border-slate-600 text-sky-500 focus:ring-sky-500 focus:ring-offset-slate-900"
+                  data-testid="terms-checkbox"
+                />
+                <label htmlFor="terms-checkbox" className="text-xs text-slate-300 flex-1">
+                  我已阅读并同意{' '}
+                  <Link to="/terms" className="text-sky-400 hover:text-sky-300">
+                    《用户协议》
+                  </Link>
+                  {' 和 '}
+                  <Link to="/privacy" className="text-sky-400 hover:text-sky-300">
+                    《隐私政策》
+                  </Link>
+                </label>
+              </div>
+
+              <Button
+                type="submit"
+                variant="primary"
+                size="md"
+                loading={isLoading}
+                disabled={!canSubmit}
+                className="w-full"
+                data-testid="register-button"
+              >
+                {isLoading ? '注册中...' : '注册'}
+              </Button>
+            </form>
+
+            <div className="mt-5 text-center">
+              <div className="divider-gradient" />
+
+              <div className="text-center text-xs text-slate-400 mt-4">
+                已有账号？{' '}
+                <Link to="/login" className="text-sky-400 hover:text-sky-300 font-medium" data-testid="login-link">
+                  立即登录
                 </Link>
-                {' 和 '}
-                <Link to="/privacy" className="text-primary-600 hover:underline">
-                  《隐私政策》
-                </Link>
-              </label>
+              </div>
             </div>
+          </div>
 
-            <button
-              type="submit"
-              disabled={!canSubmit}
-              className="btn btn-primary w-full py-3 disabled:opacity-50 disabled:cursor-not-allowed"
-              data-testid="register-button"
-            >
-              {isLoading ? '注册中...' : '注册'}
-            </button>
-          </form>
-
-          <div className="mt-6 text-center text-sm text-gray-600">
-            已有账号？{' '}
-            <Link to="/login" className="text-primary-600 hover:underline font-medium" data-testid="login-link">
-              立即登录
-            </Link>
+          {/* Tech Decorative Elements */}
+          <div className="mt-4 flex justify-center gap-2">
+            <div className="w-1.5 h-1.5 rounded-full bg-sky-500 animate-pulse"></div>
+            <div className="w-1.5 h-1.5 rounded-full bg-accent-500 animate-pulse" style={{ animationDelay: '0.2s' }}></div>
+            <div className="w-1.5 h-1.5 rounded-full bg-pink-500 animate-pulse" style={{ animationDelay: '0.4s' }}></div>
           </div>
         </div>
       </div>

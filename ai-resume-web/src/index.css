@@ -119,6 +119,14 @@
     @apply transition-all duration-300;
     background: linear-gradient(135deg, #0ea5e9, #7c3aed);
     box-shadow: 0 4px 15px rgba(14, 165, 233, 0.3);
+    /* Touch target minimum size (44px for iOS, 48dp for Android) */
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  .btn-primary.w-full,
+  button.w-full.btn-primary {
+    width: 100% !important;
   }
 
   .btn-primary:hover {
@@ -127,7 +135,7 @@
   }
 
   .btn-primary:active {
-    @apply scale-98;
+    @apply scale-95;
   }
 
   /* Secondary Button - Glass Effect */
@@ -138,6 +146,14 @@
     backdrop-filter: blur(10px);
     border: 1px solid rgba(255, 255, 255, 0.2);
     color: white;
+    /* Touch target minimum size */
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  .btn-secondary.w-full,
+  button.w-full.btn-secondary {
+    width: 100% !important;
   }
 
   .btn-secondary:hover {
@@ -150,6 +166,14 @@
   .btn-ghost {
     @apply px-6 py-3 rounded-xl font-semibold text-slate-300;
     @apply transition-all duration-300;
+    /* Touch target minimum size */
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  .btn-ghost.w-full,
+  button.w-full.btn-ghost {
+    width: 100% !important;
   }
 
   .btn-ghost:hover {
@@ -162,6 +186,14 @@
     @apply transition-all duration-300;
     background: linear-gradient(135deg, #8b5cf6, #ec4899);
     box-shadow: 0 4px 15px rgba(139, 92, 246, 0.3);
+    /* Touch target minimum size */
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  .btn-accent.w-full,
+  button.w-full.btn-accent {
+    width: 100% !important;
   }
 
   .btn-accent:hover {
@@ -228,6 +260,16 @@
     @apply w-full px-4 py-3 rounded-xl bg-slate-800/50 border border-slate-700;
     @apply text-white placeholder-slate-400;
     @apply transition-all duration-300;
+    /* Ensure input takes at least 50% width on mobile */
+    min-width: 200px;
+  }
+
+  /* Responsive input sizing - ensure at least 50% of viewport on mobile */
+  @media (max-width: 640px) {
+    .input-cyber {
+      width: 100%;
+      min-width: 180px;
+    }
   }
 
   .input-cyber:focus {
@@ -363,8 +405,8 @@
   .bg-orb {
     position: absolute;
     border-radius: 50%;
-    filter: blur(80px);
-    opacity: 0.5;
+    filter: blur(10px);
+    opacity: 0.15;
     pointer-events: none;
   }
 

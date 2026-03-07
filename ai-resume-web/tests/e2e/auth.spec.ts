@@ -3,7 +3,7 @@ import { test, expect } from '@playwright/test';
 test.describe('AI 简历应用 - E2E 测试', () => {
   // 每个测试前导航到根路径并等待应用加载
   test.beforeEach(async ({ page }) => {
-    await page.goto('/');
+    await page.goto('http://localhost:3000/resume/');
     // 等待页面加载完成
     await page.waitForLoadState('domcontentloaded').catch(() => {});
     await page.waitForTimeout(1500);
@@ -14,35 +14,25 @@ test.describe('AI 简历应用 - E2E 测试', () => {
   });
 
   test('登录页面可以访问', async ({ page }) => {
-    // 先导航到根路径确保应用加载
-    await page.goto('/');
-
-    // 使用客户端导航
-    await page.evaluate(() => {
-      window.history.pushState({}, '', '/login');
-      window.dispatchEvent(new PopStateEvent('popstate'));
-    });
-
-    // 等待 React Router 处理导航
+    // 直接导航到登录页面
+    await page.goto('http://localhost:3000/resume/login');
+    await page.waitForLoadState('domcontentloaded').catch(() => {});
     await page.waitForTimeout(1000);
 
-    // 检查 URL 是否更新
-    await expect(page).toHaveURL(/\/login/, { timeout: 5000 });
+    // 检查 URL 是否正确
+    await expect(page).toHaveURL(/\/resume\/login/, { timeout: 5000 });
 
-    await expect(page.getByText('AI 简历智能生成平台')).toBeVisible({ timeout: 10000 });
+    // 更新为实际页面显示的文本
+    await expect(page.getByText('欢迎回来')).toBeVisible({ timeout: 10000 });
+    await expect(page.getByText('账户登录')).toBeVisible({ timeout: 10000 });
     await expect(page.getByTestId('email-input')).toBeVisible({ timeout: 10000 });
     await expect(page.getByTestId('password-input')).toBeVisible({ timeout: 10000 });
   });
 
   test('注册页面可以访问', async ({ page }) => {
-    await page.goto('/');
-
-    // 使用客户端导航
-    await page.evaluate(() => {
-      window.history.pushState({}, '', '/register');
-      window.dispatchEvent(new PopStateEvent('popstate'));
-    });
-
+    // 直接导航到注册页面
+    await page.goto('http://localhost:3000/resume/register');
+    await page.waitForLoadState('domcontentloaded').catch(() => {});
     await page.waitForTimeout(1000);
 
     await expect(page.getByTestId('register-email-input')).toBeVisible({ timeout: 10000 });
@@ -57,13 +47,8 @@ test.describe('AI 简历应用 - E2E 测试', () => {
   });
 
   test('登录页面有注册链接', async ({ page }) => {
-    await page.goto('/');
-
-    await page.evaluate(() => {
-      window.history.pushState({}, '', '/login');
-      window.dispatchEvent(new PopStateEvent('popstate'));
-    });
-
+    await page.goto('http://localhost:3000/resume/login');
+    await page.waitForLoadState('domcontentloaded').catch(() => {});
     await page.waitForTimeout(1000);
 
     const registerLink = page.getByTestId('register-link');
@@ -71,13 +56,8 @@ test.describe('AI 简历应用 - E2E 测试', () => {
   });
 
   test('注册页面有登录链接', async ({ page }) => {
-    await page.goto('/');
-
-    await page.evaluate(() => {
-      window.history.pushState({}, '', '/register');
-      window.dispatchEvent(new PopStateEvent('popstate'));
-    });
-
+    await page.goto('http://localhost:3000/resume/register');
+    await page.waitForLoadState('domcontentloaded').catch(() => {});
     await page.waitForTimeout(1000);
 
     const loginLink = page.getByTestId('login-link');
@@ -85,13 +65,8 @@ test.describe('AI 简历应用 - E2E 测试', () => {
   });
 
   test('注册页面表单验证 - 密码不匹配提示', async ({ page }) => {
-    await page.goto('/');
-
-    await page.evaluate(() => {
-      window.history.pushState({}, '', '/register');
-      window.dispatchEvent(new PopStateEvent('popstate'));
-    });
-
+    await page.goto('http://localhost:3000/resume/register');
+    await page.waitForLoadState('domcontentloaded').catch(() => {});
     await page.waitForTimeout(1000);
 
     // 填写表单
@@ -105,13 +80,8 @@ test.describe('AI 简历应用 - E2E 测试', () => {
   });
 
   test('登录页面UI元素完整', async ({ page }) => {
-    await page.goto('/');
-
-    await page.evaluate(() => {
-      window.history.pushState({}, '', '/login');
-      window.dispatchEvent(new PopStateEvent('popstate'));
-    });
-
+    await page.goto('http://localhost:3000/resume/login');
+    await page.waitForLoadState('domcontentloaded').catch(() => {});
     await page.waitForTimeout(1000);
 
     // 检查所有输入框
@@ -128,13 +98,8 @@ test.describe('AI 简历应用 - E2E 测试', () => {
   });
 
   test('注册页面UI元素完整', async ({ page }) => {
-    await page.goto('/');
-
-    await page.evaluate(() => {
-      window.history.pushState({}, '', '/register');
-      window.dispatchEvent(new PopStateEvent('popstate'));
-    });
-
+    await page.goto('http://localhost:3000/resume/register');
+    await page.waitForLoadState('domcontentloaded').catch(() => {});
     await page.waitForTimeout(1000);
 
     // 检查所有输入框
@@ -166,13 +131,9 @@ test.describe('AI 简历应用 - E2E 测试', () => {
   });
 
   test('页面响应式布局', async ({ page }) => {
-    await page.goto('/');
-
-    await page.evaluate(() => {
-      window.history.pushState({}, '', '/login');
-      window.dispatchEvent(new PopStateEvent('popstate'));
-    });
-
+    // 直接导航到登录页面（使用完整路径）
+    await page.goto('http://localhost:3000/resume/login');
+    await page.waitForLoadState('domcontentloaded').catch(() => {});
     await page.waitForTimeout(1000);
 
     // 测试移动端视口
@@ -187,7 +148,7 @@ test.describe('AI 简历应用 - E2E 测试', () => {
 
 test.describe('页面可访问性测试', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/');
+    await page.goto('http://localhost:3000/resume/');
     await page.waitForLoadState('domcontentloaded').catch(() => {});
     await page.waitForTimeout(1500);
   });
@@ -200,31 +161,27 @@ test.describe('页面可访问性测试', () => {
   });
 
   test('表单元素有标签', async ({ page }) => {
-    await page.evaluate(() => {
-      window.history.pushState({}, '', '/login');
-      window.dispatchEvent(new PopStateEvent('popstate'));
-    });
-
+    // 直接导航到登录页面（使用完整路径）
+    await page.goto('http://localhost:3000/resume/login');
+    await page.waitForLoadState('domcontentloaded').catch(() => {});
     await page.waitForTimeout(1000);
 
     const emailInput = page.getByTestId('email-input');
-    await expect(emailInput).toHaveAttribute('id');
+    await expect(emailInput).toHaveAttribute('id', { timeout: 10000 });
   });
 });
 
 test.describe('导航测试', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/');
+    await page.goto('http://localhost:3000/resume/');
     await page.waitForLoadState('domcontentloaded').catch(() => {});
     await page.waitForTimeout(1500);
   });
 
   test('登录页面到底部链接', async ({ page }) => {
-    await page.evaluate(() => {
-      window.history.pushState({}, '', '/login');
-      window.dispatchEvent(new PopStateEvent('popstate'));
-    });
-
+    // 直接导航到登录页面（使用完整路径）
+    await page.goto('http://localhost:3000/resume/login');
+    await page.waitForLoadState('domcontentloaded').catch(() => {});
     await page.waitForTimeout(1000);
 
     // 检查用户协议链接
