@@ -3,7 +3,7 @@ import { test, expect } from '@playwright/test';
 test.describe('AI 简历应用 - E2E 测试', () => {
   // 每个测试前导航到根路径并等待应用加载
   test.beforeEach(async ({ page }) => {
-    await page.goto('http://localhost:3000/resume/');
+    await page.goto('http://localhost:3000/');
     // 等待页面加载完成
     await page.waitForLoadState('domcontentloaded').catch(() => {});
     await page.waitForTimeout(1500);
@@ -15,12 +15,12 @@ test.describe('AI 简历应用 - E2E 测试', () => {
 
   test('登录页面可以访问', async ({ page }) => {
     // 直接导航到登录页面
-    await page.goto('http://localhost:3000/resume/login');
+    await page.goto('http://localhost:3000/login');
     await page.waitForLoadState('domcontentloaded').catch(() => {});
     await page.waitForTimeout(1000);
 
     // 检查 URL 是否正确
-    await expect(page).toHaveURL(/\/resume\/login/, { timeout: 5000 });
+    await expect(page).toHaveURL(/\/login/, { timeout: 5000 });
 
     // 更新为实际页面显示的文本
     await expect(page.getByText('欢迎回来')).toBeVisible({ timeout: 10000 });
@@ -31,7 +31,7 @@ test.describe('AI 简历应用 - E2E 测试', () => {
 
   test('注册页面可以访问', async ({ page }) => {
     // 直接导航到注册页面
-    await page.goto('http://localhost:3000/resume/register');
+    await page.goto('http://localhost:3000/register');
     await page.waitForLoadState('domcontentloaded').catch(() => {});
     await page.waitForTimeout(1000);
 
@@ -47,7 +47,7 @@ test.describe('AI 简历应用 - E2E 测试', () => {
   });
 
   test('登录页面有注册链接', async ({ page }) => {
-    await page.goto('http://localhost:3000/resume/login');
+    await page.goto('http://localhost:3000/login');
     await page.waitForLoadState('domcontentloaded').catch(() => {});
     await page.waitForTimeout(1000);
 
@@ -56,7 +56,7 @@ test.describe('AI 简历应用 - E2E 测试', () => {
   });
 
   test('注册页面有登录链接', async ({ page }) => {
-    await page.goto('http://localhost:3000/resume/register');
+    await page.goto('http://localhost:3000/register');
     await page.waitForLoadState('domcontentloaded').catch(() => {});
     await page.waitForTimeout(1000);
 
@@ -65,7 +65,7 @@ test.describe('AI 简历应用 - E2E 测试', () => {
   });
 
   test('注册页面表单验证 - 密码不匹配提示', async ({ page }) => {
-    await page.goto('http://localhost:3000/resume/register');
+    await page.goto('http://localhost:3000/register');
     await page.waitForLoadState('domcontentloaded').catch(() => {});
     await page.waitForTimeout(1000);
 
@@ -80,7 +80,7 @@ test.describe('AI 简历应用 - E2E 测试', () => {
   });
 
   test('登录页面UI元素完整', async ({ page }) => {
-    await page.goto('http://localhost:3000/resume/login');
+    await page.goto('http://localhost:3000/login');
     await page.waitForLoadState('domcontentloaded').catch(() => {});
     await page.waitForTimeout(1000);
 
@@ -98,7 +98,7 @@ test.describe('AI 简历应用 - E2E 测试', () => {
   });
 
   test('注册页面UI元素完整', async ({ page }) => {
-    await page.goto('http://localhost:3000/resume/register');
+    await page.goto('http://localhost:3000/register');
     await page.waitForLoadState('domcontentloaded').catch(() => {});
     await page.waitForTimeout(1000);
 
@@ -132,7 +132,7 @@ test.describe('AI 简历应用 - E2E 测试', () => {
 
   test('页面响应式布局', async ({ page }) => {
     // 直接导航到登录页面（使用完整路径）
-    await page.goto('http://localhost:3000/resume/login');
+    await page.goto('http://localhost:3000/login');
     await page.waitForLoadState('domcontentloaded').catch(() => {});
     await page.waitForTimeout(1000);
 
@@ -148,7 +148,7 @@ test.describe('AI 简历应用 - E2E 测试', () => {
 
 test.describe('页面可访问性测试', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('http://localhost:3000/resume/');
+    await page.goto('http://localhost:3000/');
     await page.waitForLoadState('domcontentloaded').catch(() => {});
     await page.waitForTimeout(1500);
   });
@@ -162,7 +162,7 @@ test.describe('页面可访问性测试', () => {
 
   test('表单元素有标签', async ({ page }) => {
     // 直接导航到登录页面（使用完整路径）
-    await page.goto('http://localhost:3000/resume/login');
+    await page.goto('http://localhost:3000/login');
     await page.waitForLoadState('domcontentloaded').catch(() => {});
     await page.waitForTimeout(1000);
 
@@ -173,14 +173,14 @@ test.describe('页面可访问性测试', () => {
 
 test.describe('导航测试', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('http://localhost:3000/resume/');
+    await page.goto('http://localhost:3000/');
     await page.waitForLoadState('domcontentloaded').catch(() => {});
     await page.waitForTimeout(1500);
   });
 
   test('登录页面到底部链接', async ({ page }) => {
     // 直接导航到登录页面（使用完整路径）
-    await page.goto('http://localhost:3000/resume/login');
+    await page.goto('http://localhost:3000/login');
     await page.waitForLoadState('domcontentloaded').catch(() => {});
     await page.waitForTimeout(1000);
 

@@ -46,7 +46,7 @@ export default function RegisterPage() {
   }, [countdown]);
 
   const handleSendCode = async () => {
-    if (!email) return;
+    if (!email || countdown > 0) return;
 
     try {
       setCodeSending(true);
@@ -55,6 +55,8 @@ export default function RegisterPage() {
     } catch (error) {
       const message = error instanceof Error ? error.message : '发送验证码失败，请稍后重试';
       setPasswordMismatchError(message);
+      // API失败时也设置短暂冷却时间，避免频繁点击
+      setCountdown(5);
     } finally {
       setCodeSending(false);
     }

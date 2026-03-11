@@ -177,7 +177,7 @@ test.describe('移动端 - 注册流程', () => {
     // 清除cookies以确保干净状态
     await context.clearCookies();
     // 不使用clearAuth，直接导航到登录页
-    await page.goto('http://localhost:3000/resume/login');
+    await page.goto('http://localhost:3000/login');
     await page.waitForLoadState('domcontentloaded').catch(() => {});
     await page.waitForTimeout(1500);
   });
@@ -233,7 +233,7 @@ test.describe('移动端 - 注册流程', () => {
   });
 
   test('注册表单验证 - 密码不匹配提示', async ({ page }) => {
-    await page.goto('http://localhost:3000/resume/register');
+    await page.goto('http://localhost:3000/register');
     await page.waitForTimeout(1000);
 
     // 输入不匹配的密码
@@ -256,7 +256,7 @@ test.describe('移动端 - 注册流程', () => {
   });
 
   test('注册表单验证 - 用户协议必选', async ({ page }) => {
-    await page.goto('http://localhost:3000/resume/register');
+    await page.goto('http://localhost:3000/register');
     await page.waitForTimeout(1000);
 
     // 填写表单但不勾选用户协议
@@ -278,7 +278,7 @@ test.describe('移动端 - 注册流程', () => {
   });
 
   test('验证码倒计时功能', async ({ page }) => {
-    await page.goto('http://localhost:3000/resume/register');
+    await page.goto('http://localhost:3000/register');
     await page.waitForTimeout(1000);
 
     // 输入邮箱
@@ -305,7 +305,7 @@ test.describe('移动端 - 登录流程', () => {
 
   test.beforeEach(async ({ page, context }) => {
     await context.clearCookies();
-    await page.goto('http://localhost:3000/resume/login');
+    await page.goto('http://localhost:3000/login');
     await page.waitForLoadState('domcontentloaded').catch(() => {});
     await page.waitForTimeout(1500);
   });
@@ -378,7 +378,7 @@ authenticatedTest.describe('移动端 - 首页功能', () => {
   authenticatedTest.use({ ...MOBILE_DEVICES.iPhone12Pro, hasTouch: true });
 
   authenticatedTest.beforeEach(async ({ page }) => {
-    await page.goto('http://localhost:3000/resume/');
+    await page.goto('http://localhost:3000/');
     await page.waitForLoadState('domcontentloaded').catch(() => {});
     await page.waitForTimeout(2000);
   });
@@ -394,7 +394,7 @@ authenticatedTest.describe('移动端 - 首页功能', () => {
     // 使用文本选择器和data-testid，避免依赖完整URL
     await expect(page.getByText('创建新简历')).toBeVisible();
     await expect(page.getByText('浏览模板')).toBeVisible();
-    await expect(page.locator('a[href="/resume/settings"]')).toBeVisible();
+    await expect(page.locator('a[href="/settings"]')).toBeVisible();
 
     // 验证最近编辑区域
     await expect(page.getByText('最近编辑')).toBeVisible();
@@ -428,12 +428,12 @@ authenticatedTest.describe('移动端 - 首页功能', () => {
 
   authenticatedTest('首页导航栏功能', async ({ page }) => {
     // 测试设置按钮 - 使用正确的URL
-    await page.tap('a[href="/resume/settings"]');
+    await page.tap('a[href="/settings"]');
     await page.waitForTimeout(1000);
     await expect(page).toHaveURL(/\/settings/);
 
     // 返回首页
-    await page.goto('http://localhost:3000/resume/');
+    await page.goto('http://localhost:3000/');
     await page.waitForTimeout(1500);
 
     // 测试退出按钮 - 使用更精确的选择器
@@ -455,7 +455,7 @@ authenticatedTest.describe('移动端 - 简历列表', () => {
   authenticatedTest.use({ ...MOBILE_DEVICES.iPhone12Pro, hasTouch: true });
 
   authenticatedTest.beforeEach(async ({ page }) => {
-    await page.goto('http://localhost:3000/resume/resumes');
+    await page.goto('http://localhost:3000/resumes');
     await page.waitForLoadState('domcontentloaded').catch(() => {});
     await page.waitForTimeout(2000);
   });
@@ -509,7 +509,7 @@ authenticatedTest.describe('移动端 - 简历编辑器', () => {
   authenticatedTest.use({ ...MOBILE_DEVICES.iPhone12Pro, hasTouch: true });
 
   authenticatedTest.beforeEach(async ({ page }) => {
-    await page.goto('http://localhost:3000/resume/resumes/new');
+    await page.goto('http://localhost:3000/resumes/new');
     await page.waitForLoadState('domcontentloaded').catch(() => {});
     await page.waitForTimeout(2000);
   });
@@ -610,7 +610,7 @@ authenticatedTest.describe('移动端 - 模板库', () => {
   authenticatedTest.use({ ...MOBILE_DEVICES.iPhone12Pro, hasTouch: true });
 
   authenticatedTest.beforeEach(async ({ page }) => {
-    await page.goto('http://localhost:3000/resume/templates');
+    await page.goto('http://localhost:3000/templates');
     await page.waitForLoadState('domcontentloaded').catch(() => {});
     await page.waitForTimeout(2000);
   });
@@ -679,7 +679,7 @@ authenticatedTest.describe('移动端 - 个人中心', () => {
   authenticatedTest.use({ ...MOBILE_DEVICES.iPhone12Pro, hasTouch: true });
 
   authenticatedTest.beforeEach(async ({ page }) => {
-    await page.goto('http://localhost:3000/resume/profile');
+    await page.goto('http://localhost:3000/profile');
     await page.waitForLoadState('domcontentloaded').catch(() => {});
     await page.waitForTimeout(2000);
   });
@@ -716,16 +716,16 @@ authenticatedTest.describe('移动端 - 个人中心', () => {
 
   authenticatedTest('个人中心导航功能', async ({ page }) => {
     // 点击我的简历
-    await page.tap('a[href="/resume/resumes"]');
+    await page.tap('a[href="/resumes"]');
     await page.waitForTimeout(1000);
     await expect(page).toHaveURL(/\/resumes/);
 
     // 返回个人中心
-    await page.goto('http://localhost:3000/resume/profile');
+    await page.goto('http://localhost:3000/profile');
     await page.waitForTimeout(1500);
 
     // 点击设置
-    await page.tap('a[href="/resume/settings"]');
+    await page.tap('a[href="/settings"]');
     await page.waitForTimeout(1000);
     await expect(page).toHaveURL(/\/settings/);
   });
@@ -739,7 +739,7 @@ authenticatedTest.describe('移动端 - 设置页面', () => {
   authenticatedTest.use({ ...MOBILE_DEVICES.iPhone12Pro, hasTouch: true });
 
   authenticatedTest.beforeEach(async ({ page }) => {
-    await page.goto('http://localhost:3000/resume/settings');
+    await page.goto('http://localhost:3000/settings');
     await page.waitForLoadState('domcontentloaded').catch(() => {});
     await page.waitForTimeout(2000);
   });
@@ -798,7 +798,7 @@ test.describe('移动端 - 多设备兼容性', () => {
       await page.setViewportSize(config.viewport);
       await page.setExtraHTTPHeaders({ 'User-Agent': config.userAgent });
 
-      await page.goto('http://localhost:3000/resume/login');
+      await page.goto('http://localhost:3000/login');
       await page.waitForLoadState('domcontentloaded').catch(() => {});
       await page.waitForTimeout(1500);
 
@@ -822,7 +822,7 @@ test.describe('移动端 - 多设备兼容性', () => {
       await page.setViewportSize(config.viewport);
       await page.setExtraHTTPHeaders({ 'User-Agent': config.userAgent });
 
-      await page.goto('http://localhost:3000/resume/register');
+      await page.goto('http://localhost:3000/register');
       await page.waitForLoadState('domcontentloaded').catch(() => {});
       await page.waitForTimeout(1500);
 
@@ -843,7 +843,7 @@ authenticatedTest.describe('移动端 - 触摸交互优化', () => {
   authenticatedTest.use({ ...MOBILE_DEVICES.iPhone12Pro, hasTouch: true });
 
   authenticatedTest.beforeEach(async ({ page }) => {
-    await page.goto('http://localhost:3000/resume/');
+    await page.goto('http://localhost:3000/');
     await page.waitForLoadState('domcontentloaded').catch(() => {});
     await page.waitForTimeout(2000);
   });
@@ -903,7 +903,7 @@ authenticatedTest.describe.skip('移动端 - 横屏模式', () => {
   });
 
   authenticatedTest('横屏 - 首页布局', async ({ page }) => {
-    await page.goto('http://localhost:3000/resume/');
+    await page.goto('http://localhost:3000/');
     await page.waitForLoadState('domcontentloaded').catch(() => {});
     await page.waitForTimeout(2000);
 
@@ -913,7 +913,7 @@ authenticatedTest.describe.skip('移动端 - 横屏模式', () => {
   });
 
   authenticatedTest('横屏 - 登录页面布局', async ({ page }) => {
-    await page.goto('http://localhost:3000/resume/login');
+    await page.goto('http://localhost:3000/login');
     await page.waitForLoadState('domcontentloaded').catch(() => {});
     await page.waitForTimeout(2000);
 
@@ -923,7 +923,7 @@ authenticatedTest.describe.skip('移动端 - 横屏模式', () => {
   });
 
   authenticatedTest('横屏 - 注册页面布局', async ({ page }) => {
-    await page.goto('http://localhost:3000/resume/register');
+    await page.goto('http://localhost:3000/register');
     await page.waitForLoadState('domcontentloaded').catch(() => {});
     await page.waitForTimeout(2000);
 
@@ -942,7 +942,7 @@ test.describe('移动端 - 完整用户旅程', () => {
 
   test('新用户完整旅程 - 浏览注册登录页面', async ({ page }) => {
     // 步骤1: 访问登录页
-    await page.goto('http://localhost:3000/resume/login');
+    await page.goto('http://localhost:3000/login');
     await page.waitForTimeout(1000);
 
     // 步骤2: 验证登录页面元素
@@ -961,7 +961,7 @@ test.describe('移动端 - 完整用户旅程', () => {
     await expect(page.getByTestId('email-input')).toBeVisible();
 
     // 步骤6: 返回注册页
-    await page.goto('http://localhost:3000/resume/register');
+    await page.goto('http://localhost:3000/register');
     await page.waitForTimeout(1000);
     await expect(page.getByTestId('register-email-input')).toBeVisible();
 
@@ -972,46 +972,46 @@ test.describe('移动端 - 完整用户旅程', () => {
 
   authenticatedTest('已登录用户完整旅程 - 浏览所有页面', async ({ page }) => {
     // 步骤1: 访问首页
-    await page.goto('http://localhost:3000/resume/');
+    await page.goto('http://localhost:3000/');
     await page.waitForTimeout(2000);
     await expect(page.getByText('欢迎回来')).toBeVisible();
 
     // 步骤2: 导航到简历列表 - 使用直接导航避免移动端菜单问题
-    await page.goto('http://localhost:3000/resume/resumes');
+    await page.goto('http://localhost:3000/resumes');
     await page.waitForTimeout(1500);
     await expect(page.getByText('我的简历')).toBeVisible();
 
     // 步骤3: 导航到模板库
-    await page.goto('http://localhost:3000/resume/templates');
+    await page.goto('http://localhost:3000/templates');
     await page.waitForTimeout(1500);
     await expect(page.getByText('模板库')).toBeVisible();
 
     // 步骤4: 导航到个人中心
-    await page.goto('http://localhost:3000/resume/profile');
+    await page.goto('http://localhost:3000/profile');
     await page.waitForTimeout(1500);
     await expect(page.getByText('个人中心')).toBeVisible();
 
     // 步骤5: 导航到设置
-    await page.goto('http://localhost:3000/resume/settings');
+    await page.goto('http://localhost:3000/settings');
     await page.waitForTimeout(1500);
     await expect(page.getByText('设置')).toBeVisible();
 
     // 步骤6: 返回首页
-    await page.goto('http://localhost:3000/resume/');
+    await page.goto('http://localhost:3000/');
     await page.waitForTimeout(1500);
     await expect(page.getByText('欢迎回来')).toBeVisible();
   });
 
   authenticatedTest('简历创建完整流程', async ({ page }) => {
     // 步骤1: 从首页点击创建新简历
-    await page.goto('http://localhost:3000/resume/');
+    await page.goto('http://localhost:3000/');
     await page.waitForTimeout(2000);
 
     // 滚动找到快捷功能
     await humanScroll(page, 300);
     await page.waitForTimeout(500);
 
-    await page.tap('a[href="/resume/resumes/new"]');
+    await page.tap('a[href="/resumes/new"]');
     await page.waitForTimeout(1500);
 
     // 步骤2: 填写基本信息

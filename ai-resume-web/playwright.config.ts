@@ -32,11 +32,10 @@ export default defineConfig({
     // 桌面端测试 - 主要测试目标
     {
       name: 'chromium-desktop',
-      use: { 
+      use: {
         ...devices['Desktop Chrome'],
         viewport: { width: 1280, height: 720 },
       },
-      grep: [/@desktop/, /@critical/],
     },
     // 移动端模拟测试
     {
@@ -44,7 +43,6 @@ export default defineConfig({
       use: {
         ...devices['iPhone 12'],
       },
-      grep: [/@mobile/, /@critical/],
     },
     // Android 设备模拟
     {
@@ -52,7 +50,6 @@ export default defineConfig({
       use: {
         ...devices['Pixel 5'],
       },
-      grep: [/@mobile/, /@critical/],
     },
   ],
 });
