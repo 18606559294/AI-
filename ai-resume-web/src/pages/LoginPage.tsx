@@ -65,17 +65,8 @@ export default function LoginPage() {
           {/* Logo & Title */}
           <div className="text-center mb-6">
             <Link to="/" className="inline-flex items-center justify-center gap-3 mb-4">
-              <div 
-                className="w-12 h-12 rounded-xl bg-gradient-to-br from-sky-400 to-accent-500 flex items-center justify-center shadow-neon-blue"
-                style={{ width: '48px', height: '48px' }}
-              >
-                <svg 
-                  className="w-7 h-7 text-white" 
-                  fill="none" 
-                  stroke="currentColor" 
-                  viewBox="0 0 24 24"
-                  style={{ width: '28px', height: '28px' }}
-                >
+              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-sky-400 to-accent-500 flex items-center justify-center shadow-neon-blue">
+                <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                 </svg>
               </div>

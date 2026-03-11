@@ -37,30 +37,28 @@ export class AuthApi {
   }
 
   /**
-   * 用户注册
+   * 用户注册 - 修复：使用JSON而非FormData
    */
   async register(data: RegisterRequest): Promise<AuthResponse> {
-    const formData = new FormData();
-    formData.append('email', data.email);
-    formData.append('password', data.password);
-    if (data.phone) formData.append('phone', data.phone);
-    if (data.username) formData.append('username', data.username);
-    if (data.verification_code) {
-      formData.append('verification_code', data.verification_code);
-    }
+    const payload: Record<string, string> = {
+      email: data.email,
+      password: data.password,
+    };
+    if (data.phone) payload.phone = data.phone;
+    if (data.username) payload.username = data.username;
+    if (data.verification_code) payload.verification_code = data.verification_code;
 
-    return this.client.post<AuthResponse>('/auth/register', formData);
+    return this.client.post<AuthResponse>('/auth/register', payload);
   }
 
   /**
-   * 用户登录
+   * 用户登录 - 修复：使用JSON而非FormData
    */
   async login(email: string, password: string): Promise<AuthResponse> {
-    const formData = new FormData();
-    formData.append('username', email);
-    formData.append('password', password);
-
-    return this.client.post<AuthResponse>('/auth/login', formData);
+    return this.client.post<AuthResponse>('/auth/login', {
+      username: email,
+      password: password,
+    });
   }
 
   /**

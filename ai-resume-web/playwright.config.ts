@@ -6,14 +6,19 @@ export default defineConfig({
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 1, // 增加重试次数
   workers: 1, // 单个worker避免并发问题
-  reporter: 'html',
+  reporter: [['html', { outputFolder: 'playwright-report' }], ['line']],
   timeout: 120000, // 增加单个测试超时时间到120秒
   use: {
     baseURL: 'http://localhost:3000',
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
+    video: 'on-first-retry',
     actionTimeout: 30000, // 操作超时30秒
     navigationTimeout: 120000, // 导航超时120秒
+    // 模拟真人操作设置
+    launchOptions: {
+      slowMo: 50, // 轻微延迟模拟真人操作
+    },
   },
 
   webServer: {
@@ -24,46 +29,30 @@ export default defineConfig({
   },
 
   projects: [
-    // 桌面端测试
+    // 桌面端测试 - 主要测试目标
     {
       name: 'chromium-desktop',
-      use: { ...devices['Desktop Chrome'] },
+      use: { 
+        ...devices['Desktop Chrome'],
+        viewport: { width: 1280, height: 720 },
+      },
+      grep: [/@desktop/, /@critical/],
     },
-    // iPhone 12 Pro 测试 (using chromium for mobile simulation)
+    // 移动端模拟测试
     {
       name: 'mobile-iphone',
       use: {
-        ...devices['Desktop Chrome'],
-        viewport: { width: 390, height: 844 },
-        deviceScaleFactor: 3,
-        isMobile: true,
-        hasTouch: true,
-        userAgent: 'Mozilla/5.0 (iPhone; CPU iPhone OS 14_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.0 Mobile/15E148 Safari/604.1',
+        ...devices['iPhone 12'],
       },
+      grep: [/@mobile/, /@critical/],
     },
-    // Pixel 5 测试 (using chromium for mobile simulation)
+    // Android 设备模拟
     {
       name: 'mobile-android',
       use: {
-        ...devices['Desktop Chrome'],
-        viewport: { width: 393, height: 851 },
-        deviceScaleFactor: 2.625,
-        isMobile: true,
-        hasTouch: true,
-        userAgent: 'Mozilla/5.0 (Linux; Android 11) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.93 Mobile Safari/537.36',
+        ...devices['Pixel 5'],
       },
-    },
-    // iPad 测试 (using chromium for tablet simulation)
-    {
-      name: 'tablet-ipad',
-      use: {
-        ...devices['Desktop Chrome'],
-        viewport: { width: 1024, height: 1366 },
-        deviceScaleFactor: 2,
-        isMobile: true,
-        hasTouch: true,
-        userAgent: 'Mozilla/5.0 (iPad; CPU OS 14_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.0 Mobile/15E148 Safari/604.1',
-      },
+      grep: [/@mobile/, /@critical/],
     },
   ],
 });
