@@ -1,6 +1,17 @@
 import axios, { AxiosError, AxiosInstance, AxiosResponse } from 'axios';
 
 /**
+ * 获取默认API基础URL
+ * 尝试从localStorage读取用户配置的API地址，否则使用默认值
+ */
+function getDefaultBaseURL(): string {
+  if (typeof localStorage !== 'undefined') {
+    return localStorage.getItem('api_base_url') || 'http://127.0.0.1:8000/api/v1';
+  }
+  return 'http://127.0.0.1:8000/api/v1';
+}
+
+/**
  * API 异常类
  * 用于处理API请求返回的错误信息
  */
@@ -36,7 +47,7 @@ export class ApiClient {
 
   constructor(config: ApiClientConfig = {}) {
     this.config = {
-      baseURL: config.baseURL ?? 'http://127.0.0.1:8000/api/v1',
+      baseURL: config.baseURL ?? getDefaultBaseURL(),
       timeout: config.timeout ?? 30000,
     };
 

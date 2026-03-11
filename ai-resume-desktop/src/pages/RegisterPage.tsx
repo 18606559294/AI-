@@ -4,9 +4,15 @@ import { useAuthStore } from '../store/auth';
 import { Button, Input, GradientText, Orb } from '../components/UIComponents';
 import { api } from '@ai-resume/shared';
 
-// 常量定义
-const PASSWORD_MIN_LENGTH = 8;
-const VERIFICATION_CODE_COUNTDOWN = 60;
+// 常量配置 - 组织为配置对象便于维护
+const VALIDATION_CONFIG = {
+  PASSWORD: {
+    MIN_LENGTH: 8,
+  },
+  VERIFICATION_CODE: {
+    COUNTDOWN_SECONDS: 60,
+  },
+} as const;
 
 export default function RegisterPage() {
   const navigate = useNavigate();
@@ -23,7 +29,7 @@ export default function RegisterPage() {
   const [codeSending, setCodeSending] = useState(false);
 
   const validatePassword = useCallback((): string | null => {
-    if (password.length < PASSWORD_MIN_LENGTH) return `密码长度至少${PASSWORD_MIN_LENGTH}位`;
+    if (password.length < VALIDATION_CONFIG.PASSWORD.MIN_LENGTH) return `密码长度至少${VALIDATION_CONFIG.PASSWORD.MIN_LENGTH}位`;
     if (!/[A-Za-z]/.test(password)) return '密码必须包含字母';
     if (!/\d/.test(password)) return '密码必须包含数字';
     return null;
@@ -45,7 +51,7 @@ export default function RegisterPage() {
     try {
       setCodeSending(true);
       await api.auth.sendVerificationCode(email);
-      setCountdown(VERIFICATION_CODE_COUNTDOWN);
+      setCountdown(VALIDATION_CONFIG.VERIFICATION_CODE.COUNTDOWN_SECONDS);
     } catch (error) {
       const message = error instanceof Error ? error.message : '发送验证码失败，请稍后重试';
       setPasswordMismatchError(message);
@@ -211,7 +217,7 @@ export default function RegisterPage() {
                   setPassword(e.target.value);
                   setPasswordError(null);
                 }}
-                placeholder="至少8位，包含字母和数字"
+                placeholder={`至少${VALIDATION_CONFIG.PASSWORD.MIN_LENGTH}位，包含字母和数字`}
                 required
                 icon={
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -224,7 +230,7 @@ export default function RegisterPage() {
                 <p className="text-rose-400 text-sm" data-testid="password-error">{passwordError}</p>
               )}
               {password && !isPasswordValid && !confirmPassword && (
-                <p className="text-amber-400 text-sm">密码需至少8位，包含字母和数字</p>
+                <p className="text-amber-400 text-sm">密码需至少{VALIDATION_CONFIG.PASSWORD.MIN_LENGTH}位，包含字母和数字</p>
               )}
 
               <Input

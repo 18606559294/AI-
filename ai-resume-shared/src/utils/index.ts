@@ -317,9 +317,11 @@ export async function copyToClipboard(text: string): Promise<boolean> {
 
 /**
  * 验证邮箱
+ * 使用更标准的邮箱验证正则表达式
  */
 export function isValidEmail(email: string): boolean {
-  const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  // 常见的邮箱验证正则：允许字母、数字、点、下划线、百分号、加号、减号
+  const regex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
   return regex.test(email);
 }
 
