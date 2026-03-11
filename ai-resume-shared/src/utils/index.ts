@@ -1,3 +1,5 @@
+import type { User } from '../types/index.js';
+
 /**
  * 本地存储工具
  */
@@ -45,17 +47,28 @@ export const storage = {
   },
 
   /**
-   * 获取用户信息
+   * 获取用户信息 - 修复返回类型
    */
-  getUser(): string | null {
-    return localStorage.getItem('user');
+  getUser(): User | null {
+    const data = localStorage.getItem('user');
+    if (!data) return null;
+    try {
+      return JSON.parse(data) as User;
+    } catch {
+      return null;
+    }
   },
 
   /**
-   * 设置用户信息
+   * 设置用户信息 - 添加数据验证
    */
   setUser(user: unknown): void {
-    localStorage.setItem('user', JSON.stringify(user));
+    if (!user || typeof user !== 'object') {
+      throw new Error('Invalid user data');
+    }
+    // 使用structuredClone进行深拷贝，避免JSON.parse/stringify的限制
+    const sanitized = structuredClone(user);
+    localStorage.setItem('user', JSON.stringify(sanitized));
   },
 
   /**
@@ -319,22 +332,44 @@ export function isValidPhone(phone: string): boolean {
 }
 
 /**
- * 验证密码强度（至少6位，包含字母和数字）
+ * 验证密码强度（至少8位，包含字母和数字）
+ *
+ * 验证规则：
+ * - 最小长度8位
+ * - 必须包含字母（大小写均可）
+ * - 必须包含数字
+ *
+ * 强度评估：
+ * - 弱：满足基本要求（8位+字母+数字）
+ * - 中：12位以上 或 包含特殊字符
+ * - 强：12位以上 且 包含特殊字符
  */
 export function isValidPassword(password: string): {
   valid: boolean;
+  strength: 'weak' | 'medium' | 'strong';
   message?: string;
 } {
-  if (password.length < 6) {
-    return { valid: false, message: '密码长度至少6位' };
+  if (password.length < 8) {
+    return { valid: false, strength: 'weak', message: '密码长度至少8位' };
   }
   if (!/[A-Za-z]/.test(password)) {
-    return { valid: false, message: '密码必须包含字母' };
+    return { valid: false, strength: 'weak', message: '密码必须包含字母' };
   }
   if (!/\d/.test(password)) {
-    return { valid: false, message: '密码必须包含数字' };
+    return { valid: false, strength: 'weak', message: '密码必须包含数字' };
   }
-  return { valid: true };
+
+  // 检查密码强度（与验证规则对齐）
+  let strengthLevel = 0;
+  if (password.length >= 12) strengthLevel++;
+  if (/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password)) strengthLevel++;
+
+  if (strengthLevel >= 2) {
+    return { valid: true, strength: 'strong' };
+  } else if (strengthLevel === 1) {
+    return { valid: true, strength: 'medium' };
+  }
+  return { valid: true, strength: 'weak' };
 }
 
 /**

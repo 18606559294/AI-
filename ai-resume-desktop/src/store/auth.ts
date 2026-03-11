@@ -103,10 +103,11 @@ export const useAuthStore = create<AuthState>()(
       loadUser: async () => {
         const token = storage.getToken();
         if (!token) {
-          set({ isAuthenticated: false, user: null, token: null });
+          set({ isAuthenticated: false, user: null, token: null, isLoading: false });
           return;
         }
 
+        set({ isLoading: true });
         try {
             const response = await api.auth.getCurrentUser();
             const userData = response as User;
@@ -114,6 +115,7 @@ export const useAuthStore = create<AuthState>()(
             user: userData,
             token,
             isAuthenticated: true,
+            isLoading: false,
           });
         } catch {
           storage.clearAuth();
@@ -121,6 +123,7 @@ export const useAuthStore = create<AuthState>()(
             user: null,
             token: null,
             isAuthenticated: false,
+            isLoading: false,
           });
         }
       },

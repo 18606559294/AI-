@@ -1,3 +1,4 @@
+import { useEffect, useRef } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { useAuthStore } from './store/auth';
 import LoginPage from './pages/LoginPage';
@@ -8,9 +9,31 @@ import ResumeEditorPage from './pages/ResumeEditorPage';
 import TemplatesPage from './pages/TemplatesPage';
 import ProfilePage from './pages/ProfilePage';
 import SettingsPage from './pages/SettingsPage';
+import { Spinner } from './components/UIComponents';
 
 function App() {
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+  const loadUser = useAuthStore((state) => state.loadUser);
+  const isLoading = useAuthStore((state) => state.isLoading);
+  const hasLoaded = useRef(false);
+
+  // 修复：应用启动时验证token有效性（使用useRef确保单次执行）
+  useEffect(() => {
+    if (!hasLoaded.current) {
+      hasLoaded.current = true;
+      loadUser();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // 显示加载状态
+  if (isLoading && isAuthenticated === false) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-slate-950">
+        <Spinner size="lg" />
+      </div>
+    );
+  }
 
   return (
     <Routes>

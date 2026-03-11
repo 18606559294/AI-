@@ -1,6 +1,21 @@
 import axios, { AxiosError, AxiosInstance, AxiosResponse } from 'axios';
 
 /**
+ * API 异常类
+ * 用于处理API请求返回的错误信息
+ */
+export class ApiException extends Error {
+  constructor(
+    public errorMessage: string,
+    public statusCode: number,
+    public detail?: unknown
+  ) {
+    super(errorMessage);
+    this.name = 'ApiException';
+  }
+}
+
+/**
  * API 客户端配置
  */
 export interface ApiClientConfig {
@@ -21,7 +36,7 @@ export class ApiClient {
 
   constructor(config: ApiClientConfig = {}) {
     this.config = {
-      baseURL: config.baseURL ?? 'http://192.168.8.6:8080/api',
+      baseURL: config.baseURL ?? 'http://127.0.0.1:8000/api/v1',
       timeout: config.timeout ?? 30000,
     };
 
@@ -32,7 +47,8 @@ export class ApiClient {
         'Content-Type': 'application/json',
         Accept: 'application/json',
       },
-      validateStatus: (status) => status != null && status < 500,
+      // 只接受 2xx 状态码为成功，其他都视为错误
+      validateStatus: (status) => status >= 200 && status < 300,
     });
 
     this.setupInterceptors(config);
@@ -69,13 +85,20 @@ export class ApiClient {
 
   /**
    * 处理 API 响应
+   * 支持所有2xx状态码（200, 201, 204等）
    */
   private handleResponse<T>(response: AxiosResponse): T {
-    if (response.status === 200 && response.data) {
+    // 处理有数据的情况
+    if (response.data) {
       if (typeof response.data === 'object' && 'data' in response.data) {
         return response.data.data as T;
       }
       return response.data as T;
+    }
+
+    // 处理204 No Content等情况
+    if (response.status === 204) {
+      return undefined as T;
     }
 
     throw new Error(response.data?.message ?? '请求失败');
@@ -117,18 +140,7 @@ export class ApiClient {
           }
         }
 
-        const errorClass = class extends Error {
-          constructor(
-            public errorMessage: string,
-            public statusCode: number,
-            public detail?: unknown
-          ) {
-            super(errorMessage);
-            this.name = 'ApiException';
-          }
-        };
-
-        return new errorClass(
+        return new ApiException(
           message as string,
           axiosError.response.status,
           data.detail

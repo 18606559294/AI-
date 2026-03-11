@@ -1,7 +1,12 @@
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../store/auth';
 import { Button, Input, GradientText, Orb } from '../components/UIComponents';
+import { api } from '@ai-resume/shared';
+
+// 常量定义
+const PASSWORD_MIN_LENGTH = 8;
+const VERIFICATION_CODE_COUNTDOWN = 60;
 
 export default function RegisterPage() {
   const navigate = useNavigate();
@@ -14,36 +19,49 @@ export default function RegisterPage() {
   const [countdown, setCountdown] = useState(0);
   const [agreedToTerms, setAgreedToTerms] = useState(false);
   const [passwordError, setPasswordError] = useState<string | null>(null);
+  const [passwordMismatchError, setPasswordMismatchError] = useState<string | null>(null);
+  const [codeSending, setCodeSending] = useState(false);
 
-  const validatePassword = (): string | null => {
-    if (password.length < 6) return '密码长度至少6位';
+  const validatePassword = useCallback((): string | null => {
+    if (password.length < PASSWORD_MIN_LENGTH) return `密码长度至少${PASSWORD_MIN_LENGTH}位`;
     if (!/[A-Za-z]/.test(password)) return '密码必须包含字母';
     if (!/\d/.test(password)) return '密码必须包含数字';
     return null;
-  };
+  }, [password]);
+
+  // 修复内存泄漏：使用useEffect管理倒计时
+  useEffect(() => {
+    if (countdown > 0) {
+      const timer = setInterval(() => {
+        setCountdown(prev => prev - 1);
+      }, 1000);
+      return () => clearInterval(timer);
+    }
+  }, [countdown]);
 
   const handleSendCode = async () => {
     if (!email) return;
 
-    // TODO: 实现发送验证码
-    setCountdown(60);
-
-    const timer = setInterval(() => {
-      setCountdown((prev) => {
-        if (prev <= 1) {
-          clearInterval(timer);
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
+    try {
+      setCodeSending(true);
+      await api.auth.sendVerificationCode(email);
+      setCountdown(VERIFICATION_CODE_COUNTDOWN);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : '发送验证码失败，请稍后重试';
+      setPasswordMismatchError(message);
+    } finally {
+      setCodeSending(false);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     clearError();
+    setPasswordMismatchError(null);
 
+    // 修复：添加密码不匹配的错误提示
     if (password !== confirmPassword) {
+      setPasswordMismatchError('两次输入的密码不一致');
       return;
     }
 
@@ -90,17 +108,8 @@ export default function RegisterPage() {
           {/* Logo & Title */}
           <div className="text-center mb-8 animate-fade-in">
             <Link to="/" className="inline-flex items-center justify-center gap-3 mb-6">
-              <div 
-                className="w-16 h-16 rounded-2xl bg-gradient-to-br from-sky-400 to-accent-500 flex items-center justify-center shadow-neon-blue animate-pulse-glow"
-                style={{ width: '64px', height: '64px' }}
-              >
-                <svg 
-                  className="w-10 h-10 text-white" 
-                  fill="none" 
-                  stroke="currentColor" 
-                  viewBox="0 0 24 24"
-                  style={{ width: '40px', height: '40px' }}
-                >
+              <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-sky-400 to-accent-500 flex items-center justify-center shadow-neon-blue animate-pulse-glow">
+                <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                 </svg>
               </div>
@@ -165,11 +174,12 @@ export default function RegisterPage() {
                     variant="secondary"
                     size="md"
                     onClick={handleSendCode}
-                    disabled={countdown > 0 || !email}
+                    disabled={countdown > 0 || !email || codeSending}
+                    loading={codeSending}
                     className="whitespace-nowrap min-w-[100px]"
                     data-testid="send-code-button"
                   >
-                    {countdown > 0 ? `${countdown}秒` : '发送验证码'}
+                    {codeSending ? '发送中...' : countdown > 0 ? `${countdown}秒` : '发送验证码'}
                   </Button>
                 </div>
                 {!email && (
@@ -201,7 +211,7 @@ export default function RegisterPage() {
                   setPassword(e.target.value);
                   setPasswordError(null);
                 }}
-                placeholder="至少6位，包含字母和数字"
+                placeholder="至少8位，包含字母和数字"
                 required
                 icon={
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -214,7 +224,7 @@ export default function RegisterPage() {
                 <p className="text-rose-400 text-sm" data-testid="password-error">{passwordError}</p>
               )}
               {password && !isPasswordValid && !confirmPassword && (
-                <p className="text-amber-400 text-sm">密码需至少6位，包含字母和数字</p>
+                <p className="text-amber-400 text-sm">密码需至少8位，包含字母和数字</p>
               )}
 
               <Input
@@ -232,8 +242,11 @@ export default function RegisterPage() {
                 }
                 data-testid="confirm-password-input"
               />
-              {confirmPassword && password !== confirmPassword && (
-                <p className="text-rose-400 text-sm" data-testid="password-mismatch-error">两次输入的密码不一致</p>
+              {/* 显示密码不匹配错误 */}
+              {(passwordMismatchError || (confirmPassword && password !== confirmPassword)) && (
+                <p className="text-rose-400 text-sm" data-testid="password-mismatch-error">
+                  {passwordMismatchError || '两次输入的密码不一致'}
+                </p>
               )}
 
               <div className="flex items-start gap-3 p-4 rounded-xl bg-slate-800/50">
@@ -286,8 +299,8 @@ export default function RegisterPage() {
           {/* Tech Decorative Elements */}
           <div className="mt-8 flex justify-center gap-2">
             <div className="w-2 h-2 rounded-full bg-sky-500 animate-pulse"></div>
-            <div className="w-2 h-2 rounded-full bg-accent-500 animate-pulse" style={{ animationDelay: '0.2s' }}></div>
-            <div className="w-2 h-2 rounded-full bg-pink-500 animate-pulse" style={{ animationDelay: '0.4s' }}></div>
+            <div className="w-2 h-2 rounded-full bg-accent-500 animate-pulse [animation-delay:0.2s]"></div>
+            <div className="w-2 h-2 rounded-full bg-pink-500 animate-pulse [animation-delay:0.4s]"></div>
           </div>
         </div>
       </div>
