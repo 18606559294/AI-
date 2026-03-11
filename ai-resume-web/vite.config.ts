@@ -3,7 +3,6 @@ import react from '@vitejs/plugin-react';
 import { resolve } from 'path';
 
 export default defineConfig({
-  base: '/resume/',
   plugins: [react()],
   resolve: {
     alias: {

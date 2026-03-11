@@ -13,14 +13,14 @@ test.describe('手机端注册功能测试', () => {
   });
 
   test.beforeEach(async ({ page }) => {
-    await page.goto('http://localhost:3000/resume/');
+    await page.goto('http://localhost:3000/');
     await page.waitForLoadState('domcontentloaded').catch(() => {});
     await page.waitForTimeout(1500);
   });
 
   test('手机端 - 导航到注册页面', async ({ page }) => {
     // 直接导航到注册页面
-    await page.goto('http://localhost:3000/resume/register');
+    await page.goto('http://localhost:3000/register');
     await page.waitForLoadState('domcontentloaded').catch(() => {});
     await page.waitForTimeout(1000);
 
@@ -33,7 +33,7 @@ test.describe('手机端注册功能测试', () => {
   });
 
   test('手机端 - 注册表单所有字段可见', async ({ page }) => {
-    await page.goto('http://localhost:3000/resume/register');
+    await page.goto('http://localhost:3000/register');
     await page.waitForLoadState('domcontentloaded').catch(() => {});
     await page.waitForTimeout(1000);
 
@@ -49,7 +49,7 @@ test.describe('手机端注册功能测试', () => {
   });
 
   test('手机端 - 输入字段可以正常输入', async ({ page }) => {
-    await page.goto('http://localhost:3000/resume/register');
+    await page.goto('http://localhost:3000/register');
     await page.waitForLoadState('domcontentloaded').catch(() => {});
     await page.waitForTimeout(1000);
 
@@ -80,7 +80,7 @@ test.describe('手机端注册功能测试', () => {
   });
 
   test('手机端 - 密码不匹配时显示错误提示', async ({ page }) => {
-    await page.goto('http://localhost:3000/resume/register');
+    await page.goto('http://localhost:3000/register');
     await page.waitForLoadState('domcontentloaded').catch(() => {});
     await page.waitForTimeout(1000);
 
@@ -95,7 +95,7 @@ test.describe('手机端注册功能测试', () => {
   });
 
   test('手机端 - 密码匹配时错误提示消失', async ({ page }) => {
-    await page.goto('http://localhost:3000/resume/register');
+    await page.goto('http://localhost:3000/register');
     await page.waitForLoadState('domcontentloaded').catch(() => {});
     await page.waitForTimeout(1000);
 
@@ -114,7 +114,7 @@ test.describe('手机端注册功能测试', () => {
   });
 
   test('手机端 - 发送验证码按钮初始状态', async ({ page }) => {
-    await page.goto('http://localhost:3000/resume/register');
+    await page.goto('http://localhost:3000/register');
     await page.waitForLoadState('domcontentloaded').catch(() => {});
     await page.waitForTimeout(1000);
 
@@ -126,7 +126,7 @@ test.describe('手机端注册功能测试', () => {
   });
 
   test('手机端 - 未输入邮箱时发送验证码按钮禁用', async ({ page }) => {
-    await page.goto('http://localhost:3000/resume/register');
+    await page.goto('http://localhost:3000/register');
     await page.waitForLoadState('domcontentloaded').catch(() => {});
     await page.waitForTimeout(1000);
 
@@ -138,7 +138,7 @@ test.describe('手机端注册功能测试', () => {
   });
 
   test('手机端 - 点击发送验证码进入倒计时', async ({ page }) => {
-    await page.goto('http://localhost:3000/resume/register');
+    await page.goto('http://localhost:3000/register');
     await page.waitForLoadState('domcontentloaded').catch(() => {});
     await page.waitForTimeout(1000);
 
@@ -155,7 +155,7 @@ test.describe('手机端注册功能测试', () => {
   });
 
   test('手机端 - 用户协议复选框可以勾选', async ({ page }) => {
-    await page.goto('http://localhost:3000/resume/register');
+    await page.goto('http://localhost:3000/register');
     await page.waitForLoadState('domcontentloaded').catch(() => {});
     await page.waitForTimeout(1000);
 
@@ -170,7 +170,7 @@ test.describe('手机端注册功能测试', () => {
   });
 
   test('手机端 - 注册按钮状态检查', async ({ page }) => {
-    await page.goto('http://localhost:3000/resume/register');
+    await page.goto('http://localhost:3000/register');
     await page.waitForLoadState('domcontentloaded').catch(() => {});
     await page.waitForTimeout(1000);
 
@@ -203,7 +203,7 @@ test.describe('手机端注册功能测试', () => {
   });
 
   test('手机端 - 注册页面有登录链接', async ({ page }) => {
-    await page.goto('http://localhost:3000/resume/register');
+    await page.goto('http://localhost:3000/register');
     await page.waitForLoadState('domcontentloaded').catch(() => {});
     await page.waitForTimeout(1000);
 
@@ -213,7 +213,7 @@ test.describe('手机端注册功能测试', () => {
   });
 
   test('手机端 - 表单在小屏幕上的布局正确', async ({ page }) => {
-    await page.goto('http://localhost:3000/resume/register');
+    await page.goto('http://localhost:3000/register');
     await page.waitForLoadState('domcontentloaded').catch(() => {});
     await page.waitForTimeout(1000);
 
@@ -236,7 +236,7 @@ test.describe('手机端注册功能测试', () => {
   });
 
   test('手机端 - 验证码输入框和按钮的布局', async ({ page }) => {
-    await page.goto('http://localhost:3000/resume/register');
+    await page.goto('http://localhost:3000/register');
     await page.waitForLoadState('domcontentloaded').catch(() => {});
     await page.waitForTimeout(1000);
 
@@ -261,7 +261,7 @@ test.describe('手机端注册功能测试', () => {
   });
 
   test('手机端 - 验证码输入框最大长度限制', async ({ page }) => {
-    await page.goto('http://localhost:3000/resume/register');
+    await page.goto('http://localhost:3000/register');
     await page.waitForLoadState('domcontentloaded').catch(() => {});
     await page.waitForTimeout(1000);
 
@@ -274,7 +274,7 @@ test.describe('手机端注册功能测试', () => {
   });
 
   test('手机端 - 链接到用户协议和隐私政策', async ({ page }) => {
-    await page.goto('http://localhost:3000/resume/register');
+    await page.goto('http://localhost:3000/register');
     await page.waitForLoadState('domcontentloaded').catch(() => {});
     await page.waitForTimeout(1000);
 
@@ -286,7 +286,7 @@ test.describe('手机端注册功能测试', () => {
   });
 
   test('手机端 - 表单验证 - 邮箱必填', async ({ page }) => {
-    await page.goto('http://localhost:3000/resume/register');
+    await page.goto('http://localhost:3000/register');
     await page.waitForLoadState('domcontentloaded').catch(() => {});
     await page.waitForTimeout(1000);
 
@@ -297,7 +297,7 @@ test.describe('手机端注册功能测试', () => {
   });
 
   test('手机端 - 表单验证 - 密码必填', async ({ page }) => {
-    await page.goto('http://localhost:3000/resume/register');
+    await page.goto('http://localhost:3000/register');
     await page.waitForLoadState('domcontentloaded').catch(() => {});
     await page.waitForTimeout(1000);
 
@@ -310,7 +310,7 @@ test.describe('手机端注册功能测试', () => {
   });
 
   test('手机端 - 注册页面滚动测试', async ({ page }) => {
-    await page.goto('http://localhost:3000/resume/register');
+    await page.goto('http://localhost:3000/register');
     await page.waitForLoadState('domcontentloaded').catch(() => {});
     await page.waitForTimeout(1000);
 
@@ -322,7 +322,7 @@ test.describe('手机端注册功能测试', () => {
   });
 
   test('手机端 - 注册按钮在屏幕底部可见性', async ({ page }) => {
-    await page.goto('http://localhost:3000/resume/register');
+    await page.goto('http://localhost:3000/register');
     await page.waitForLoadState('domcontentloaded').catch(() => {});
     await page.waitForTimeout(1000);
 
@@ -334,7 +334,7 @@ test.describe('手机端注册功能测试', () => {
   });
 
   test('手机端 - 用户协议文本在小屏幕上的显示', async ({ page }) => {
-    await page.goto('http://localhost:3000/resume/register');
+    await page.goto('http://localhost:3000/register');
     await page.waitForLoadState('domcontentloaded').catch(() => {});
     await page.waitForTimeout(1000);
 
@@ -349,13 +349,13 @@ test.describe('手机端登录功能测试', () => {
   });
 
   test.beforeEach(async ({ page }) => {
-    await page.goto('http://localhost:3000/resume/');
+    await page.goto('http://localhost:3000/');
     await page.waitForLoadState('domcontentloaded').catch(() => {});
     await page.waitForTimeout(1500);
   });
 
   test('手机端 - 登录页面可以访问', async ({ page }) => {
-    await page.goto('http://localhost:3000/resume/login');
+    await page.goto('http://localhost:3000/login');
     await page.waitForLoadState('domcontentloaded').catch(() => {});
     await page.waitForTimeout(1000);
 
@@ -366,7 +366,7 @@ test.describe('手机端登录功能测试', () => {
   });
 
   test('手机端 - 登录表单可以输入', async ({ page }) => {
-    await page.goto('http://localhost:3000/resume/login');
+    await page.goto('http://localhost:3000/login');
     await page.waitForLoadState('domcontentloaded').catch(() => {});
     await page.waitForTimeout(1000);
 
@@ -378,7 +378,7 @@ test.describe('手机端登录功能测试', () => {
   });
 
   test('手机端 - 登录按钮可见且可点击', async ({ page }) => {
-    await page.goto('http://localhost:3000/resume/login');
+    await page.goto('http://localhost:3000/login');
     await page.waitForLoadState('domcontentloaded').catch(() => {});
     await page.waitForTimeout(1000);
 
@@ -388,7 +388,7 @@ test.describe('手机端登录功能测试', () => {
   });
 
   test('手机端 - 登录页面有注册链接', async ({ page }) => {
-    await page.goto('http://localhost:3000/resume/login');
+    await page.goto('http://localhost:3000/login');
     await page.waitForLoadState('domcontentloaded').catch(() => {});
     await page.waitForTimeout(1000);
 
@@ -404,13 +404,13 @@ test.describe('手机端触摸交互测试', () => {
   });
 
   test.beforeEach(async ({ page }) => {
-    await page.goto('http://localhost:3000/resume/');
+    await page.goto('http://localhost:3000/');
     await page.waitForLoadState('domcontentloaded').catch(() => {});
     await page.waitForTimeout(1500);
   });
 
   test('手机端 - 触摸点击注册页面链接', async ({ page }) => {
-    await page.goto('http://localhost:3000/resume/login');
+    await page.goto('http://localhost:3000/login');
     await page.waitForLoadState('domcontentloaded').catch(() => {});
     await page.waitForTimeout(1000);
 
@@ -424,7 +424,7 @@ test.describe('手机端触摸交互测试', () => {
   });
 
   test('手机端 - 触摸点击登录链接', async ({ page }) => {
-    await page.goto('http://localhost:3000/resume/register');
+    await page.goto('http://localhost:3000/register');
     await page.waitForLoadState('domcontentloaded').catch(() => {});
     await page.waitForTimeout(1000);
 
@@ -438,7 +438,7 @@ test.describe('手机端触摸交互测试', () => {
   });
 
   test('手机端 - 触摸点击复选框', async ({ page }) => {
-    await page.goto('http://localhost:3000/resume/register');
+    await page.goto('http://localhost:3000/register');
     await page.waitForLoadState('domcontentloaded').catch(() => {});
     await page.waitForTimeout(1000);
 
@@ -466,11 +466,11 @@ test.describe('手机端不同屏幕尺寸测试', () => {
   for (const size of screenSizes) {
     test(`手机端 - ${size.name} 屏幕尺寸测试`, async ({ page }) => {
       await page.setViewportSize({ width: size.width, height: size.height });
-      await page.goto('http://localhost:3000/resume/');
+      await page.goto('http://localhost:3000/');
       await page.waitForLoadState('domcontentloaded').catch(() => {});
       await page.waitForTimeout(1500);
 
-      await page.goto('http://localhost:3000/resume/register');
+      await page.goto('http://localhost:3000/register');
     await page.waitForLoadState('domcontentloaded').catch(() => {});
     await page.waitForTimeout(1000);
 
@@ -496,13 +496,13 @@ test.describe.skip('手机端横屏测试', () => {
   });
 
   test.beforeEach(async ({ page }) => {
-    await page.goto('http://localhost:3000/resume/');
+    await page.goto('http://localhost:3000/');
     await page.waitForLoadState('domcontentloaded').catch(() => {});
     await page.waitForTimeout(1500);
   });
 
   test('手机端 - 横屏模式下注册页面布局', async ({ page }) => {
-    await page.goto('http://localhost:3000/resume/register');
+    await page.goto('http://localhost:3000/register');
     await page.waitForLoadState('domcontentloaded').catch(() => {});
     await page.waitForTimeout(1000);
 
@@ -513,7 +513,7 @@ test.describe.skip('手机端横屏测试', () => {
   });
 
   test('手机端 - 横屏模式下登录页面布局', async ({ page }) => {
-    await page.goto('http://localhost:3000/resume/login');
+    await page.goto('http://localhost:3000/login');
     await page.waitForLoadState('domcontentloaded').catch(() => {});
     await page.waitForTimeout(1000);
 
