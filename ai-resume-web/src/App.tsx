@@ -3,6 +3,11 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import { useAuthStore } from './store/auth';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
+import ForgotPasswordPage from './pages/ForgotPasswordPage';
+import TermsPage from './pages/TermsPage';
+import PrivacyPage from './pages/PrivacyPage';
+import HelpPage from './pages/HelpPage';
+import AboutPage from './pages/AboutPage';
 import HomePage from './pages/HomePage';
 import ResumeListPage from './pages/ResumeListPage';
 import ResumeEditorPage from './pages/ResumeEditorPage';
@@ -46,6 +51,14 @@ function App() {
         path="/register"
         element={!isAuthenticated ? <RegisterPage /> : <Navigate to="/" replace />}
       />
+      <Route
+        path="/forgot-password"
+        element={<ForgotPasswordPage />}
+      />
+      <Route path="/terms" element={<TermsPage />} />
+      <Route path="/privacy" element={<PrivacyPage />} />
+      <Route path="/help" element={<HelpPage />} />
+      <Route path="/about" element={<AboutPage />} />
 
       {/* 受保护路由 */}
       <Route

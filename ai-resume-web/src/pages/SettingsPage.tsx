@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { storage, } from '@ai-resume/shared';
 import { getApiClient } from '@ai-resume/shared/api';
@@ -23,6 +23,7 @@ export default function SettingsPage() {
 
   const [isSaving, setIsSaving] = useState(false);
   const [message, setMessage] = useState('');
+  const [switchingProvider, setSwitchingProvider] = useState<AIProvider | null>(null);
 
   useEffect(() => {
     // 加载配置
@@ -144,24 +145,32 @@ export default function SettingsPage() {
             </label>
             <div className="flex gap-2">
               {[
-                { value: 'openai', label: 'OpenAI', icon: '🌟' },
-                { value: 'deepseek', label: 'DeepSeek', icon: '🧠' },
-                { value: 'xiaomi', label: '小米AI', icon: '📱' },
+                { value: 'openai' as const, label: 'OpenAI', icon: '🌟' },
+                { value: 'deepseek' as const, label: 'DeepSeek', icon: '🧠' },
+                { value: 'xiaomi' as const, label: '小米AI', icon: '📱' },
               ].map((item) => (
                 <button
                   key={item.value}
-                  onClick={() => setProvider(item.value as AIProvider)}
-                  className={`flex-1 p-3 rounded-lg border-2 transition-colors ${
+                  onClick={() => {
+                    setSwitchingProvider(item.value);
+                    setProvider(item.value);
+                    setTimeout(() => setSwitchingProvider(null), 300);
+                  }}
+                  disabled={switchingProvider !== null}
+                  className={`flex-1 p-3 rounded-lg border-2 transition-all duration-300 ${
                     provider === item.value
-                      ? 'border-primary-500 bg-primary-50'
+                      ? 'border-primary-500 bg-primary-50 scale-105 shadow-sm'
                       : 'border-gray-200 hover:border-gray-300'
-                  }`}
+                  } ${switchingProvider !== null ? 'opacity-50 cursor-not-allowed' : ''}`}
                 >
                   <span className="mr-1">{item.icon}</span>
                   {item.label}
                 </button>
               ))}
             </div>
+            <p className="text-xs text-gray-500 mt-2">
+              切换提供商后需要重新配置 API 密钥
+            </p>
           </div>
 
           {/* OpenAI 配置 */}
@@ -305,7 +314,7 @@ export default function SettingsPage() {
             <span className="text-sm text-gray-500">版本 1.0.0</span>
           </button>
 
-          <button className="flex items-center justify-between p-4 hover:bg-gray-50 w-full text-left">
+          <Link to="/help" className="flex items-center justify-between p-4 hover:bg-gray-50 w-full text-left">
             <div className="flex items-center gap-3">
               <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -315,9 +324,9 @@ export default function SettingsPage() {
             <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
             </svg>
-          </button>
+          </Link>
 
-          <button className="flex items-center justify-between p-4 hover:bg-gray-50 w-full text-left">
+          <Link to="/privacy" className="flex items-center justify-between p-4 hover:bg-gray-50 w-full text-left">
             <div className="flex items-center gap-3">
               <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
@@ -327,7 +336,7 @@ export default function SettingsPage() {
             <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
             </svg>
-          </button>
+          </Link>
         </div>
       </main>
     </div>
