@@ -1,0 +1,328 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+env:
+  PYTHON_VERSION: '3.13'
+  NODE_VERSION: '20'
+
+jobs:
+  # 后端测试
+  backend-test:
+    name: Backend Tests
+    runs-on: ubuntu-latest
+
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: rootpassword
+          MYSQL_DATABASE: ai_resume_test
+          MYSQL_USER: testuser
+          MYSQL_PASSWORD: testpass
+        ports:
+          - 3306:3306
+        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
+
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: --health-cmd="redis-cli ping" --health-interval=10s --health-timeout=5s --health-retries=3
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: |
+          cd backend
+          pip install --upgrade pip
+          pip install pytest pytest-cov pytest-asyncio pytest-mock
+          pip install -r requirements.txt
+
+      - name: Run linting
+        run: |
+          cd backend
+          pip install ruff
+          ruff check app/ --output-format=github
+
+      - name: Run type checking
+        run: |
+          cd backend
+          pip install mypy
+          mypy app/ --ignore-missing-imports || true
+
+      - name: Run security scan (bandit)
+        run: |
+          cd backend
+          pip install bandit[toml]
+          bandit -r app/ -f json -o bandit-report.json || true
+
+      - name: Run dependency check (safety)
+        run: |
+          cd backend
+          pip install safety
+          safety check --json > safety-report.json || true
+
+      - name: Run tests
+        env:
+          DATABASE_URL: mysql+aiomysql://testuser:testpass@localhost:3306/ai_resume_test
+          REDIS_URL: redis://localhost:6379
+          SECRET_KEY: test-secret-key-for-ci
+          DEBUG: false
+        run: |
+          cd backend
+          pytest tests/ test_*.py -v --cov=app --cov-report=xml --cov-report=html --asyncio-mode=auto
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          files: ./backend/coverage.xml
+          flags: backend
+          name: backend-coverage
+
+      - name: Upload test results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: backend-test-results
+          path: |
+            backend/htmlcov/
+            backend/coverage.xml
+          retention-days: 30
+
+      - name: Upload security reports
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: backend-security-reports
+          path: |
+            backend/bandit-report.json
+            backend/safety-report.json
+          retention-days: 30
+
+  # 前端测试
+  frontend-test:
+    name: Frontend Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: ai-resume-web/package-lock.json
+
+      - name: Install dependencies
+        run: |
+          cd ai-resume-web
+          npm ci
+
+      - name: Run linting (ESLint)
+        run: |
+          cd ai-resume-web
+          npm run lint || true
+
+      - name: Run type checking
+        run: |
+          cd ai-resume-web
+          npm run type-check || true
+
+      - name: Run unit tests
+        run: |
+          cd ai-resume-web
+          npm run test -- --run || true
+
+      - name: Run tests with coverage
+        run: |
+          cd ai-resume-web
+          npm run test:coverage || true
+
+      - name: Build production bundle
+        run: |
+          cd ai-resume-web
+          npm run build
+
+      - name: Run security audit
+        run: |
+          cd ai-resume-web
+          npm audit --json > npm-audit-report.json || true
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          files: ./ai-resume-web/coverage/coverage-final.json
+          flags: frontend
+          name: frontend-coverage
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-build
+          path: ai-resume-web/dist/
+          retention-days: 7
+
+      - name: Upload test results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: frontend-test-results
+          path: |
+            ai-resume-web/coverage/
+            ai-resume-web/npm-audit-report.json
+          retention-days: 30
+
+  # 安全扫描
+  security-scan:
+    name: Security Scanning
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'fs'
+          scan-ref: '.'
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+
+      - name: Upload Trivy results to GitHub Security tab
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: 'trivy-results.sarif'
+
+      - name: Run CodeQL Analysis
+        uses: github/codeql-action/analyze@v3
+        with:
+          languages: python, javascript
+          queries: security-extended, security-and-quality
+
+  # 构建和推送 Docker 镜像
+  build-and-push:
+    name: Build & Push Docker Images
+    needs: [backend-test, frontend-test, security-scan]
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Extract metadata for backend
+        id: meta-backend
+        uses: docker/metadata-action@v5
+        with:
+          images: your-dockerhub-username/ai-resume-backend
+          tags: |
+            type=ref,event=branch
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=sha,prefix={{branch}}-
+
+      - name: Build and push backend image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./backend
+          file: ./backend/Dockerfile
+          push: true
+          tags: ${{ steps.meta-backend.outputs.tags }}
+          labels: ${{ steps.meta-backend.outputs.labels }}
+          cache-from: type=registry,ref=your-dockerhub-username/ai-resume-backend:buildcache
+          cache-to: type=registry,ref=your-dockerhub-username/ai-resume-backend:buildcache,mode=max
+
+      - name: Extract metadata for frontend
+        id: meta-frontend
+        uses: docker/metadata-action@v5
+        with:
+          images: your-dockerhub-username/ai-resume-frontend
+          tags: |
+            type=ref,event=branch
+            type=semver,pattern={{version}}
+            type=sha,prefix={{branch}}-
+
+      - name: Build and push frontend image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./ai-resume-web
+          file: ./ai-resume-web/Dockerfile
+          push: true
+          tags: ${{ steps.meta-frontend.outputs.tags }}
+          labels: ${{ steps.meta-frontend.outputs.labels }}
+          cache-from: type=registry,ref=your-dockerhub-username/ai-resume-frontend:buildcache
+          cache-to: type=registry,ref=your-dockerhub-username/ai-resume-frontend:buildcache,mode=max
+
+  # 部署到生产环境（示例）
+  deploy-production:
+    name: Deploy to Production
+    needs: [build-and-push]
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    environment:
+      name: production
+      url: https://yourdomain.com
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.PRODUCTION_HOST }}
+          username: ${{ secrets.PRODUCTION_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            cd /path/to/ai-resume
+            docker-compose pull
+            docker-compose up -d
+            docker image prune -f
+
+      - name: Run smoke tests
+        run: |
+          # 健康检查
+          sleep 10
+          curl -f https://yourdomain.com/health || exit 1
+          curl -f https://yourdomain.com/api/v1/health || exit 1
+
+      - name: Notify deployment
+        uses: 8398a7/action-slack@v3
+        if: always()
+        with:
+          status: ${{ job.status }}
+          text: 'Deployment to production: ${{ job.status }}'
+          webhook_url: ${{ secrets.SLACK_WEBHOOK }}
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
