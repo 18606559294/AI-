@@ -118,3 +118,15 @@ EXECUTE_TEST.js
 # Chinese named files and directories
 测试状态报告.md
 请启动*
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
