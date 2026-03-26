@@ -1,0 +1,311 @@
+name: AI Resume Platform - CD
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: '部署环境'
+        required: true
+        default: 'staging'
+        type: choice
+        options:
+          - staging
+          - production
+
+env:
+  NODE_VERSION: '20'
+  PYTHON_VERSION: '3.11'
+  REGISTRY: ghcr.io
+  IMAGE_NAME_WEB: ai-resume-web
+  IMAGE_NAME_BACKEND: ai-resume-backend
+
+jobs:
+  # ==================== 构建和推送 Docker 镜像 ====================
+  build-and-push:
+    name: Build & Push Docker Images
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    outputs:
+      image-web: ${{ steps.meta-web.outputs.tags }}
+      image-backend: ${{ steps.meta-backend.outputs.tags }}
+      version: ${{ steps.version.outputs.version }}
+
+    steps:
+      - name: Checkout 代码
+        uses: actions/checkout@v4
+
+      - name: 生成版本号
+        id: version
+        run: |
+          if [[ "${{ github.ref }}" == "refs/tags/"* ]]; then
+            VERSION=${GITHUB_REF#refs/tags/v}
+          else
+            VERSION=$(date +%Y.%m.%d).${{ github.run_number }}
+          fi
+          echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
+          echo "版本号: $VERSION"
+
+      - name: 登录到 Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: 设置 Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: 提取前端元数据
+        id: meta-web
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ github.repository }}/${{ env.IMAGE_NAME_WEB }}
+          tags: |
+            type=ref,event=branch
+            type=ref,event=pr
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=semver,pattern={{major}}
+            type=raw,value=latest,enable={{is_default_branch}}
+          labels: |
+            org.opencontainers.image.title=AI Resume Web
+            org.opencontainers.image.description=AI 驱动的智能简历生成平台 - 前端
+            org.opencontainers.image.version=${{ steps.version.outputs.version }}
+
+      - name: 提取后端元数据
+        id: meta-backend
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ github.repository }}/${{ env.IMAGE_NAME_BACKEND }}
+          tags: |
+            type=ref,event=branch
+            type=ref,event=pr
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=semver,pattern={{major}}
+            type=raw,value=latest,enable={{is_default_branch}}
+          labels: |
+            org.opencontainers.image.title=AI Resume Backend
+            org.opencontainers.image.description=AI 驱动的智能简历生成平台 - 后端 API
+            org.opencontainers.image.version=${{ steps.version.outputs.version }}
+
+      - name: 构建并推送前端镜像
+        uses: docker/build-push-action@v5
+        with:
+          context: ./ai-resume-web
+          push: true
+          tags: ${{ steps.meta-web.outputs.tags }}
+          labels: ${{ steps.meta-web.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          platforms: linux/amd64,linux/arm64
+
+      - name: 构建并推送后端镜像
+        uses: docker/build-push-action@v5
+        with:
+          context: ./backend
+          push: true
+          tags: ${{ steps.meta-backend.outputs.tags }}
+          labels: ${{ steps.meta-backend.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          platforms: linux/amd64,linux/arm64
+
+  # ==================== 部署到 Staging 环境 ====================
+  deploy-staging:
+    name: Deploy to Staging
+    runs-on: ubuntu-latest
+    needs: build-and-push
+    if: github.ref == 'refs/heads/main' || github.event.inputs.environment == 'staging'
+    environment:
+      name: staging
+      url: https://staging.ai-resume.example.com
+
+    steps:
+      - name: Checkout 代码
+        uses: actions/checkout@v4
+
+      - name: 设置 kubectl
+        uses: azure/setup-kubectl@v4
+        with:
+          version: 'v1.28.0'
+
+      - name: 配置 kubeconfig
+        run: |
+          mkdir -p ~/.kube
+          echo "${{ secrets.KUBECONFIG_STAGING }}" | base64 -d > ~/.kube/config
+
+      - name: 更新 deployment 镜像
+        run: |
+          kubectl set image deployment/ai-resume-web \
+            ai-resume-web=${{ needs.build-and-push.outputs.image-web }} \
+            -n ai-resume-staging
+
+          kubectl set image deployment/ai-resume-backend \
+            ai-resume-backend=${{ needs.build-and-push.outputs.image-backend }} \
+            -n ai-resume-staging
+
+      - name: 等待部署就绪
+        run: |
+          kubectl rollout status deployment/ai-resume-web -n ai-resume-staging --timeout=5m
+          kubectl rollout status deployment/ai-resume-backend -n ai-resume-staging --timeout=5m
+
+      - name: 验证部署
+        run: |
+          # 健康检查
+          kubectl get pods -n ai-resume-staging -l app=ai-resume-backend
+
+          # 简单的 HTTP 检查（如果有 LoadBalancer）
+          # curl -f http://staging.ai-resume.example.com/health || exit 1
+
+      - name: 通知部署状态
+        if: always()
+        run: |
+          echo "部署状态: ${{ job.status }}"
+
+  # ==================== 部署到 Production 环境 ====================
+  deploy-production:
+    name: Deploy to Production
+    runs-on: ubuntu-latest
+    needs: [build-and-push, deploy-staging]
+    if: |
+      startsWith(github.ref, 'refs/tags/v') ||
+      github.event.inputs.environment == 'production'
+    environment:
+      name: production
+      url: https://ai-resume.example.com
+
+    steps:
+      - name: Checkout 代码
+        uses: actions/checkout@v4
+
+      - name: 设置 kubectl
+        uses: azure/setup-kubectl@v4
+        with:
+          version: 'v1.28.0'
+
+      - name: 配置 kubeconfig
+        run: |
+          mkdir -p ~/.kube
+          echo "${{ secrets.KUBECONFIG_PROD }}" | base64 -d > ~/.kube/config
+
+      - name: 创建部署备份
+        run: |
+          # 保存当前 deployment 配置
+          kubectl get deployment ai-resume-web -n ai-resume-prod -o yaml > backup-web-${{ github.run_number }}.yaml
+          kubectl get deployment ai-resume-backend -n ai-resume-prod -o yaml > backup-backend-${{ github.run_number }}.yaml
+
+      - name: 更新 deployment 镜像
+        run: |
+          kubectl set image deployment/ai-resume-web \
+            ai-resume-web=${{ needs.build-and-push.outputs.image-web }} \
+            -n ai-resume-prod
+
+          kubectl set image deployment/ai-resume-backend \
+            ai-resume-backend=${{ needs.build-and-push.outputs.image-backend }} \
+            -n ai-resume-prod
+
+      - name: 等待部署就绪
+        run: |
+          kubectl rollout status deployment/ai-resume-web -n ai-resume-prod --timeout=10m
+          kubectl rollout status deployment/ai-resume-backend -n ai-resume-prod --timeout=10m
+
+      - name: 健康检查
+        run: |
+          # 检查 pods 状态
+          kubectl get pods -n ai-resume-prod -l app=ai-resume-backend
+
+          # HTTP 健康检查（如果有服务端点）
+          # curl -f http://ai-resume.example.com/health || exit 1
+
+      - name: 运行冒烟测试
+        run: |
+          # 简单的冒烟测试
+          echo "运行冒烟测试..."
+          # 这里可以添加实际的测试命令
+
+      - name: 通知部署成功
+        if: success()
+        run: |
+          echo "生产环境部署成功!"
+          echo "版本: ${{ needs.build-and-push.outputs.version }}"
+
+      - name: 部署失败时回滚
+        if: failure()
+        run: |
+          echo "部署失败，执行回滚..."
+          kubectl rollout undo deployment/ai-resume-web -n ai-resume-prod
+          kubectl rollout undo deployment/ai-resume-backend -n ai-resume-prod
+
+  # ==================== GitHub Release ====================
+  create-release:
+    name: Create GitHub Release
+    runs-on: ubuntu-latest
+    needs: [build-and-push, deploy-production]
+    if: startsWith(github.ref, 'refs/tags/v')
+
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout 代码
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: 生成 Release Notes
+        id: release_notes
+        run: |
+          VERSION=${{ needs.build-and-push.outputs.version }}
+          NOTES="## AI Resume Platform v$VERSION\n\n"
+          NOTES+="### 更新内容\n\n"
+          NOTES+="- 前端镜像: ${{ needs.build-and-push.outputs.image-web }}\n"
+          NOTES+="- 后端镜像: ${{ needs.build-and-push.outputs.image-backend }}\n\n"
+          NOTES+="\n### 安装\n\n"
+          NOTES+="\`\`\`bash\n"
+          NOTES+="docker pull ghcr.io/${{ github.repository }}/ai-resume-web:$VERSION\n"
+          NOTES+="docker pull ghcr.io/${{ github.repository }}/ai-resume-backend:$VERSION"
+          NOTES+="\n\`\`\`\n"
+          echo "notes<<EOF" >> $GITHUB_OUTPUT
+          echo "$NOTES" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: 创建 Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ needs.build-and-push.outputs.version }}
+          name: Release v${{ needs.build-and-push.outputs.version }}
+          body: ${{ steps.release_notes.outputs.notes }}
+          draft: false
+          prerelease: false
+          generate_release_notes: true
+
+  # ==================== 部署后通知 ====================
+  notify:
+    name: Send Notification
+    runs-on: ubuntu-latest
+    needs: [build-and-push, deploy-staging, deploy-production]
+    if: always()
+
+    steps:
+      - name: 发送通知
+        run: |
+          ENV="${{ github.event.inputs.environment || 'staging' }}"
+          STATUS="${{ job.status }}"
+          VERSION="${{ needs.build-and-push.outputs.version }}"
+
+          echo "部署通知:"
+          echo "  环境: $ENV"
+          echo "  版本: $VERSION"
+          echo "  状态: $STATUS"
+
+          # 这里可以添加实际的通知服务，如 Slack、钉钉等
+          # curl -X POST ${{ secrets.SLACK_WEBHOOK }} \
+          #   -H 'Content-Type: application/json' \
+          #   -d "{\"text\":\"部署 $ENV $VERSION: $STATUS\"}"
