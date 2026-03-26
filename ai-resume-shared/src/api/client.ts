@@ -209,8 +209,8 @@ export class ApiClient {
   /**
    * POST 请求
    */
-  async post<T>(url: string, data?: unknown): Promise<T> {
-    const response = await this.client.post(url, data);
+  async post<T>(url: string, data?: unknown, config?: Record<string, unknown>): Promise<T> {
+    const response = await this.client.post(url, data, config);
     return this.handleResponse<T>(response);
   }
 

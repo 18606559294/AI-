@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { useAuthStore } from './store/auth';
+import { ErrorBoundary } from './components/ErrorBoundary';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import ForgotPasswordPage from './pages/ForgotPasswordPage';
@@ -41,58 +42,60 @@ function App() {
   }
 
   return (
-    <Routes>
-      {/* 公开路由 */}
-      <Route
-        path="/login"
-        element={!isAuthenticated ? <LoginPage /> : <Navigate to="/" replace />}
-      />
-      <Route
-        path="/register"
-        element={!isAuthenticated ? <RegisterPage /> : <Navigate to="/" replace />}
-      />
-      <Route
-        path="/forgot-password"
-        element={<ForgotPasswordPage />}
-      />
-      <Route path="/terms" element={<TermsPage />} />
-      <Route path="/privacy" element={<PrivacyPage />} />
-      <Route path="/help" element={<HelpPage />} />
-      <Route path="/about" element={<AboutPage />} />
+    <ErrorBoundary>
+      <Routes>
+        {/* 公开路由 */}
+        <Route
+          path="/login"
+          element={!isAuthenticated ? <LoginPage /> : <Navigate to="/" replace />}
+        />
+        <Route
+          path="/register"
+          element={!isAuthenticated ? <RegisterPage /> : <Navigate to="/" replace />}
+        />
+        <Route
+          path="/forgot-password"
+          element={<ForgotPasswordPage />}
+        />
+        <Route path="/terms" element={<TermsPage />} />
+        <Route path="/privacy" element={<PrivacyPage />} />
+        <Route path="/help" element={<HelpPage />} />
+        <Route path="/about" element={<AboutPage />} />
 
-      {/* 受保护路由 */}
-      <Route
-        path="/"
-        element={isAuthenticated ? <HomePage /> : <Navigate to="/login" replace />}
-      />
-      <Route
-        path="/resumes"
-        element={isAuthenticated ? <ResumeListPage /> : <Navigate to="/login" replace />}
-      />
-      <Route
-        path="/resumes/new"
-        element={isAuthenticated ? <ResumeEditorPage /> : <Navigate to="/login" replace />}
-      />
-      <Route
-        path="/resumes/:id"
-        element={isAuthenticated ? <ResumeEditorPage /> : <Navigate to="/login" replace />}
-      />
-      <Route
-        path="/templates"
-        element={isAuthenticated ? <TemplatesPage /> : <Navigate to="/login" replace />}
-      />
-      <Route
-        path="/profile"
-        element={isAuthenticated ? <ProfilePage /> : <Navigate to="/login" replace />}
-      />
-      <Route
-        path="/settings"
-        element={isAuthenticated ? <SettingsPage /> : <Navigate to="/login" replace />}
-      />
+        {/* 受保护路由 */}
+        <Route
+          path="/"
+          element={isAuthenticated ? <HomePage /> : <Navigate to="/login" replace />}
+        />
+        <Route
+          path="/resumes"
+          element={isAuthenticated ? <ResumeListPage /> : <Navigate to="/login" replace />}
+        />
+        <Route
+          path="/resumes/new"
+          element={isAuthenticated ? <ResumeEditorPage /> : <Navigate to="/login" replace />}
+        />
+        <Route
+          path="/resumes/:id"
+          element={isAuthenticated ? <ResumeEditorPage /> : <Navigate to="/login" replace />}
+        />
+        <Route
+          path="/templates"
+          element={isAuthenticated ? <TemplatesPage /> : <Navigate to="/login" replace />}
+        />
+        <Route
+          path="/profile"
+          element={isAuthenticated ? <ProfilePage /> : <Navigate to="/login" replace />}
+        />
+        <Route
+          path="/settings"
+          element={isAuthenticated ? <SettingsPage /> : <Navigate to="/login" replace />}
+        />
 
-      {/* 404 */}
-      <Route path="*" element={<Navigate to="/" replace />} />
-    </Routes>
+        {/* 404 */}
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    </ErrorBoundary>
   );
 }
 

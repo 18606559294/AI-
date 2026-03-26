@@ -3,6 +3,7 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '@ai-resume/shared/api';
 import type { ResumeContent, Education, WorkExperience, Project } from '@ai-resume/shared/types';
+import ResumePreview from '../components/ResumePreview';
 
 export default function ResumeEditorPage() {
   const { id } = useParams<{ id: string }>();
@@ -14,6 +15,10 @@ export default function ResumeEditorPage() {
   const [title, setTitle] = useState('我的简历');
   const [isSaving, setIsSaving] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
+
+  // 实时预览相关状态
+  const [showPreview, setShowPreview] = useState(false);
+  const [previewTemplate, setPreviewTemplate] = useState<'modern' | 'classic' | 'minimal'>('modern');
 
   // 简历内容
   const [content, setContent] = useState<ResumeContent>({
@@ -233,6 +238,30 @@ export default function ResumeEditorPage() {
             </div>
 
             <div className="flex items-center gap-2">
+              {/* 预览切换按钮 */}
+              <button
+                onClick={() => setShowPreview(!showPreview)}
+                className={`btn flex items-center gap-2 ${
+                  showPreview ? 'btn-primary' : 'btn-secondary'
+                }`}
+              >
+                <span>{showPreview ? '📝' : '👁️'}</span>
+                {showPreview ? '编辑' : '预览'}
+              </button>
+
+              {/* 模板选择（仅在预览模式下显示） */}
+              {showPreview && (
+                <select
+                  value={previewTemplate}
+                  onChange={(e) => setPreviewTemplate(e.target.value as any)}
+                  className="btn btn-secondary px-3 py-2"
+                >
+                  <option value="modern">现代模板</option>
+                  <option value="classic">经典模板</option>
+                  <option value="minimal">简约模板</option>
+                </select>
+              )}
+
               <button
                 onClick={handleAIGenerate}
                 disabled={isGenerating || isNew}
@@ -265,340 +294,341 @@ export default function ResumeEditorPage() {
         </div>
       </header>
 
-      {/* 标签页导航 */}
-      <div className="bg-white border-b">
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="flex gap-1">
-            {tabs.map((tab, index) => (
-              <button
-                key={index}
-                onClick={() => setActiveTab(index)}
-                className={`px-6 py-3 font-medium transition-colors ${
-                  activeTab === index
-                    ? 'text-primary-600 border-b-2 border-primary-600'
-                    : 'text-gray-600 hover:text-gray-900'
-                }`}
-              >
-                <span className="mr-1">{tab.icon}</span>
-                {tab.label}
-              </button>
-            ))}
+      {/* 预览模式 */}
+      {showPreview ? (
+        <main className="flex-1 overflow-auto bg-gray-100 p-8">
+          <ResumePreview content={content} template={previewTemplate} />
+        </main>
+      ) : (
+        <>
+          {/* 标签页导航 */}
+          <div className="bg-white border-b">
+            <div className="max-w-7xl mx-auto px-4">
+              <div className="flex gap-1">
+                {tabs.map((tab, index) => (
+                  <button
+                    key={index}
+                    onClick={() => setActiveTab(index)}
+                    className={`px-6 py-3 font-medium transition-colors ${
+                      activeTab === index
+                        ? 'text-primary-600 border-b-2 border-primary-600'
+                        : 'text-gray-600 hover:text-gray-900'
+                    }`}
+                  >
+                    <span className="mr-1">{tab.icon}</span>
+                    {tab.label}
+                  </button>
+                ))}
+              </div>
+            </div>
           </div>
-        </div>
-      </div>
 
-      {/* 内容区域 */}
-      <main className="flex-1 overflow-auto">
-        <div className="max-w-4xl mx-auto px-4 py-8">
-          {activeTab === 0 && (
-            <div className="space-y-6">
-              <h2 className="text-xl font-semibold mb-4">基本信息</h2>
-              <div className="card p-6 space-y-4">
-                <div className="grid md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">姓名</label>
-                    <input
-                      type="text"
-                      value={content.basic_info?.name ?? ''}
-                      onChange={(e) => setContent({
-                        ...content,
-                        basic_info: { ...content.basic_info!, name: e.target.value }
-                      })}
-                      className="input"
-                      placeholder="请输入姓名"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">邮箱</label>
-                    <input
-                      type="email"
-                      value={content.basic_info?.email ?? ''}
-                      onChange={(e) => setContent({
-                        ...content,
-                        basic_info: { ...content.basic_info!, email: e.target.value }
-                      })}
-                      className="input"
-                      placeholder="请输入邮箱"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">手机号</label>
-                    <input
-                      type="tel"
-                      value={content.basic_info?.phone ?? ''}
-                      onChange={(e) => setContent({
-                        ...content,
-                        basic_info: { ...content.basic_info!, phone: e.target.value }
-                      })}
-                      className="input"
-                      placeholder="请输入手机号"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">所在城市</label>
-                    <input
-                      type="text"
-                      value={content.basic_info?.location ?? ''}
-                      onChange={(e) => setContent({
-                        ...content,
-                        basic_info: { ...content.basic_info!, location: e.target.value }
-                      })}
-                      className="input"
-                      placeholder="请输入所在城市"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">求职意向</label>
-                    <input
-                      type="text"
-                      value={content.basic_info?.job_intention ?? ''}
-                      onChange={(e) => setContent({
-                        ...content,
-                        basic_info: { ...content.basic_info!, job_intention: e.target.value }
-                      })}
-                      className="input"
-                      placeholder="例如：前端工程师"
-                    />
+          {/* 内容区域 */}
+          <main className="flex-1 overflow-auto">
+            <div className="max-w-4xl mx-auto px-4 py-8">
+              {activeTab === 0 && (
+                <div className="space-y-6">
+                  <h2 className="text-xl font-semibold mb-4">基本信息</h2>
+                  <div className="card p-6 space-y-4">
+                    <div className="grid md:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">姓名</label>
+                        <input
+                          type="text"
+                          value={content.basic_info?.name || ''}
+                          onChange={(e) => setContent({
+                            ...content,
+                            basic_info: { ...content.basic_info, name: e.target.value }
+                          })}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">邮箱</label>
+                        <input
+                          type="email"
+                          value={content.basic_info?.email || ''}
+                          onChange={(e) => setContent({
+                            ...content,
+                            basic_info: { ...content.basic_info, email: e.target.value }
+                          })}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">电话</label>
+                        <input
+                          type="tel"
+                          value={content.basic_info?.phone || ''}
+                          onChange={(e) => setContent({
+                            ...content,
+                            basic_info: { ...content.basic_info, phone: e.target.value }
+                          })}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">地点</label>
+                        <input
+                          type="text"
+                          value={content.basic_info?.location || ''}
+                          onChange={(e) => setContent({
+                            ...content,
+                            basic_info: { ...content.basic_info, location: e.target.value }
+                          })}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">职位</label>
+                        <input
+                          type="text"
+                          value={content.basic_info?.title || ''}
+                          onChange={(e) => setContent({
+                            ...content,
+                            basic_info: { ...content.basic_info, title: e.target.value }
+                          })}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">求职意向</label>
+                        <input
+                          type="text"
+                          value={content.basic_info?.job_intention || ''}
+                          onChange={(e) => setContent({
+                            ...content,
+                            basic_info: { ...content.basic_info, job_intention: e.target.value }
+                          })}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">个人简介</label>
+                      <textarea
+                        value={content.basic_info?.summary || ''}
+                        onChange={(e) => setContent({
+                          ...content,
+                          basic_info: { ...content.basic_info, summary: e.target.value }
+                        })}
+                        rows={3}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">自我介绍</label>
+                      <textarea
+                        value={content.basic_info?.self_introduction || ''}
+                        onChange={(e) => setContent({
+                          ...content,
+                          basic_info: { ...content.basic_info, self_introduction: e.target.value }
+                        })}
+                        rows={4}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                      />
+                    </div>
                   </div>
                 </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">个人简介</label>
-                  <textarea
-                    value={content.basic_info?.summary ?? ''}
-                    onChange={(e) => setContent({
-                      ...content,
-                      basic_info: { ...content.basic_info!, summary: e.target.value }
-                    })}
-                    className="input min-h-[120px]"
-                    placeholder="请输入个人简介"
-                  />
-                </div>
-              </div>
-            </div>
-          )}
+              )}
 
-          {activeTab === 1 && (
-            <div className="space-y-6">
-              <div className="flex items-center justify-between">
-                <h2 className="text-xl font-semibold">教育经历</h2>
-                <button onClick={addEducation} className="btn btn-secondary">
-                  + 添加教育经历
-                </button>
-              </div>
-              {content.education?.map((edu, index) => (
-                <div key={index} className="card p-6 relative">
-                  <button
-                    onClick={() => removeEducation(index)}
-                    className="absolute top-4 right-4 text-gray-400 hover:text-red-500"
-                  >
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                  </button>
-                  <div className="grid md:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">学校</label>
-                      <input
-                        type="text"
-                        value={edu.school}
-                        onChange={(e) => updateEducation(index, 'school', e.target.value)}
-                        className="input"
-                        placeholder="请输入学校名称"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">学历</label>
-                      <input
-                        type="text"
-                        value={edu.degree}
-                        onChange={(e) => updateEducation(index, 'degree', e.target.value)}
-                        className="input"
-                        placeholder="例如：本科、硕士"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">专业</label>
-                      <input
-                        type="text"
-                        value={edu.major ?? ''}
-                        onChange={(e) => updateEducation(index, 'major', e.target.value)}
-                        className="input"
-                        placeholder="请输入专业"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">毕业时间</label>
-                      <input
-                        type="month"
-                        value={edu.end_date ?? ''}
-                        onChange={(e) => updateEducation(index, 'end_date', e.target.value)}
-                        className="input"
-                      />
-                    </div>
+              {activeTab === 1 && (
+                <div className="space-y-6">
+                  <div className="flex justify-between items-center mb-4">
+                    <h2 className="text-xl font-semibold">教育经历</h2>
+                    <button onClick={addEducation} className="btn btn-primary">
+                      + 添加
+                    </button>
+                  </div>
+                  <div className="space-y-4">
+                    {content.education?.map((edu, index) => (
+                      <div key={index} className="card p-6 space-y-4">
+                        <div className="flex justify-end">
+                          <button
+                            onClick={() => removeEducation(index)}
+                            className="text-red-600 hover:text-red-800"
+                          >
+                            删除
+                          </button>
+                        </div>
+                        <div className="grid md:grid-cols-2 gap-4">
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">学校</label>
+                            <input
+                              type="text"
+                              value={edu.school || ''}
+                              onChange={(e) => updateEducation(index, 'school', e.target.value)}
+                              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">学位</label>
+                            <input
+                              type="text"
+                              value={edu.degree || ''}
+                              onChange={(e) => updateEducation(index, 'degree', e.target.value)}
+                              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">专业</label>
+                            <input
+                              type="text"
+                              value={edu.major || ''}
+                              onChange={(e) => updateEducation(index, 'major', e.target.value)}
+                              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 </div>
-              ))}
-              {(!content.education || content.education.length === 0) && (
-                <div className="card p-8 text-center text-gray-500">
-                  还没有添加教育经历，点击上方按钮添加
+              )}
+
+              {activeTab === 2 && (
+                <div className="space-y-6">
+                  <div className="flex justify-between items-center mb-4">
+                    <h2 className="text-xl font-semibold">工作经历</h2>
+                    <button onClick={addWork} className="btn btn-primary">
+                      + 添加
+                    </button>
+                  </div>
+                  <div className="space-y-4">
+                    {content.work_experience?.map((work, index) => (
+                      <div key={index} className="card p-6 space-y-4">
+                        <div className="flex justify-end">
+                          <button
+                            onClick={() => removeWork(index)}
+                            className="text-red-600 hover:text-red-800"
+                          >
+                            删除
+                          </button>
+                        </div>
+                        <div className="grid md:grid-cols-2 gap-4">
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">公司</label>
+                            <input
+                              type="text"
+                              value={work.company || ''}
+                              onChange={(e) => updateWork(index, 'company', e.target.value)}
+                              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">职位</label>
+                            <input
+                              type="text"
+                              value={work.position || ''}
+                              onChange={(e) => updateWork(index, 'position', e.target.value)}
+                              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                            />
+                          </div>
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">工作描述</label>
+                          <textarea
+                            value={work.description || ''}
+                            onChange={(e) => updateWork(index, 'description', e.target.value)}
+                            rows={4}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                          />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {activeTab === 3 && (
+                <div className="space-y-6">
+                  <div className="flex justify-between items-center mb-4">
+                    <h2 className="text-xl font-semibold">项目经历</h2>
+                    <button onClick={addProject} className="btn btn-primary">
+                      + 添加
+                    </button>
+                  </div>
+                  <div className="space-y-4">
+                    {content.projects?.map((project, index) => (
+                      <div key={index} className="card p-6 space-y-4">
+                        <div className="flex justify-end">
+                          <button
+                            onClick={() => removeProject(index)}
+                            className="text-red-600 hover:text-red-800"
+                          >
+                            删除
+                          </button>
+                        </div>
+                        <div className="grid md:grid-cols-2 gap-4">
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">项目名称</label>
+                            <input
+                              type="text"
+                              value={project.name || ''}
+                              onChange={(e) => updateProject(index, 'name', e.target.value)}
+                              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">项目角色</label>
+                            <input
+                              type="text"
+                              value={project.role || ''}
+                              onChange={(e) => updateProject(index, 'role', e.target.value)}
+                              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                            />
+                          </div>
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">项目描述</label>
+                          <textarea
+                            value={project.description || ''}
+                            onChange={(e) => updateProject(index, 'description', e.target.value)}
+                            rows={4}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                          />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {activeTab === 4 && (
+                <div className="space-y-6">
+                  <div className="flex justify-between items-center mb-4">
+                    <h2 className="text-xl font-semibold">技能特长</h2>
+                    <button onClick={addSkill} className="btn btn-primary">
+                      + 添加
+                    </button>
+                  </div>
+                  <div className="card p-6">
+                    <div className="flex flex-wrap gap-2">
+                      {content.skills?.map((skill, index) => (
+                        <span
+                          key={index}
+                          className="bg-primary-100 text-primary-800 px-3 py-1 rounded-full text-sm font-medium flex items-center gap-2"
+                        >
+                          {skill.name}
+                          <button
+                            onClick={() => removeSkill(index)}
+                            className="text-red-600 hover:text-red-800"
+                          >
+                            ×
+                          </button>
+                        </span>
+                      ))}
+                      {(!content.skills || content.skills.length === 0) && (
+                        <p className="text-gray-500">暂无技能</p>
+                      )}
+                    </div>
+                  </div>
                 </div>
               )}
             </div>
-          )}
-
-          {activeTab === 2 && (
-            <div className="space-y-6">
-              <div className="flex items-center justify-between">
-                <h2 className="text-xl font-semibold">工作经历</h2>
-                <button onClick={addWork} className="btn btn-secondary">
-                  + 添加工作经历
-                </button>
-              </div>
-              {content.work_experience?.map((work, index) => (
-                <div key={index} className="card p-6 relative">
-                  <button
-                    onClick={() => removeWork(index)}
-                    className="absolute top-4 right-4 text-gray-400 hover:text-red-500"
-                  >
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                  </button>
-                  <div className="grid md:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">公司</label>
-                      <input
-                        type="text"
-                        value={work.company}
-                        onChange={(e) => updateWork(index, 'company', e.target.value)}
-                        className="input"
-                        placeholder="请输入公司名称"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">职位</label>
-                      <input
-                        type="text"
-                        value={work.position}
-                        onChange={(e) => updateWork(index, 'position', e.target.value)}
-                        className="input"
-                        placeholder="请输入职位"
-                      />
-                    </div>
-                  </div>
-                  <div className="mt-4">
-                    <label className="block text-sm font-medium text-gray-700 mb-1">工作描述</label>
-                    <textarea
-                      value={work.description ?? ''}
-                      onChange={(e) => updateWork(index, 'description', e.target.value)}
-                      className="input min-h-[100px]"
-                      placeholder="请描述你的工作内容和成就"
-                    />
-                  </div>
-                </div>
-              ))}
-              {(!content.work_experience || content.work_experience.length === 0) && (
-                <div className="card p-8 text-center text-gray-500">
-                  还没有添加工作经历，点击上方按钮添加
-                </div>
-              )}
-            </div>
-          )}
-
-          {activeTab === 3 && (
-            <div className="space-y-6">
-              <div className="flex items-center justify-between">
-                <h2 className="text-xl font-semibold">项目经历</h2>
-                <button onClick={addProject} className="btn btn-secondary">
-                  + 添加项目经历
-                </button>
-              </div>
-              {content.projects?.map((project, index) => (
-                <div key={index} className="card p-6 relative">
-                  <button
-                    onClick={() => removeProject(index)}
-                    className="absolute top-4 right-4 text-gray-400 hover:text-red-500"
-                  >
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                  </button>
-                  <div className="grid md:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">项目名称</label>
-                      <input
-                        type="text"
-                        value={project.name}
-                        onChange={(e) => updateProject(index, 'name', e.target.value)}
-                        className="input"
-                        placeholder="请输入项目名称"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">担任角色</label>
-                      <input
-                        type="text"
-                        value={project.role ?? ''}
-                        onChange={(e) => updateProject(index, 'role', e.target.value)}
-                        className="input"
-                        placeholder="例如：前端开发"
-                      />
-                    </div>
-                  </div>
-                  <div className="mt-4">
-                    <label className="block text-sm font-medium text-gray-700 mb-1">项目描述</label>
-                    <textarea
-                      value={project.description ?? ''}
-                      onChange={(e) => updateProject(index, 'description', e.target.value)}
-                      className="input min-h-[100px]"
-                      placeholder="请描述项目内容和你的贡献"
-                    />
-                  </div>
-                </div>
-              ))}
-              {(!content.projects || content.projects.length === 0) && (
-                <div className="card p-8 text-center text-gray-500">
-                  还没有添加项目经历，点击上方按钮添加
-                </div>
-              )}
-            </div>
-          )}
-
-          {activeTab === 4 && (
-            <div className="space-y-6">
-              <div className="flex items-center justify-between">
-                <h2 className="text-xl font-semibold">技能特长</h2>
-                <button onClick={addSkill} className="btn btn-secondary">
-                  + 添加技能
-                </button>
-              </div>
-              <div className="card p-6">
-                <div className="flex flex-wrap gap-2">
-                  {content.skills?.map((skill, index) => (
-                    <span
-                      key={index}
-                      className="inline-flex items-center gap-1 px-3 py-1 bg-primary-100 text-primary-700 rounded-full"
-                    >
-                      {skill.name}
-                      <button
-                        onClick={() => removeSkill(index)}
-                        className="hover:text-primary-900"
-                      >
-                        ×
-                      </button>
-                    </span>
-                  ))}
-                </div>
-                {(!content.skills || content.skills.length === 0) && (
-                  <p className="text-gray-500 text-center py-4">
-                    还没有添加技能，点击上方按钮添加
-                  </p>
-                )}
-              </div>
-            </div>
-          )}
-        </div>
-      </main>
+          </main>
+        </>
+      )}
     </div>
   );
 }

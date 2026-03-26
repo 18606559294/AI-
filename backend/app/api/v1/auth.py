@@ -1,12 +1,13 @@
 """
 认证路由
 """
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Optional
 from fastapi import APIRouter, Depends, HTTPException, status, Request
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
+import bcrypt
 import httpx
 from app.core.database import get_db
 from app.core.security import (
@@ -29,14 +30,14 @@ from app.schemas.common import Response
 router = APIRouter(prefix="/auth", tags=["认证"])
 
 
-@router.post("/register", response_model=Response[UserResponse])
+@router.post("/register", response_model=None)
 @limiter.limit(RateLimit.AUTH_REGISTER)
 async def register(
     user_data: UserCreate,
     request: Request,
     db: AsyncSession = Depends(get_db)
 ):
-    """用户注册"""
+    """用户注册 - 注册成功后自动登录返回token"""
     # 检查邮箱是否已存在
     result = await db.execute(select(User).where(User.email == user_data.email))
     if result.scalar_one_or_none():
@@ -44,7 +45,7 @@ async def register(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="该邮箱已被注册"
         )
-    
+
     # 检查手机号是否已存在
     if user_data.phone:
         result = await db.execute(select(User).where(User.phone == user_data.phone))
@@ -53,7 +54,7 @@ async def register(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="该手机号已被注册"
             )
-    
+
     # 创建用户
     user = User(
         email=user_data.email,
@@ -64,46 +65,56 @@ async def register(
     db.add(user)
     await db.commit()
     await db.refresh(user)
-    
+
+    # 注册成功后自动生成token，实现自动登录
+    access_token = create_access_token(data={"sub": str(user.id)})
+    refresh_token = create_refresh_token(data={"sub": str(user.id)})
+
     return Response(
-        data=UserResponse.model_validate(user),
+        data={
+            "user": UserResponse.model_validate(user),
+            "access_token": access_token,
+            "refresh_token": refresh_token,
+            "token_type": "bearer",
+            "expires_in": settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60
+        },
         message="注册成功"
     )
 
 
-@router.post("/login", response_model=Response[TokenResponse])
+@router.post("/login", response_model=None)
 @limiter.limit(RateLimit.AUTH_LOGIN)
 async def login(
     request: Request,
     form_data: OAuth2PasswordRequestForm = Depends(),
     db: AsyncSession = Depends(get_db)
 ):
-    """用户登录"""
+    """用户登录 - OAuth2 表单格式"""
     # 查找用户
     result = await db.execute(select(User).where(User.email == form_data.username))
     user = result.scalar_one_or_none()
-    
+
     if not user or not verify_password(form_data.password, user.password_hash):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="邮箱或密码错误",
             headers={"WWW-Authenticate": "Bearer"},
         )
-    
+
     if not user.is_active:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="账户已被禁用"
         )
-    
+
     # 更新最后登录时间
-    user.last_login_at = datetime.utcnow()
+    user.last_login_at = datetime.now(timezone.utc)
     await db.commit()
-    
+
     # 生成令牌
     access_token = create_access_token(data={"sub": str(user.id)})
     refresh_token = create_refresh_token(data={"sub": str(user.id)})
-    
+
     return Response(
         data=TokenResponse(
             access_token=access_token,
@@ -114,7 +125,48 @@ async def login(
     )
 
 
-@router.post("/refresh", response_model=Response[TokenResponse])
+@router.post("/login/json")
+async def login_json(
+    login_data: UserLogin,
+    db: AsyncSession = Depends(get_db)
+):
+    """用户登录 - JSON格式"""
+    # 查找用户
+    result = await db.execute(select(User).where(User.email == login_data.email))
+    user = result.scalar_one_or_none()
+
+    if not user or not verify_password(login_data.password, user.password_hash):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="邮箱或密码错误",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+    if not user.is_active:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="账户已被禁用"
+        )
+
+    # 更新最后登录时间
+    user.last_login_at = datetime.now(timezone.utc)
+    await db.commit()
+
+    # 生成令牌
+    access_token = create_access_token(data={"sub": str(user.id)})
+    refresh_token = create_refresh_token(data={"sub": str(user.id)})
+
+    return Response(
+        data=TokenResponse(
+            access_token=access_token,
+            refresh_token=refresh_token,
+            expires_in=settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60
+        ),
+        message="登录成功"
+    )
+
+
+@router.post("/refresh", response_model=None)
 async def refresh_token(
     token_data: TokenRefresh,
     db: AsyncSession = Depends(get_db)
@@ -151,7 +203,7 @@ async def refresh_token(
     )
 
 
-@router.get("/me", response_model=Response[UserResponse])
+@router.get("/me", response_model=None)
 async def get_current_user_info(
     current_user: User = Depends(get_current_user)
 ):
@@ -162,7 +214,7 @@ async def get_current_user_info(
     )
 
 
-@router.post("/change-password", response_model=Response)
+@router.post("/change-password")
 async def change_password(
     password_data: PasswordChange,
     current_user: User = Depends(get_current_user),
@@ -181,7 +233,7 @@ async def change_password(
     return Response(message="密码修改成功")
 
 
-@router.post("/password-reset/request", response_model=Response)
+@router.post("/password-reset/request")
 @limiter.limit(RateLimit.AUTH_PASSWORD_RESET)
 async def request_password_reset(
     request: Request,
@@ -207,7 +259,7 @@ async def request_password_reset(
     return Response(message="如果该邮箱已注册，重置验证码已发送到您的邮箱")
 
 
-@router.post("/password-reset/verify", response_model=Response)
+@router.post("/password-reset/verify")
 async def verify_password_reset(
     reset_data: PasswordResetVerify,
     db: AsyncSession = Depends(get_db)
@@ -275,7 +327,7 @@ async def _get_wechat_access_token(code: str) -> dict:
         return data
 
 
-@router.post("/wechat/login", response_model=Response[TokenResponse])
+@router.post("/wechat/login", response_model=None)
 async def wechat_login(
     request: WechatLoginRequest,
     db: AsyncSession = Depends(get_db)
@@ -313,7 +365,7 @@ async def wechat_login(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="账户已被禁用"
             )
-        user.last_login_at = datetime.utcnow()
+        user.last_login_at = datetime.now(timezone.utc)
         await db.commit()
     else:
         # 新用户，创建账号
@@ -353,7 +405,7 @@ async def wechat_login(
     )
 
 
-@router.post("/wechat/bind", response_model=Response[UserResponse])
+@router.post("/wechat/bind", response_model=None)
 async def wechat_bind_account(
     code: str,
     current_user: User = Depends(get_current_user),
@@ -394,7 +446,7 @@ async def wechat_bind_account(
     )
 
 
-@router.post("/wechat/unbind", response_model=Response)
+@router.post("/wechat/unbind")
 async def wechat_unbind_account(
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db)

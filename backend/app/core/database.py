@@ -7,7 +7,7 @@ from sqlalchemy.pool import NullPool, QueuePool
 from app.core.config import settings
 
 # 根据数据库类型选择不同的连接池配置
-if "sqlite" in settings.DATABASE_URL.lower():
+if settings.USE_SQLITE or "sqlite" in settings.DATABASE_URL.lower():
     # SQLite 使用 NullPool
     engine = create_async_engine(
         settings.DATABASE_URL,

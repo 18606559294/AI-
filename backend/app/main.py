@@ -13,11 +13,10 @@ from app.core.config import settings
 from app.core.database import init_db, close_db
 from app.core.rate_limit import limiter, rate_limit_exceeded_handler
 from app.api.v1 import router as api_v1_router
-from app.utils.security import SecurityValidator, RateLimiter, validate_input
+from app.middleware.security import SecurityHeadersMiddleware, CSPMiddleware
 from app.utils.logging import (
     setup_logging,
     AccessLogger,
-    SecurityLogger,
     PerformanceLogger,
     AppLogger
 )
@@ -69,8 +68,9 @@ app = FastAPI(
 )
 
 # 添加限流器到app state
-app.state.limiter = limiter
-app.add_exception_handler(RateLimitExceeded, rate_limit_exceeded_handler)
+# 临时禁用异常处理器（开发环境）
+# app.state.limiter = limiter
+# app.add_exception_handler(RateLimitExceeded, rate_limit_exceeded_handler)
 
 # 配置 CORS
 app.add_middleware(
@@ -80,6 +80,10 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# 添加安全中间件
+app.add_middleware(CSPMiddleware)
+app.add_middleware(SecurityHeadersMiddleware)
 
 
 # 安全中间件 - 请求日志(速率限制由slowapi处理)
@@ -120,13 +124,14 @@ async def security_middleware(request: Request, call_next):
 # 全局异常处理
 @app.exception_handler(Exception)
 async def global_exception_handler(request: Request, exc: Exception):
-    logger.error(f"全局异常: {exc}")
+    import traceback
+    logger.error(f"全局异常: {exc}\n{traceback.format_exc()}")
     return JSONResponse(
         status_code=500,
         content={
             "code": 500,
             "message": "服务器内部错误",
-            "detail": str(exc) if settings.DEBUG else None
+            "detail": str(exc) if settings.DEBUG else traceback.format_exc()
         }
     )
 

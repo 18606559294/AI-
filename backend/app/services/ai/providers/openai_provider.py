@@ -24,20 +24,26 @@ class OpenAIProvider(AIProviderBase):
         style: str = "professional",
         language: str = "zh"
     ) -> Dict[str, Any]:
-        """生成简历内容 - 三元协同Agent架构"""
+        """生成简历内容 - 三元协同Agent架构（带降级容错）"""
         if not self.client:
             return self._generate_mock_content(user_info, target_position)
 
-        # 阶段1: 对话理解
-        context = await self._dialogue_phase(user_info, target_position, language)
-
-        # 阶段2: 规划
-        plan = await self._planning_phase(context, style)
-
-        # 阶段3: 执行
-        content = await self._execution_phase(plan, language)
-
-        return content
+        try:
+            # 阶段1: 对话理解
+            context = await self._dialogue_phase(user_info, target_position, language)
+            
+            # 阶段2: 规划
+            plan = await self._planning_phase(context, style)
+            
+            # 阶段3: 执行
+            content = await self._execution_phase(plan, language)
+            
+            return content
+            
+        except Exception as e:
+            # 降级策略：任一阶段失败，返回简化生成
+            print(f"[WARN] AI generation failed: {e}, falling back to simplified generation")
+            return await self._generate_simplified(user_info, target_position, language)
 
     async def _dialogue_phase(
         self,
@@ -45,37 +51,55 @@ class OpenAIProvider(AIProviderBase):
         target_position: str,
         language: str
     ) -> Dict[str, Any]:
-        """对话阶段：理解用户需求"""
-        system_prompt = """你是一位专业的简历顾问。分析用户信息和目标岗位，提取关键信息点。
+        """对话阶段：理解用户需求（带错误处理）"""
+        try:
+            system_prompt = """你是一位专业的简历顾问。分析用户信息和目标岗位，提取关键信息点。
         返回JSON格式的分析结果，包含：
         - key_strengths: 用户的核心优势
         - skill_gaps: 可能需要补充的技能
         - highlight_areas: 应该重点突出的领域
         - industry_keywords: 相关行业关键词"""
 
-        user_prompt = f"""
+            user_prompt = f"""
         用户信息: {json.dumps(user_info, ensure_ascii=False)}
         目标岗位: {target_position}
 
         请分析并返回JSON格式的结果。
         """
 
-        response = await self.client.chat.completions.create(
-            model=self.model,
-            messages=[
-                {"role": "system", "content": system_prompt},
-                {"role": "user", "content": user_prompt}
-            ],
-            temperature=0.3,
-            response_format={"type": "json_object"}
-        )
+            response = await self.client.chat.completions.create(
+                model=self.model,
+                messages=[
+                    {"role": "system", "content": system_prompt},
+                    {"role": "user", "content": user_prompt}
+                ],
+                temperature=0.3,
+                response_format={"type": "json_object"}
+            )
 
-        return {
-            "user_info": user_info,
-            "target_position": target_position,
-            "analysis": json.loads(response.choices[0].message.content),
-            "language": language
-        }
+            return {
+                "user_info": user_info,
+                "target_position": target_position,
+                "analysis": json.loads(response.choices[0].message.content),
+                "language": language
+            }
+        except json.JSONDecodeError as e:
+            print(f"[WARN] Dialogue phase JSON parse error: {e}")
+            # 返回默认分析
+            return {
+                "user_info": user_info,
+                "target_position": target_position,
+                "analysis": {
+                    "key_strengths": [],
+                    "skill_gaps": [],
+                    "highlight_areas": [target_position],
+                    "industry_keywords": []
+                },
+                "language": language
+            }
+        except Exception as e:
+            print(f"[WARN] Dialogue phase error: {e}")
+            raise
 
     async def _planning_phase(
         self,
@@ -120,46 +144,63 @@ class OpenAIProvider(AIProviderBase):
         plan: Dict[str, Any],
         language: str
     ) -> Dict[str, Any]:
-        """执行阶段：生成简历内容"""
-        lang_instruction = "使用中文撰写" if language == "zh" else "Write in English"
+        """执行阶段：生成简历内容（带错误处理和验证）"""
+        try:
+            lang_instruction = "使用中文撰写" if language == "zh" else "Write in English"
 
-        system_prompt = f"""你是专业简历撰写专家。根据策略计划生成完整的简历内容。
-        {lang_instruction}。
+            system_prompt = f"""你是专业简历撰写专家。根据策略计划生成完整的简历内容。
+            {lang_instruction}。
 
-        使用STAR法则描述工作经历和项目：
-        - Situation: 情境背景
-        - Task: 任务目标
-        - Action: 采取行动
-        - Result: 量化成果
+            使用STAR法则描述工作经历和项目：
+            - Situation: 情境背景
+            - Task: 任务目标
+            - Action: 采取行动
+            - Result: 量化成果
 
-        返回JSON格式的完整简历内容。"""
+            返回JSON格式的完整简历内容。"""
 
-        user_prompt = f"""
-        用户信息: {json.dumps(plan['user_info'], ensure_ascii=False)}
-        目标岗位: {plan['target_position']}
-        生成策略: {json.dumps(plan['plan'], ensure_ascii=False)}
+            user_prompt = f"""
+            用户信息: {json.dumps(plan['user_info'], ensure_ascii=False)}
+            目标岗位: {plan['target_position']}
+            生成策略: {json.dumps(plan['plan'], ensure_ascii=False)}
 
-        请生成完整的简历内容，包含以下模块：
-        - basic_info: 基本信息
-        - education: 教育经历列表
-        - work_experience: 工作经历列表
-        - projects: 项目经历列表
-        - skills: 技能列表
-        - certifications: 证书列表（如有）
-        """
+            请生成完整的简历内容，包含以下模块：
+            - basic_info: 基本信息
+            - education: 教育经历列表
+            - work_experience: 工作经历列表
+            - projects: 项目经历列表
+            - skills: 技能列表
+            - certifications: 证书列表（如有）
+            """
 
-        response = await self.client.chat.completions.create(
-            model=self.model,
-            messages=[
-                {"role": "system", "content": system_prompt},
-                {"role": "user", "content": user_prompt}
-            ],
-            temperature=0.7,
-            max_tokens=self.max_tokens,
-            response_format={"type": "json_object"}
-        )
+            response = await self.client.chat.completions.create(
+                model=self.model,
+                messages=[
+                    {"role": "system", "content": system_prompt},
+                    {"role": "user", "content": user_prompt}
+                ],
+                temperature=0.7,
+                max_tokens=self.max_tokens,
+                response_format={"type": "json_object"}
+            )
 
-        return json.loads(response.choices[0].message.content)
+            content = json.loads(response.choices[0].message.content)
+            
+            # 基础验证：确保关键字段存在
+            required_fields = ["basic_info", "education", "work_experience", "projects", "skills"]
+            for field in required_fields:
+                if field not in content:
+                    content[field] = plan['user_info'].get(field, [])
+            
+            return content
+            
+        except json.JSONDecodeError as e:
+            print(f"[WARN] Execution phase JSON parse error: {e}")
+            # 返回用户原始信息
+            return self._build_fallback_content(plan['user_info'])
+        except Exception as e:
+            print(f"[WARN] Execution phase error: {e}")
+            raise
 
     async def optimize_content(
         self,
@@ -381,6 +422,68 @@ class OpenAIProvider(AIProviderBase):
             "polish": "【润色后】"
         }
         return f"{prefixes.get(optimization_type, '【优化后】')}{original}（已使用AI优化）"
+
+    async def _generate_simplified(
+        self,
+        user_info: Dict[str, Any],
+        target_position: str,
+        language: str
+    ) -> Dict[str, Any]:
+        """简化版生成（降级策略）- 单次LLM调用"""
+        if not self.client:
+            return self._generate_mock_content(user_info, target_position)
+        
+        try:
+            lang_instruction = "使用中文撰写" if language == "zh" else "Write in English"
+            
+            system_prompt = f"""你是一位专业简历撰写专家。根据用户信息生成简洁专业的简历内容。
+            {lang_instruction}。直接返回JSON格式结果。"""
+            
+            user_prompt = f"""
+            用户信息: {json.dumps(user_info, ensure_ascii=False)}
+            目标岗位: {target_position}
+            
+            请生成简历内容，包含：basic_info, education, work_experience, projects, skills。
+            工作经历使用STAR法则，包含量化成果。
+            """
+            
+            response = await self.client.chat.completions.create(
+                model=self.model,
+                messages=[
+                    {"role": "system", "content": system_prompt},
+                    {"role": "user", "content": user_prompt}
+                ],
+                temperature=0.7,
+                max_tokens=self.max_tokens,
+                response_format={"type": "json_object"}
+            )
+            
+            content = json.loads(response.choices[0].message.content)
+            
+            # 验证关键字段
+            required_fields = ["basic_info", "education", "work_experience", "projects", "skills"]
+            for field in required_fields:
+                if field not in content:
+                    content[field] = user_info.get(field, [])
+            
+            return content
+            
+        except Exception as e:
+            print(f"[ERROR] Simplified generation also failed: {e}")
+            # 最终降级：返回原始信息
+            return self._build_fallback_content(user_info)
+
+    def _build_fallback_content(self, user_info: Dict[str, Any]) -> Dict[str, Any]:
+        """构建最终降级内容（直接返回用户输入）"""
+        return {
+            "basic_info": user_info.get("basic_info", {}),
+            "education": user_info.get("education", []),
+            "work_experience": user_info.get("work_experience", []),
+            "projects": user_info.get("projects", []),
+            "skills": user_info.get("skills", []),
+            "certifications": user_info.get("certifications", []),
+            "_fallback": True  # 标记为降级生成
+        }
 
     @property
     def provider_name(self) -> str:

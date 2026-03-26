@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
+import { SEO } from '../components/SEO';
+import { ResumeListSkeleton } from '../components/ui/Skeleton';
 import { api } from '@ai-resume/shared/api';
 import type { ResumeFilter } from '@ai-resume/shared/types';
 import { ResumeStatus } from '@ai-resume/shared/types';
@@ -14,7 +16,7 @@ export default function ResumeListPage() {
     queryFn: () => api.resume.getResumes(filter),
   });
 
-  const resumes = data?.items ?? [];
+  const resumes = data?.data ?? [];
 
   const handleDelete = async (id: number) => {
     if (!confirm('确定要删除这份简历吗？此操作无法撤销。')) return;
@@ -44,7 +46,13 @@ export default function ResumeListPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <>
+      <SEO
+        title="我的简历"
+        description="查看和管理你的所有简历。使用 AI 技术快速编辑、优化和导出专业简历。"
+        noIndex
+      />
+      <div className="min-h-screen bg-gray-50">
       {/* 顶部导航栏 */}
       <header className="bg-white shadow-sm sticky top-0 z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -112,9 +120,7 @@ export default function ResumeListPage() {
         </div>
 
         {isLoading ? (
-          <div className="text-center py-12">
-            <div className="inline-block w-8 h-8 border-4 border-primary-200 border-t-primary-600 rounded-full animate-spin" />
-          </div>
+          <ResumeListSkeleton count={6} />
         ) : resumes.length === 0 ? (
           <div className="card p-12 text-center">
             <svg className="w-16 h-16 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -176,5 +182,6 @@ export default function ResumeListPage() {
         )}
       </main>
     </div>
+    </>
   );
 }

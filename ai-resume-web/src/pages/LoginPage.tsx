@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../store/auth';
+import { SEO } from '../components/SEO';
 import { Button, Input, GradientText, Orb } from '../components/UIComponents';
 
 // 存储键名常量
@@ -49,7 +50,13 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen relative overflow-x-hidden flex flex-col justify-center bg-slate-950">
+    <>
+      <SEO
+        title="用户登录"
+        description="登录 AI Resume，管理你的简历，使用 AI 技术快速创建专业简历。"
+        noIndex
+      />
+      <div className="min-h-screen relative overflow-x-hidden flex flex-col justify-center bg-slate-950">
       {/* Background Orbs - 桌面端优化 */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden">
         <Orb color="primary" size={200} className="top-0 left-0 -translate-x-1/2 -translate-y-1/2 opacity-20" />
@@ -212,5 +219,6 @@ export default function LoginPage() {
         </div>
       </div>
     </div>
+    </>
   );
 }

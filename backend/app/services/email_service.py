@@ -4,7 +4,7 @@
 """
 import random
 import string
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Optional
 import smtplib
 from email.mime.text import MIMEText
@@ -27,7 +27,7 @@ class EmailService:
 
     def save_code(self, email: str, code: str, expire_minutes: int = 5) -> None:
         """保存验证码（带过期时间）"""
-        expire_time = datetime.utcnow() + timedelta(minutes=expire_minutes)
+        expire_time = datetime.now(timezone.utc) + timedelta(minutes=expire_minutes)
         self._verification_codes[email] = {
             'code': code,
             'expire_time': expire_time,
@@ -46,7 +46,7 @@ class EmailService:
             return False
 
         # 检查是否过期
-        if datetime.utcnow() > stored_data['expire_time']:
+        if datetime.now(timezone.utc) > stored_data['expire_time']:
             # 清除过期验证码
             del self._verification_codes[email]
             return False
@@ -149,7 +149,7 @@ class EmailService:
 
     def cleanup_expired_codes(self) -> None:
         """清理过期的验证码"""
-        now = datetime.utcnow()
+        now = datetime.now(timezone.utc)
         expired_emails = [
             email for email, data in self._verification_codes.items()
             if now > data['expire_time']
@@ -159,7 +159,7 @@ class EmailService:
 
     def save_reset_code(self, email: str, code: str, expire_minutes: int = 15) -> None:
         """保存密码重置码（带过期时间）"""
-        expire_time = datetime.utcnow() + timedelta(minutes=expire_minutes)
+        expire_time = datetime.now(timezone.utc) + timedelta(minutes=expire_minutes)
         self._reset_codes[email] = {
             'code': code,
             'expire_time': expire_time,
@@ -178,7 +178,7 @@ class EmailService:
             return False
 
         # 检查是否过期
-        if datetime.utcnow() > stored_data['expire_time']:
+        if datetime.now(timezone.utc) > stored_data['expire_time']:
             # 清除过期重置码
             del self._reset_codes[email]
             return False

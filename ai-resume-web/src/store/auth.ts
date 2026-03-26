@@ -107,6 +107,28 @@ export const useAuthStore = create<AuthState>()(
           return;
         }
 
+        // 先尝试从 localStorage 读取用户数据（避免不必要的 API 调用）
+        const storedUser = storage.getUser();
+        if (storedUser) {
+          set({
+            user: storedUser,
+            token,
+            isAuthenticated: true,
+            isLoading: false,
+          });
+          // 后台静默验证 token 有效性，不阻塞 UI
+          api.auth.getCurrentUser().catch(() => {
+            // token 失效，清除认证状态
+            storage.clearAuth();
+            set({
+              user: null,
+              token: null,
+              isAuthenticated: false,
+            });
+          });
+          return;
+        }
+
         set({ isLoading: true });
         try {
             const response = await api.auth.getCurrentUser();

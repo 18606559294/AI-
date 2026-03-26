@@ -1,9 +1,26 @@
 """
 应用配置模块
 """
+import os
+import secrets
+import hashlib
 from typing import Optional, List
 from pydantic_settings import BaseSettings
+from pydantic import ConfigDict
 from functools import lru_cache
+
+
+def _generate_secure_key() -> str:
+    """生成安全的随机密钥"""
+    # 尝试验证环境变量中是否设置了安全的SECRET_KEY
+    env_key = os.environ.get("SECRET_KEY", "")
+    if env_key and len(env_key) >= 32:
+        return env_key
+    
+    # 如果没有安全的环境变量密钥，生成一个随机密钥
+    # 注意：这仅用于开发环境，生产环境必须通过环境变量设置
+    random_bytes = secrets.token_bytes(32)
+    return hashlib.sha256(random_bytes).hexdigest()
 
 
 class Settings(BaseSettings):
@@ -12,7 +29,7 @@ class Settings(BaseSettings):
     # 应用基础配置
     APP_NAME: str = "AI简历智能生成平台"
     APP_VERSION: str = "1.0.0"
-    DEBUG: bool = True
+    DEBUG: bool = False  # 生产环境必须设为False
     API_V1_PREFIX: str = "/api/v1"
     
     # 服务器配置
@@ -30,7 +47,8 @@ class Settings(BaseSettings):
     REDIS_URL: str = "redis://localhost:6379/0"
     
     # JWT配置
-    SECRET_KEY: str = "your-super-secret-key-change-in-production"
+    # 生产环境必须通过环境变量 SECRET_KEY 设置至少32位的强密钥
+    SECRET_KEY: str = ""
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
     REFRESH_TOKEN_EXPIRE_DAYS: int = 7
@@ -66,8 +84,9 @@ class Settings(BaseSettings):
     MAX_UPLOAD_SIZE: int = 10 * 1024 * 1024  # 10MB
     ALLOWED_EXTENSIONS: List[str] = ["pdf", "doc", "docx", "png", "jpg", "jpeg"]
     
-    # CORS配置
-    CORS_ORIGINS: List[str] = ["http://localhost:3000", "http://localhost:8080", "*"]
+    # CORS配置 - 生产环境应只允许特定域名
+    # 开发环境使用localhost，生产环境使用实际域名
+    CORS_ORIGINS: List[str] = ["http://localhost:3000", "http://localhost:5173", "http://localhost:8080"]
     
     # 邮件配置（可选）
     SMTP_HOST: Optional[str] = None
@@ -78,16 +97,38 @@ class Settings(BaseSettings):
     # 微信登录配置（可选）
     WECHAT_APP_ID: Optional[str] = None
     WECHAT_APP_SECRET: Optional[str] = None
-    
-    class Config:
-        env_file = ".env"
-        case_sensitive = True
+
+    model_config = ConfigDict(
+        env_file=".env",
+        case_sensitive=True
+    )
 
 
 @lru_cache()
 def get_settings() -> Settings:
     """获取配置单例"""
-    return Settings()
+    settings = Settings()
+    
+    # 生产环境安全检查
+    if not settings.DEBUG:
+        # 生产环境必须设置安全的SECRET_KEY
+        if not settings.SECRET_KEY or len(settings.SECRET_KEY) < 32:
+            import warnings
+            warnings.warn(
+                "⚠️ 生产环境警告: SECRET_KEY未设置或长度不足32位！"
+                "请在环境变量中设置: export SECRET_KEY=<至少32位的随机字符串>"
+            )
+            # 使用生成的临时密钥（仅用于开发）
+            settings.SECRET_KEY = _generate_secure_key()
+        
+        # 生产环境应该使用MySQL而不是SQLite
+        if settings.USE_SQLITE:
+            import warnings
+            warnings.warn(
+                "⚠️ 生产环境警告: 建议将USE_SQLITE设为False使用MySQL数据库"
+            )
+    
+    return settings
 
 
 settings = get_settings()

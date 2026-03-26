@@ -25,7 +25,7 @@ test.describe('手机端注册功能测试', () => {
     await page.waitForTimeout(1000);
 
     // 验证当前URL
-    await expect(page).toHaveURL(/\/resume\/register/, { timeout: 5000 });
+    await expect(page).toHaveURL(/\/register/, { timeout: 5000 });
 
     // 验证页面标题
     await expect(page.getByText('创建账号', { exact: true })).toBeVisible();
@@ -359,7 +359,7 @@ test.describe('手机端登录功能测试', () => {
     await page.waitForLoadState('domcontentloaded').catch(() => {});
     await page.waitForTimeout(1000);
 
-    await expect(page).toHaveURL(/\/resume\/login/, { timeout: 5000 });
+    await expect(page).toHaveURL(/\/login/, { timeout: 5000 });
     await expect(page.getByText('欢迎回来')).toBeVisible();
     await expect(page.getByTestId('email-input')).toBeVisible();
     await expect(page.getByTestId('password-input')).toBeVisible();

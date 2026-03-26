@@ -8,6 +8,7 @@ from enum import Enum
 from app.services.ai.base import AIProviderBase
 from app.services.ai.providers import (
     OpenAIProvider,
+    OpenAIProviderV2,  # 新增优化版
     DeepSeekProvider,
     XiaomiProvider,
 )
@@ -16,13 +17,9 @@ from app.services.ai.providers import (
 class AIProvider(str, Enum):
     """AI提供商枚举"""
     OPENAI = "openai"
+    OPENAI_V2 = "openai_v2"  # 新增优化版
     DEEPSEEK = "deepseek"
     XIAOMI = "xiaomi"
-    # 未来可扩展
-    # ANTHROPIC = "anthropic"
-    # QWEN = "qwen"
-    # BAICHUAN = "baichuan"
-    # ERNIE = "ernie"
 
 
 class AIModelConfig:
@@ -33,6 +30,12 @@ class AIModelConfig:
     OPENAI_MODEL: str = "gpt-4"
     OPENAI_MAX_TOKENS: int = 4000
     OPENAI_TEMPERATURE: float = 0.7
+
+    # OpenAI V2 配置（优化版）
+    OPENAI_V2_API_KEY: str = ""  # 复用 OPENAI_API_KEY
+    OPENAI_V2_MODEL: str = "gpt-4"
+    OPENAI_V2_MAX_TOKENS: int = 4000
+    OPENAI_V2_TEMPERATURE: float = 0.7
 
     # DeepSeek配置
     DEEPSEEK_API_KEY: str = ""
@@ -49,7 +52,7 @@ class AIModelConfig:
     XIAOMI_TEMPERATURE: float = 0.7
 
     # 默认使用的提供商
-    DEFAULT_PROVIDER: AIProvider = AIProvider.OPENAI
+    DEFAULT_PROVIDER: AIProvider = AIProvider.OPENAI_V2  # 默认使用优化版
 
 
 class AIServiceFactory:
@@ -100,6 +103,15 @@ class AIServiceFactory:
                 model=self.config.OPENAI_MODEL,
                 max_tokens=self.config.OPENAI_MAX_TOKENS,
                 temperature=self.config.OPENAI_TEMPERATURE
+            )
+
+        elif provider == AIProvider.OPENAI_V2:
+            # 使用优化版 Provider
+            return OpenAIProviderV2(
+                api_key=self.config.OPENAI_API_KEY or self.config.OPENAI_V2_API_KEY,
+                model=self.config.OPENAI_V2_MODEL,
+                max_tokens=self.config.OPENAI_V2_MAX_TOKENS,
+                temperature=self.config.OPENAI_V2_TEMPERATURE
             )
 
         elif provider == AIProvider.DEEPSEEK:

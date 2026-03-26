@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { storage, } from '@ai-resume/shared';
 import { getApiClient } from '@ai-resume/shared/api';

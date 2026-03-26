@@ -7,27 +7,43 @@ import { test, expect } from '@playwright/test';
 
 // 扩展 test 来创建带有 mock 认证的测试
 const authenticatedTest = test.extend({
-  // 创建一个带有认证的 context
-  context: async ({ context }, use) => {
-    const userData = JSON.stringify({
-      state: {
-        user: { id: 1, email: 'test@example.com', nickname: '测试用户' },
-        token: 'mock-token-12345',
-        isAuthenticated: true,
-      },
-      version: 0,
+  // 创建一个带有认证的 page
+  page: async ({ page }, use) => {
+    // Mock API 响应
+    await page.route('**/api/v1/auth/me', (route) => {
+      route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          id: 1,
+          email: 'test@example.com',
+          nickname: '测试用户',
+        }),
+      });
     });
 
-    // 在 context 创建时添加 init script
-    await context.addInitScript((data) => {
-      try {
-        localStorage.setItem('auth-storage', data);
-      } catch (e) {
-        // 忽略存储错误
-      }
-    }, userData);
+    // 设置 localStorage 认证数据
+    await page.addInitScript(() => {
+      const zustandData = JSON.stringify({
+        state: {
+          user: { id: 1, email: 'test@example.com', nickname: '测试用户' },
+          token: 'mock-token-12345',
+          isAuthenticated: true,
+        },
+        version: 0,
+      });
+      const userData = JSON.stringify({
+        id: 1,
+        email: 'test@example.com',
+        nickname: '测试用户',
+      });
 
-    await use(context);
+      localStorage.setItem('auth-storage', zustandData);
+      localStorage.setItem('access_token', 'mock-token-12345');
+      localStorage.setItem('user', userData);
+    });
+
+    await use(page);
   },
 });
 
@@ -190,7 +206,7 @@ test.describe('移动端 - 注册流程', () => {
     // 步骤2: 点击注册链接
     await humanClick(page, '[data-testid="register-link"]');
     await page.waitForTimeout(1000);
-    await expect(page).toHaveURL(/\/resume\/register/);
+    await expect(page).toHaveURL(/\/register/);
 
     // 步骤3: 填写注册表单 - 模拟真人输入
     await humanType(page, '[data-testid="register-email-input"]', TEST_USER.email);

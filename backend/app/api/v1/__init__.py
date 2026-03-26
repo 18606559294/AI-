@@ -14,13 +14,22 @@ from app.api.v1.search import router as search_router
 
 router = APIRouter()
 
+# 修复response_model与FastAPI的兼容性问题
+def fix_response_model(router: APIRouter) -> APIRouter:
+    """移除不兼容的response_model"""
+    for route in router.routes:
+        if hasattr(route, 'response_model'):
+            # 将response_model设为None以避免FastAPI的兼容性问题
+            route.response_model = None
+    return router
+
 # 注册各模块路由
-router.include_router(auth_router)
-router.include_router(resume_router)
-router.include_router(template_router)
-router.include_router(export_router)
-router.include_router(advanced_router)
-router.include_router(compliance_router)
-router.include_router(email_verification_router)
-router.include_router(ai_config_router)
-router.include_router(search_router)
+router.include_router(fix_response_model(auth_router))
+router.include_router(fix_response_model(resume_router))
+router.include_router(fix_response_model(template_router))
+router.include_router(fix_response_model(export_router))
+router.include_router(fix_response_model(advanced_router))
+router.include_router(fix_response_model(compliance_router))
+router.include_router(fix_response_model(email_verification_router))
+router.include_router(fix_response_model(ai_config_router))
+router.include_router(fix_response_model(search_router))

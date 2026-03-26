@@ -198,14 +198,14 @@ export interface Template {
 }
 
 /**
- * 分页响应
+ * 分页响应 - 与后端 PageResponse 一致
  */
 export interface PaginatedResponse<T> {
-  items: T[];
+  data: T[];
   total: number;
   page: number;
   page_size: number;
-  pages: number;
+  total_pages?: number;
 }
 
 /**

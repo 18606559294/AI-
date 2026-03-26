@@ -3,7 +3,7 @@
 """
 from datetime import datetime, date
 from typing import Optional, List, Dict, Any
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 
 
 # ============ 简历内容子模块 ============
@@ -139,9 +139,8 @@ class ResumeResponse(BaseModel):
     version: int
     created_at: datetime
     updated_at: datetime
-    
-    class Config:
-        from_attributes = True
+
+    model_config = ConfigDict(from_attributes=True)
 
 
 class ResumeListResponse(BaseModel):
@@ -161,9 +160,8 @@ class ResumeVersionResponse(BaseModel):
     style_config: Optional[Dict[str, Any]] = None
     change_note: Optional[str] = None
     created_at: datetime
-    
-    class Config:
-        from_attributes = True
+
+    model_config = ConfigDict(from_attributes=True)
 
 
 # ============ AI 生成相关 ============

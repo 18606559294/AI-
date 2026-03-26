@@ -2,6 +2,7 @@ import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { HelmetProvider } from 'react-helmet-async';
 import { initApiClient, getApiClient } from '@ai-resume/shared/api';
 import { storage } from '@ai-resume/shared';
 import App from './App';
@@ -11,8 +12,15 @@ import './index.css';
 initApiClient(() => storage.getToken());
 
 // 设置API Base URL
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000/api';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000/api/v1';
 getApiClient().setBaseURL(API_BASE_URL);
+
+// 初始化性能监控 (仅在web-vitals安装完成后启用)
+// if (import.meta.env.PROD) {
+//   import('./utils/performance').then(({ initPerformanceMonitoring }) => {
+//     initPerformanceMonitoring().catch(console.error);
+//   });
+// }
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -25,10 +33,12 @@ const queryClient = new QueryClient({
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <QueryClientProvider client={queryClient}>
-      <BrowserRouter basename="/resume">
-        <App />
-      </BrowserRouter>
-    </QueryClientProvider>
+    <HelmetProvider>
+      <QueryClientProvider client={queryClient}>
+        <BrowserRouter>
+          <App />
+        </BrowserRouter>
+      </QueryClientProvider>
+    </HelmetProvider>
   </StrictMode>
 );

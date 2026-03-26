@@ -1,21 +1,35 @@
-# Build stage
-FROM node:18-alpine as build
+# 前端 Dockerfile - 多阶段构建
+FROM node:20-alpine as builder
+
 WORKDIR /app
 
-# Copy shared module first to cache dependencies
-COPY ai-resume-shared ./ai-resume-shared
+# 复制依赖文件
+COPY package.json package-lock.json* ./
 
-# Copy web module
-COPY ai-resume-web ./ai-resume-web
+# 安装依赖
+RUN npm ci --only=production
 
-# Install dependencies and build
-WORKDIR /app/ai-resume-web
-RUN npm install
+# 复制代码
+COPY . .
+
+# 构建应用
 RUN npm run build
 
-# Production stage
+# 生产镜像 - 使用 Nginx
 FROM nginx:alpine
-COPY --from=build /app/ai-resume-web/dist /usr/share/nginx/html
-COPY ai-resume-web/nginx.conf /etc/nginx/conf.d/default.conf
+
+# 复制自定义 Nginx 配置
+COPY nginx.conf /etc/nginx/nginx.conf
+
+# 复制构建产物
+COPY --from=builder /app/dist /usr/share/nginx/html
+
+# 暴露端口
 EXPOSE 80
+
+# 启动 Nginx
 CMD ["nginx", "-g", "daemon off;"]
+
+# 健康检查
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+  CMD wget --no-verbose --tries=1 --spider http://localhost/ || exit 1

@@ -52,12 +52,18 @@ export class AuthApi {
   }
 
   /**
-   * 用户登录 - 修复：使用JSON而非FormData
+   * 用户登录 - 使用form-data格式
    */
   async login(email: string, password: string): Promise<AuthResponse> {
-    return this.client.post<AuthResponse>('/auth/login', {
-      username: email,
-      password: password,
+    // 使用URLSearchParams发送form-data格式
+    const params = new URLSearchParams();
+    params.append('username', email);
+    params.append('password', password);
+
+    return this.client.post<AuthResponse>('/auth/login', params.toString(), {
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
     });
   }
 

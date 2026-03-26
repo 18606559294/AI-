@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
+import { SEO } from '../components/SEO';
 import { api } from '@ai-resume/shared/api';
 import type { TemplateFilter } from '@ai-resume/shared/types';
 
@@ -18,7 +19,7 @@ export default function TemplatesPage() {
     queryFn: () => api.template.getTemplates(filter),
   });
 
-  const templates = data?.items ?? [];
+  const templates = data?.data ?? [];
 
   const handleSearch = () => {
     setFilter({
@@ -60,7 +61,13 @@ export default function TemplatesPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <>
+      <SEO
+        title="简历模板库 - 50+ 精美模板"
+        description="浏览 50+ 专业设计的简历模板，涵盖互联网、金融、教育、医疗等各行业。免费使用 AI 技术快速生成专业简历。"
+        keywords="简历模板,简历范例,专业简历,简历格式,简历下载"
+      />
+      <div className="min-h-screen bg-gray-50">
       {/* 顶部导航栏 */}
       <header className="bg-white shadow-sm sticky top-0 z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -216,5 +223,6 @@ export default function TemplatesPage() {
         )}
       </main>
     </div>
+    </>
   );
 }

@@ -21,11 +21,13 @@ export default defineConfig({
     },
   },
 
+  // 使用现有的开发服务器，不启动新服务器
+  // 确保在运行测试前先启动: npm run dev
   webServer: {
-    command: 'npx vite preview --port 3000',
+    command: 'echo "Using existing dev server on port 3000"',
     url: 'http://localhost:3000',
-    reuseExistingServer: !process.env.CI,
-    timeout: 180000, // 服务器启动超时3分钟
+    reuseExistingServer: true,
+    timeout: 30000,
   },
 
   projects: [
