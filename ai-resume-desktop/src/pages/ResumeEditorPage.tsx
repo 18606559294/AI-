@@ -269,12 +269,12 @@ export default function ResumeEditorPage() {
       <div className="bg-white border-b">
         <div className="max-w-7xl mx-auto px-4">
           <div className="flex gap-1">
-            {tabs.map((tab, index) => (
+            {tabs.map((tab) => (
               <button
-                key={index}
-                onClick={() => setActiveTab(index)}
+                key={tab.label}
+                onClick={() => setActiveTab(tabs.indexOf(tab))}
                 className={`px-6 py-3 font-medium transition-colors ${
-                  activeTab === index
+                  activeTab === tabs.indexOf(tab)
                     ? 'text-primary-600 border-b-2 border-primary-600'
                     : 'text-gray-600 hover:text-gray-900'
                 }`}
@@ -386,7 +386,7 @@ export default function ResumeEditorPage() {
                 </button>
               </div>
               {content.education?.map((edu, index) => (
-                <div key={index} className="card p-6 relative">
+                <div key={`edu-${index}-${edu.school || ''}`} className="card p-6 relative">
                   <button
                     onClick={() => removeEducation(index)}
                     className="absolute top-4 right-4 text-gray-400 hover:text-red-500"
@@ -455,7 +455,7 @@ export default function ResumeEditorPage() {
                 </button>
               </div>
               {content.work_experience?.map((work, index) => (
-                <div key={index} className="card p-6 relative">
+                <div key={`work-${index}-${work.company || ''}`} className="card p-6 relative">
                   <button
                     onClick={() => removeWork(index)}
                     className="absolute top-4 right-4 text-gray-400 hover:text-red-500"
@@ -514,7 +514,7 @@ export default function ResumeEditorPage() {
                 </button>
               </div>
               {content.projects?.map((project, index) => (
-                <div key={index} className="card p-6 relative">
+                <div key={`project-${index}-${project.name || ''}`} className="card p-6 relative">
                   <button
                     onClick={() => removeProject(index)}
                     className="absolute top-4 right-4 text-gray-400 hover:text-red-500"
@@ -576,7 +576,7 @@ export default function ResumeEditorPage() {
                 <div className="flex flex-wrap gap-2">
                   {content.skills?.map((skill, index) => (
                     <span
-                      key={index}
+                      key={`skill-${index}-${skill.name || ''}`}
                       className="inline-flex items-center gap-1 px-3 py-1 bg-primary-100 text-primary-700 rounded-full"
                     >
                       {skill.name}

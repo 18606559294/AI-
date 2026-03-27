@@ -18,6 +18,8 @@ from app.schemas.resume import (
 )
 from app.schemas.common import Response, PageResponse
 from app.services.ai.ai_service_factory import get_ai_provider, AIProvider
+from app.services.ai_usage_service import get_ai_usage_service
+from app.services.ai_limit_decorator import AIUsageLimitExceeded
 
 router = APIRouter(prefix="/resumes", tags=["简历"])
 
@@ -296,33 +298,69 @@ async def ai_generate_resume(
     db: AsyncSession = Depends(get_db)
 ):
     """AI生成简历内容"""
+    # 检查 AI 使用限制
+    usage_service = get_ai_usage_service()
+    daily_allowed, daily_used, daily_limit = await usage_service.check_daily_limit(db, current_user.id)
+    if not daily_allowed:
+        raise AIUsageLimitExceeded(daily_used, daily_limit, "day")
+
+    monthly_allowed, monthly_used, monthly_limit = await usage_service.check_monthly_limit(db, current_user.id)
+    if not monthly_allowed:
+        raise AIUsageLimitExceeded(monthly_used, monthly_limit, "month")
+
     # 获取简历
     result = await db.execute(
         select(Resume).where(Resume.id == resume_id, Resume.user_id == current_user.id)
     )
     resume = result.scalar_one_or_none()
-    
+
     if not resume:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="简历不存在"
         )
-    
+
     # 调用AI服务
     ai_service = await get_ai_service()
-    generated_content = await ai_service.generate_resume_content(
+    ai_response = await ai_service.generate_resume_content(
         user_info=resume.content,
         target_position=request.target_position,
         style=request.style,
         language=request.language
     )
-    
+
+    # 提取内容和 token 使用信息
+    if isinstance(ai_response, dict) and "content" in ai_response:
+        generated_content = ai_response["content"]
+        usage_info = ai_response.get("usage", {})
+        meta_info = ai_response.get("meta", {})
+    else:
+        generated_content = ai_response
+        usage_info = {}
+        meta_info = {}
+
     # 更新简历
     resume.content = generated_content
     resume.version += 1
     await db.commit()
     await db.refresh(resume)
-    
+
+    # 记录 AI 使用
+    try:
+        await usage_service.record_usage(
+            db=db,
+            user_id=current_user.id,
+            provider=meta_info.get("provider", "unknown"),
+            model=meta_info.get("model", "unknown"),
+            operation="generate",
+            prompt_tokens=usage_info.get("prompt_tokens", 0),
+            completion_tokens=usage_info.get("completion_tokens", 0),
+            total_tokens=usage_info.get("total_tokens", 0),
+        )
+    except Exception as e:
+        # 记录失败不影响主流程
+        print(f"[WARN] Failed to record AI usage: {e}")
+
     return Response(
         data=ResumeResponse.model_validate(resume),
         message="AI生成成功"
@@ -334,16 +372,41 @@ async def ai_generate_resume(
 async def ai_optimize_content(
     http_request: Request,
     request: AIOptimizeRequest,
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
 ):
     """AI优化内容"""
+    # 检查 AI 使用限制
+    usage_service = get_ai_usage_service()
+    daily_allowed, daily_used, daily_limit = await usage_service.check_daily_limit(db, current_user.id)
+    if not daily_allowed:
+        raise AIUsageLimitExceeded(daily_used, daily_limit, "day")
+
+    monthly_allowed, monthly_used, monthly_limit = await usage_service.check_monthly_limit(db, current_user.id)
+    if not monthly_allowed:
+        raise AIUsageLimitExceeded(monthly_used, monthly_limit, "month")
+
     ai_service = await get_ai_service()
     optimized = await ai_service.optimize_content(
         original=request.content,
         optimization_type=request.optimization_type,
         context=request.context
     )
-    
+
+    # 记录 AI 使用（估算 token）
+    try:
+        estimated_tokens = len(request.content) + len(optimized) if optimized else len(request.content)
+        await usage_service.record_usage(
+            db=db,
+            user_id=current_user.id,
+            provider="unknown",
+            model="unknown",
+            operation="optimize",
+            total_tokens=estimated_tokens,
+        )
+    except Exception as e:
+        print(f"[WARN] Failed to record AI usage: {e}")
+
     return Response(
         data=AIOptimizeResponse(
             original=request.content,

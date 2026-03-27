@@ -19,7 +19,8 @@ def get_user_id(request: Request) -> str:
         # 检查是否有认证用户
         if hasattr(request.state, 'user') and request.state.user:
             return f"user:{request.state.user.id}"
-    except:
+    except (AttributeError, KeyError):
+        # request.state 访问异常时降级到 IP
         pass
 
     # 降级到IP地址限流

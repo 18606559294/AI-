@@ -129,8 +129,8 @@ const ModernTemplate: React.FC<{ content: ResumePreviewProps['content'] }> = ({ 
             教育经历
           </h2>
           <div className="space-y-4">
-            {content.education.map((edu, index) => (
-              <div key={index} className="border-l-2 border-blue-400 pl-4">
+            {content.education.map((edu) => (
+              <div key={`edu-${edu.school}-${edu.degree}-${edu.major}`} className="border-l-2 border-blue-400 pl-4">
                 <div className="flex justify-between items-start mb-1">
                   <h3 className="font-semibold text-gray-900">
                     {edu.school}
@@ -158,8 +158,8 @@ const ModernTemplate: React.FC<{ content: ResumePreviewProps['content'] }> = ({ 
             工作经历
           </h2>
           <div className="space-y-4">
-            {content.work_experience.map((work, index) => (
-              <div key={index} className="border-l-2 border-blue-400 pl-4">
+            {content.work_experience.map((work) => (
+              <div key={`work-${work.company}-${work.position}`} className="border-l-2 border-blue-400 pl-4">
                 <div className="flex justify-between items-start mb-1">
                   <h3 className="font-semibold text-gray-900">
                     {work.company}
@@ -192,8 +192,8 @@ const ModernTemplate: React.FC<{ content: ResumePreviewProps['content'] }> = ({ 
             项目经验
           </h2>
           <div className="space-y-4">
-            {content.projects.map((project, index) => (
-              <div key={index} className="border-l-2 border-blue-400 pl-4">
+            {content.projects.map((project) => (
+              <div key={`project-${project.name}`} className="border-l-2 border-blue-400 pl-4">
                 <div className="flex justify-between items-start mb-1">
                   <h3 className="font-semibold text-gray-900">
                     {project.name}
@@ -223,9 +223,9 @@ const ModernTemplate: React.FC<{ content: ResumePreviewProps['content'] }> = ({ 
             技能
           </h2>
           <div className="flex flex-wrap gap-2">
-            {content.skills.map((skill, index) => (
+            {content.skills.map((skill) => (
               <span
-                key={index}
+                key={`skill-${skill}`}
                 className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium"
               >
                 {skill}

@@ -35,7 +35,8 @@ class EmailService:
                     encoding="utf-8",
                     decode_responses=True
                 )
-            except:
+            except (redis.ConnectionError, redis.RedisError, ValueError):
+                # Redis 连接失败时使用内存后备
                 self._redis = None
         return self._redis
 
@@ -44,7 +45,8 @@ class EmailService:
         if self._redis:
             try:
                 await self._redis.close()
-            except:
+            except (redis.RedisError, RuntimeError):
+                # Redis 关闭异常时静默处理
                 pass
             self._redis = None
 
@@ -62,7 +64,7 @@ class EmailService:
                 key = f"verification_code:{email}"
                 await redis_client.setex(key, expire_minutes * 60, code)
                 return
-            except:
+            except (redis.RedisError, RuntimeError):
                 # Redis 失败，使用内存后备
                 pass
 
@@ -93,7 +95,7 @@ class EmailService:
                     return True
 
                 return False
-            except:
+            except (redis.RedisError, RuntimeError):
                 # Redis 失败，使用内存后备
                 pass
 
@@ -229,7 +231,7 @@ class EmailService:
                 key = f"reset_code:{email}"
                 await redis_client.setex(key, expire_minutes * 60, code)
                 return
-            except:
+            except (redis.RedisError, RuntimeError):
                 # Redis 失败，使用内存后备
                 pass
 
@@ -260,7 +262,7 @@ class EmailService:
                     return True
 
                 return False
-            except:
+            except (redis.RedisError, RuntimeError):
                 # Redis 失败，使用内存后备
                 pass
 

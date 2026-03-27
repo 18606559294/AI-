@@ -105,7 +105,7 @@ class AIUsageService:
         try:
             used = await redis_client.get(redis_key)
             used_count = int(used) if used else 0
-        except:
+        except (redis.RedisError, ValueError, TypeError):
             # Redis 失败，从数据库查询
             today_end = today_start + timedelta(days=1)
             result = await db.execute(
@@ -144,7 +144,7 @@ class AIUsageService:
         try:
             used = await redis_client.get(redis_key)
             used_count = int(used) if used else 0
-        except:
+        except (redis.RedisError, ValueError, TypeError):
             # Redis 失败，从数据库查询
             month_end = month_start + timedelta(days=32)
             month_end = month_end.replace(day=1)

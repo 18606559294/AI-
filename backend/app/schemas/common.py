@@ -1,21 +1,26 @@
 """
 通用响应模式
 """
-from typing import Optional, Generic, TypeVar, List, Any
-from pydantic import BaseModel
+from typing import Optional, Generic, TypeVar, List, Any, Union
+from pydantic import BaseModel, Field
+from pydantic.generics import GenericModel
 
 T = TypeVar('T')
 
 
 class ResponseBase(BaseModel):
     """基础响应"""
-    code: int = 200
-    message: str = "success"
-    
-    
-class Response(ResponseBase, Generic[T]):
-    """通用响应"""
-    data: Optional[T] = None
+    code: int = Field(default=200, description="响应状态码")
+    message: str = Field(default="success", description="响应消息")
+
+
+class Response(ResponseBase, GenericModel, Generic[T]):
+    """通用响应 - 与 FastAPI 兼容的泛型实现"""
+    data: Optional[T] = Field(default=None, description="响应数据")
+
+    class Config:
+        # JSON schema 编码时保留泛型信息
+        json_schema_mode_override = "serialization"
 
 
 class PageResponse(ResponseBase, Generic[T]):

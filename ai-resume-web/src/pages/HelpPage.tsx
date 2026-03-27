@@ -105,8 +105,8 @@ export default function HelpPage() {
             {/* FAQ 列表 */}
             <h2 className="text-xl font-semibold text-white mb-4">常见问题</h2>
             <div className="space-y-4">
-              {faqs.map((faq, index) => (
-                <details key={index} className="group">
+              {faqs.map((faq) => (
+                <details key={faq.question} className="group">
                   <summary className="flex items-center justify-between p-4 rounded-lg bg-slate-800/50 border border-slate-700/50 cursor-pointer hover:border-sky-500/50 transition-colors">
                     <span className="text-white font-medium">{faq.question}</span>
                     <svg className="w-5 h-5 text-slate-400 group-open:rotate-180 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">

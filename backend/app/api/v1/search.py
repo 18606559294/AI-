@@ -70,7 +70,7 @@ async def search_resumes(
             conditions[1],
             Resume.content['basic_info']['email'].astext.like(search_pattern)
         )
-    except:
+    except (ImportError, AttributeError, Exception):
         pass  # 如果JSON搜索失败，使用基本搜索
 
     # 执行查询

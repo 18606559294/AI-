@@ -125,13 +125,18 @@ class OpenAIProviderV2(AIProviderBase):
                     {"hard_skills": ats_preview.get("hard_skills", [])}
                 )
             
-            # 构建最终响应
+            # 构建最终响应，包含 token 使用信息
             result = {
                 "content": validated_content,
                 "meta": {
-                    "provider": "openai_v2",
+                    "provider": "openai",
                     "model": self.model,
                     "enhanced": enhance
+                },
+                "usage": {
+                    "prompt_tokens": response.usage.prompt_tokens if hasattr(response, 'usage') else 0,
+                    "completion_tokens": response.usage.completion_tokens if hasattr(response, 'usage') else 0,
+                    "total_tokens": response.usage.total_tokens if hasattr(response, 'usage') else 0,
                 }
             }
             

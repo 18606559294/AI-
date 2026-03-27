@@ -148,8 +148,8 @@ export default function HomePage() {
               { label: 'AI 优化', value: '智能', icon: 'M13 10V3L4 14h7v7l9-11h-7z' },
               { label: '导出格式', value: 'PDF+Word', icon: 'M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z' },
               { label: '用户数量', value: '10K+', icon: 'M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a1 1 0 001-1.857V7a3 3 0 013-3h3a1 1 0 001 1v7a3 3 0 01-1 1.857' },
-            ].map((stat, index) => (
-              <Card key={index} variant="glass" className="text-center group hover:scale-105 transition-transform">
+            ].map((stat) => (
+              <Card key={stat.label} variant="glass" className="text-center group hover:scale-105 transition-transform">
                 <svg className="w-8 h-8 mx-auto mb-3 text-sky-400 group-hover:text-sky-300 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={stat.icon} />
                 </svg>
@@ -211,9 +211,9 @@ export default function HomePage() {
                 icon: 'M3 15a4 4 0 004 4h9a5 5 0 10-.1 0H7a3 3 0 01-3.9-3 3 3 0 01.9-5.1 5 5 0 117 9 9 5 0 011 9H15',
                 color: 'accent',
               },
-            ].map((feature, index) => (
+            ].map((feature) => (
               <Link
-                key={index}
+                key={feature.title}
                 to="#"
                 className="group"
               >
