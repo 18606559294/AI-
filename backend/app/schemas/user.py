@@ -129,3 +129,34 @@ class WechatUserInfo(BaseModel):
     province: Optional[str] = None
     city: Optional[str] = None
     country: Optional[str] = None
+
+
+# ==================== OAuth Schemas ====================
+
+class OAuthLoginRequest(BaseModel):
+    """OAuth 登录请求模式"""
+    code: str = Field(..., description="OAuth 授权码")
+    state: str = Field(..., description="OAuth 状态参数（防CSRF）")
+    redirect_uri: Optional[str] = Field(None, description="重定向URI（可选，用于覆盖默认值）")
+
+
+class OAuthBindRequest(BaseModel):
+    """OAuth 绑定请求模式"""
+    code: str = Field(..., description="OAuth 授权码")
+    state: str = Field(..., description="OAuth 状态参数（防CSRF）")
+
+
+class OAuthUserInfo(BaseModel):
+    """OAuth 用户信息响应模式"""
+    provider: str  # 'google' or 'github'
+    provider_id: str
+    email: Optional[str] = None
+    verified_email: bool = False
+    name: Optional[str] = None
+    avatar_url: Optional[str] = None
+
+
+class OAuthAuthorizeRequest(BaseModel):
+    """OAuth 授权请求模式 - 获取授权URL"""
+    redirect_uri: Optional[str] = Field(None, description="授权后重定向的URI")
+    state: Optional[str] = Field(None, description="自定义状态参数（可选，系统会自动生成）")

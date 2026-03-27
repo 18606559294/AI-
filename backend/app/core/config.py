@@ -98,6 +98,24 @@ class Settings(BaseSettings):
     WECHAT_APP_ID: Optional[str] = None
     WECHAT_APP_SECRET: Optional[str] = None
 
+    # ========== OAuth 配置 ==========
+
+    # Google OAuth 配置
+    # 获取凭证: https://console.cloud.google.com/apis/credentials
+    GOOGLE_CLIENT_ID: Optional[str] = None
+    GOOGLE_CLIENT_SECRET: Optional[str] = None
+    GOOGLE_REDIRECT_URI: str = "http://localhost:8000/api/v1/auth/google/callback"
+
+    # GitHub OAuth 配置
+    # 创建 OAuth App: https://github.com/settings/developers
+    GITHUB_CLIENT_ID: Optional[str] = None
+    GITHUB_CLIENT_SECRET: Optional[str] = None
+    GITHUB_REDIRECT_URI: str = "http://localhost:8000/api/v1/auth/github/callback"
+
+    # OAuth 状态存储（用于 CSRF 保护）
+    # 开发环境使用内存存储，生产环境应使用 Redis
+    OAUTH_STATE_TTL_SECONDS: int = 600  # 10分钟
+
     model_config = ConfigDict(
         env_file=".env",
         case_sensitive=True

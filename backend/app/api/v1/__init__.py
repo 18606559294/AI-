@@ -10,6 +10,7 @@ from app.api.v1.advanced import router as advanced_router
 from app.api.v1.compliance import router as compliance_router
 from app.api.v1.email_verification import router as email_verification_router
 from app.api.v1.ai_config import router as ai_config_router
+from app.api.v1.ai_usage import router as ai_usage_router
 from app.api.v1.search import router as search_router
 
 router = APIRouter()
@@ -32,4 +33,5 @@ router.include_router(fix_response_model(advanced_router))
 router.include_router(fix_response_model(compliance_router))
 router.include_router(fix_response_model(email_verification_router))
 router.include_router(fix_response_model(ai_config_router))
+router.include_router(fix_response_model(ai_usage_router))
 router.include_router(fix_response_model(search_router))

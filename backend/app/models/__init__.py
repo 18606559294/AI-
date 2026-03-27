@@ -4,6 +4,7 @@
 from app.models.user import User, UserRole
 from app.models.resume import Resume, ResumeVersion, ResumeStatus
 from app.models.template import Template, Favorite, OperationLog
+from app.models.ai_usage import AIUsageLimit, AIUsageRecord, AIBilling
 
 __all__ = [
     "User",
@@ -14,4 +15,7 @@ __all__ = [
     "Template",
     "Favorite",
     "OperationLog",
+    "AIUsageLimit",
+    "AIUsageRecord",
+    "AIBilling",
 ]

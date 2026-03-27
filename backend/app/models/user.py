@@ -36,6 +36,16 @@ class User(Base):
     wechat_nickname = Column(String(100), nullable=True)
     wechat_avatar = Column(String(500), nullable=True)
 
+    # Google OAuth 相关
+    google_id = Column(String(100), unique=True, nullable=True, index=True)
+    google_email = Column(String(255), nullable=True)
+    google_verified_email = Column(Boolean, default=False, nullable=True)
+
+    # GitHub OAuth 相关
+    github_id = Column(Integer, unique=True, nullable=True, index=True)
+    github_login = Column(String(100), nullable=True)
+    github_email = Column(String(255), nullable=True)
+
     # 角色和状态
     role = Column(Enum(UserRole), default=UserRole.USER, nullable=False)
     is_active = Column(Boolean, default=True, nullable=False)
@@ -49,6 +59,9 @@ class User(Base):
     # 关系
     resumes = relationship("Resume", back_populates="user", lazy="dynamic")
     favorites = relationship("Favorite", back_populates="user", lazy="dynamic")
+    ai_usage_limit = relationship("AIUsageLimit", back_populates="user", uselist=False, cascade="all, delete-orphan")
+    ai_usage_records = relationship("AIUsageRecord", back_populates="user", cascade="all, delete-orphan")
+    ai_billings = relationship("AIBilling", back_populates="user", cascade="all, delete-orphan")
 
     def __repr__(self):
         return f"<User(id={self.id}, email={self.email})>"
