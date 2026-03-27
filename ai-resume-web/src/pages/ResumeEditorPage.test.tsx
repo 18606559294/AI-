@@ -2,9 +2,9 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { BrowserRouter, MemoryRouter, Route, Routes } from 'react-router-dom';
-import ResumeEditorPage from '../ResumeEditorPage';
-import * as api from '@ai-resume/shared/api';
+import { MemoryRouter, Route, Routes } from 'react-router-dom';
+import ResumeEditorPage from './ResumeEditorPage';
+import { api } from '@ai-resume/shared/api';
 
 // Mock API
 vi.mock('@ai-resume/shared/api', () => ({
@@ -15,7 +15,7 @@ vi.mock('@ai-resume/shared/api', () => ({
       updateResume: vi.fn(),
       aiGenerateResume: vi.fn(),
       deleteResume: vi.fn(),
-      listResumes: vi.fn(),
+      getResumes: vi.fn(),
     },
   },
 }));
@@ -63,7 +63,7 @@ describe('ResumeEditorPage Component', () => {
       },
     };
 
-    vi.mocked(api.resume.getResume).mockResolvedValue(mockResume);
+    vi.mocked(api.resume.getResume).mockResolvedValue(mockResume as any);
 
     renderWithProviders(<ResumeEditorPage />);
 
@@ -86,7 +86,7 @@ describe('ResumeEditorPage Component', () => {
       },
     };
 
-    vi.mocked(api.resume.getResume).mockResolvedValue(mockResume);
+    vi.mocked(api.resume.getResume).mockResolvedValue(mockResume as any);
 
     renderWithProviders(<ResumeEditorPage />);
 
@@ -112,7 +112,7 @@ describe('ResumeEditorPage Component', () => {
       },
     };
 
-    vi.mocked(api.resume.getResume).mockResolvedValue(mockResume);
+    vi.mocked(api.resume.getResume).mockResolvedValue(mockResume as any);
 
     renderWithProviders(<ResumeEditorPage />);
 
@@ -140,7 +140,7 @@ describe('ResumeEditorPage Component', () => {
       },
     };
 
-    vi.mocked(api.resume.getResume).mockResolvedValue(mockResume);
+    vi.mocked(api.resume.getResume).mockResolvedValue(mockResume as any);
     vi.mocked(api.resume.updateResume).mockResolvedValue({
       id: 1,
       title: '更新后的标题',
@@ -153,7 +153,7 @@ describe('ResumeEditorPage Component', () => {
         projects: [],
         skills: [],
       },
-    });
+    } as any);
 
     renderWithProviders(<ResumeEditorPage />);
 
@@ -182,7 +182,7 @@ describe('ResumeEditorPage Component', () => {
       },
     };
 
-    vi.mocked(api.resume.getResume).mockResolvedValue(mockResume);
+    vi.mocked(api.resume.getResume).mockResolvedValue(mockResume as any);
 
     renderWithProviders(<ResumeEditorPage />);
 
@@ -208,7 +208,7 @@ describe('ResumeEditorPage Component', () => {
         projects: [],
         skills: [],
       },
-    });
+    } as any);
 
     renderWithProviders(<ResumeEditorPage />, ['/resumes/new']);
 
@@ -247,7 +247,7 @@ describe('ResumeEditorPage Component', () => {
       },
     };
 
-    vi.mocked(api.resume.getResume).mockResolvedValue(mockResume);
+    vi.mocked(api.resume.getResume).mockResolvedValue(mockResume as any);
 
     renderWithProviders(<ResumeEditorPage />);
 
@@ -275,7 +275,7 @@ describe('ResumeEditorPage Component', () => {
       },
     };
 
-    vi.mocked(api.resume.getResume).mockResolvedValue(mockResume);
+    vi.mocked(api.resume.getResume).mockResolvedValue(mockResume as any);
 
     renderWithProviders(<ResumeEditorPage />);
 

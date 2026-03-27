@@ -1,10 +1,263 @@
+/**
+ * 增强版简历编辑器页面
+ * 支持：撤销/重做、富文本编辑、拖拽排序
+ */
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import useUndo from 'use-undo';
 import { api } from '@ai-resume/shared/api';
 import type { ResumeContent, Education, WorkExperience, Project } from '@ai-resume/shared/types';
-import ResumePreview from '../components/ResumePreview';
+import { ResumePreview } from '../components/ResumePreview';
+import { RichTextEditor, UndoRedoControls, UndoHistoryIndicator } from '../components/editor';
+import { DndContext, closestCenter, PointerSensor, useSensor, useSensors, type DragEndEvent } from '@dnd-kit/core';
+import { SortableContext, verticalListSortingStrategy, useSortable } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
+import { GripVertical, Trash2, Plus, Save, Eye, EyeOff, Wand2, X } from 'lucide-react';
 
+// 创建可拖拽的工作经历项
+function DraggableWorkItem({ work, index, onRemove, onUpdate }: {
+  work: WorkExperience;
+  index: number;
+  onRemove: (index: number) => void;
+  onUpdate: (index: number, field: keyof WorkExperience, value: string) => void;
+}) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+    id: `work-${index}`,
+  });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    zIndex: isDragging ? 1 : 0,
+  };
+
+  return (
+    <div ref={setNodeRef} style={style} className="relative group">
+      <div className="card p-6 border-l-4 border-primary-500">
+        {/* 拖拽手柄 */}
+        <div
+          className="absolute left-3 top-4 cursor-grab active:cursor-grabbing text-gray-400 hover:text-gray-600"
+          {...attributes}
+          {...listeners}
+        >
+          <GripVertical className="w-5 h-5" />
+        </div>
+
+        {/* 移除按钮 */}
+        <button
+          onClick={() => onRemove(index)}
+          className="absolute right-4 top-4 text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
+        >
+          <Trash2 className="w-5 h-5" />
+        </button>
+
+        {/* 内容 */}
+        <div className="pl-10 space-y-4">
+          <div className="flex items-center gap-2 mb-2">
+            <span className="bg-primary-100 text-primary-700 text-xs font-medium px-2 py-1 rounded">
+              {index + 1}
+            </span>
+          </div>
+
+          <div className="grid md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">公司</label>
+              <input
+                type="text"
+                value={work.company || ''}
+                onChange={(e) => onUpdate(index, 'company', e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">职位</label>
+              <input
+                type="text"
+                value={work.position || ''}
+                onChange={(e) => onUpdate(index, 'position', e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+              />
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">工作描述</label>
+            <RichTextEditor
+              content={work.description || ''}
+              onChange={(html) => onUpdate(index, 'description', html)}
+              placeholder="描述您的工作职责和成就..."
+              className="min-h-[120px]"
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// 创建可拖拽的教育经历项
+function DraggableEduItem({ edu, index, onRemove, onUpdate }: {
+  edu: Education;
+  index: number;
+  onRemove: (index: number) => void;
+  onUpdate: (index: number, field: keyof Education, value: string) => void;
+}) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+    id: `edu-${index}`,
+  });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    zIndex: isDragging ? 1 : 0,
+  };
+
+  return (
+    <div ref={setNodeRef} style={style} className="relative group">
+      <div className="card p-6 border-l-4 border-blue-500">
+        {/* 拖拽手柄 */}
+        <div
+          className="absolute left-3 top-4 cursor-grab active:cursor-grabbing text-gray-400 hover:text-gray-600"
+          {...attributes}
+          {...listeners}
+        >
+          <GripVertical className="w-5 h-5" />
+        </div>
+
+        {/* 移除按钮 */}
+        <button
+          onClick={() => onRemove(index)}
+          className="absolute right-4 top-4 text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
+        >
+          <Trash2 className="w-5 h-5" />
+        </button>
+
+        {/* 内容 */}
+        <div className="pl-10 space-y-4">
+          <div className="flex items-center gap-2 mb-2">
+            <span className="bg-blue-100 text-blue-700 text-xs font-medium px-2 py-1 rounded">
+              {index + 1}
+            </span>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">学校</label>
+              <input
+                type="text"
+                value={edu.school || ''}
+                onChange={(e) => onUpdate(index, 'school', e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">学位</label>
+              <input
+                type="text"
+                value={edu.degree || ''}
+                onChange={(e) => onUpdate(index, 'degree', e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">专业</label>
+              <input
+                type="text"
+                value={edu.major || ''}
+                onChange={(e) => onUpdate(index, 'major', e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// 创建可拖拽的项目经历项
+function DraggableProjectItem({ project, index, onRemove, onUpdate }: {
+  project: Project;
+  index: number;
+  onRemove: (index: number) => void;
+  onUpdate: (index: number, field: keyof Project, value: string | string[]) => void;
+}) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+    id: `project-${index}`,
+  });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    zIndex: isDragging ? 1 : 0,
+  };
+
+  return (
+    <div ref={setNodeRef} style={style} className="relative group">
+      <div className="card p-6 border-l-4 border-purple-500">
+        {/* 拖拽手柄 */}
+        <div
+          className="absolute left-3 top-4 cursor-grab active:cursor-grabbing text-gray-400 hover:text-gray-600"
+          {...attributes}
+          {...listeners}
+        >
+          <GripVertical className="w-5 h-5" />
+        </div>
+
+        {/* 移除按钮 */}
+        <button
+          onClick={() => onRemove(index)}
+          className="absolute right-4 top-4 text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
+        >
+          <Trash2 className="w-5 h-5" />
+        </button>
+
+        {/* 内容 */}
+        <div className="pl-10 space-y-4">
+          <div className="flex items-center gap-2 mb-2">
+            <span className="bg-purple-100 text-purple-700 text-xs font-medium px-2 py-1 rounded">
+              {index + 1}
+            </span>
+          </div>
+
+          <div className="grid md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">项目名称</label>
+              <input
+                type="text"
+                value={project.name || ''}
+                onChange={(e) => onUpdate(index, 'name', e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">担任角色</label>
+              <input
+                type="text"
+                value={project.role || ''}
+                onChange={(e) => onUpdate(index, 'role', e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+              />
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">项目描述</label>
+            <RichTextEditor
+              content={project.description || ''}
+              onChange={(html) => onUpdate(index, 'description', html)}
+              placeholder="描述项目的目标、您的贡献和成果..."
+              className="min-h-[120px]"
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// 主页面组件
 export default function ResumeEditorPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -21,7 +274,7 @@ export default function ResumeEditorPage() {
   const [previewTemplate, setPreviewTemplate] = useState<'modern' | 'classic' | 'minimal'>('modern');
 
   // 简历内容
-  const [content, setContent] = useState<ResumeContent>({
+  const initialContent: ResumeContent = {
     basic_info: {
       name: '',
       email: '',
@@ -36,7 +289,17 @@ export default function ResumeEditorPage() {
     work_experience: [],
     projects: [],
     skills: [],
-  });
+  };
+
+  const [content, setContent] = useState<ResumeContent>(initialContent);
+
+  // 撤销/重做功能
+  const [_undoState, { set: setUndoState, reset: resetUndo, undo: undoAction, redo: redoAction, canUndo, canRedo }] = useUndo(initialContent);
+
+  // 同步 content 到 undo state
+  useEffect(() => {
+    setUndoState(content);
+  }, [content, setUndoState]);
 
   // 获取简历详情
   const { data: resume, isLoading } = useQuery({
@@ -48,9 +311,11 @@ export default function ResumeEditorPage() {
   useEffect(() => {
     if (resume) {
       setTitle(resume.title);
-      setContent(resume.content ?? {});
+      const resumeContent = resume.content ?? initialContent;
+      setContent(resumeContent);
+      resetUndo(resumeContent);
     }
-  }, [resume]);
+  }, [resume, resetUndo]);
 
   // 保存 mutation
   const saveMutation = useMutation({
@@ -82,12 +347,37 @@ export default function ResumeEditorPage() {
     },
     onSuccess: (data) => {
       setIsGenerating(false);
-      setContent((data?.content ?? {}) as ResumeContent);
+      const newContent = (data?.content ?? {}) as ResumeContent;
+      setContent(newContent);
+      resetUndo(newContent);
     },
     onError: () => {
       setIsGenerating(false);
     },
   });
+
+  // 拖拽传感器
+  const sensors = useSensors(useSensor(PointerSensor));
+
+  // 处理拖拽结束
+  const handleDragEnd = (section: 'work_experience' | 'education' | 'projects') =>
+    (event: DragEndEvent) => {
+      const { active, over } = event;
+      if (!over || active.id === over.id) return;
+
+      const items = content[section] || [];
+      const oldIndex = parseInt(String(active.id).split('-')[1]);
+      const newIndex = parseInt(String(over.id).split('-')[1]);
+
+      const newItems = [...items];
+      const [removed] = newItems.splice(oldIndex, 1);
+      newItems.splice(newIndex, 0, removed);
+
+      setContent({
+        ...content,
+        [section]: newItems,
+      });
+    };
 
   const handleSave = async () => {
     setIsSaving(true);
@@ -116,13 +406,33 @@ export default function ResumeEditorPage() {
     }
   };
 
+  // 工作经历操作
+  const addWork = () => {
+    const newContent = {
+      ...content,
+      work_experience: [...(content.work_experience || []), { company: '', position: '', description: '' }],
+    };
+    setContent(newContent);
+  };
+
+  const updateWork = (index: number, field: keyof WorkExperience, value: string) => {
+    const newWork = [...(content.work_experience || [])];
+    newWork[index] = { ...newWork[index], [field]: value };
+    setContent({ ...content, work_experience: newWork });
+  };
+
+  const removeWork = (index: number) => {
+    setContent({
+      ...content,
+      work_experience: content.work_experience?.filter((_, i) => i !== index) || [],
+    });
+  };
+
+  // 教育经历操作
   const addEducation = () => {
     setContent({
       ...content,
-      education: [
-        ...(content.education || []),
-        { school: '', degree: '', major: '' },
-      ],
+      education: [...(content.education || []), { school: '', degree: '', major: '' }],
     });
   };
 
@@ -135,40 +445,15 @@ export default function ResumeEditorPage() {
   const removeEducation = (index: number) => {
     setContent({
       ...content,
-      education: content.education?.filter((_, i) => i !== index),
+      education: content.education?.filter((_, i) => i !== index) || [],
     });
   };
 
-  const addWork = () => {
-    setContent({
-      ...content,
-      work_experience: [
-        ...(content.work_experience || []),
-        { company: '', position: '', description: '' },
-      ],
-    });
-  };
-
-  const updateWork = (index: number, field: keyof WorkExperience, value: string) => {
-    const newWork = [...(content.work_experience || [])];
-    newWork[index] = { ...newWork[index], [field]: value };
-    setContent({ ...content, work_experience: newWork });
-  };
-
-  const removeWork = (index: number) => {
-    setContent({
-      ...content,
-      work_experience: content.work_experience?.filter((_, i) => i !== index),
-    });
-  };
-
+  // 项目经历操作
   const addProject = () => {
     setContent({
       ...content,
-      projects: [
-        ...(content.projects || []),
-        { name: '', description: '', tech_stack: [] },
-      ],
+      projects: [...(content.projects || []), { name: '', description: '', role: '' }],
     });
   };
 
@@ -181,10 +466,11 @@ export default function ResumeEditorPage() {
   const removeProject = (index: number) => {
     setContent({
       ...content,
-      projects: content.projects?.filter((_, i) => i !== index),
+      projects: content.projects?.filter((_, i) => i !== index) || [],
     });
   };
 
+  // 技能操作
   const addSkill = () => {
     const skill = prompt('请输入技能名称');
     if (skill) {
@@ -198,9 +484,25 @@ export default function ResumeEditorPage() {
   const removeSkill = (index: number) => {
     setContent({
       ...content,
-      skills: content.skills?.filter((_, i) => i !== index),
+      skills: content.skills?.filter((_, i) => i !== index) || [],
     });
   };
+
+  // 快捷键支持
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'z') {
+        e.preventDefault();
+        if (e.shiftKey) {
+          if (canRedo) redoAction();
+        } else {
+          if (canUndo) undoAction();
+        }
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [canUndo, canRedo, undoAction, redoAction]);
 
   const tabs = [
     { label: '基本信息', icon: '👤' },
@@ -238,6 +540,14 @@ export default function ResumeEditorPage() {
             </div>
 
             <div className="flex items-center gap-2">
+              {/* 撤销/重做 */}
+              <UndoRedoControls
+                canUndo={canUndo ?? false}
+                canRedo={canRedo ?? false}
+                onUndo={undoAction}
+                onRedo={redoAction}
+              />
+
               {/* 预览切换按钮 */}
               <button
                 onClick={() => setShowPreview(!showPreview)}
@@ -245,11 +555,11 @@ export default function ResumeEditorPage() {
                   showPreview ? 'btn-primary' : 'btn-secondary'
                 }`}
               >
-                <span>{showPreview ? '📝' : '👁️'}</span>
+                {showPreview ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 {showPreview ? '编辑' : '预览'}
               </button>
 
-              {/* 模板选择（仅在预览模式下显示） */}
+              {/* 模板选择 */}
               {showPreview && (
                 <select
                   value={previewTemplate}
@@ -267,9 +577,10 @@ export default function ResumeEditorPage() {
                 disabled={isGenerating || isNew}
                 className="btn btn-secondary flex items-center gap-2"
               >
-                <span>✨</span>
+                <Wand2 className="w-4 h-4" />
                 {isGenerating ? '生成中...' : 'AI 生成'}
               </button>
+
               <button
                 onClick={handleSave}
                 disabled={isSaving}
@@ -282,14 +593,17 @@ export default function ResumeEditorPage() {
                   </>
                 ) : (
                   <>
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                    </svg>
+                    <Save className="w-4 h-4" />
                     保存
                   </>
                 )}
               </button>
             </div>
+          </div>
+
+          {/* 历史记录指示器 */}
+          <div className="mt-2 flex justify-center">
+            <UndoHistoryIndicator pastLength={canUndo ? 1 : 0} futureLength={canRedo ? 1 : 0} />
           </div>
         </div>
       </header>
@@ -338,7 +652,7 @@ export default function ResumeEditorPage() {
                           value={content.basic_info?.name || ''}
                           onChange={(e) => setContent({
                             ...content,
-                            basic_info: { ...content.basic_info, name: e.target.value }
+                            basic_info: { ...content.basic_info, name: e.target.value },
                           })}
                           className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
                         />
@@ -350,7 +664,7 @@ export default function ResumeEditorPage() {
                           value={content.basic_info?.email || ''}
                           onChange={(e) => setContent({
                             ...content,
-                            basic_info: { ...content.basic_info, email: e.target.value }
+                            basic_info: { ...content.basic_info, email: e.target.value },
                           })}
                           className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
                         />
@@ -362,7 +676,7 @@ export default function ResumeEditorPage() {
                           value={content.basic_info?.phone || ''}
                           onChange={(e) => setContent({
                             ...content,
-                            basic_info: { ...content.basic_info, phone: e.target.value }
+                            basic_info: { ...content.basic_info, phone: e.target.value },
                           })}
                           className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
                         />
@@ -374,7 +688,7 @@ export default function ResumeEditorPage() {
                           value={content.basic_info?.location || ''}
                           onChange={(e) => setContent({
                             ...content,
-                            basic_info: { ...content.basic_info, location: e.target.value }
+                            basic_info: { ...content.basic_info, location: e.target.value },
                           })}
                           className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
                         />
@@ -386,7 +700,7 @@ export default function ResumeEditorPage() {
                           value={content.basic_info?.title || ''}
                           onChange={(e) => setContent({
                             ...content,
-                            basic_info: { ...content.basic_info, title: e.target.value }
+                            basic_info: { ...content.basic_info, title: e.target.value },
                           })}
                           className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
                         />
@@ -398,7 +712,7 @@ export default function ResumeEditorPage() {
                           value={content.basic_info?.job_intention || ''}
                           onChange={(e) => setContent({
                             ...content,
-                            basic_info: { ...content.basic_info, job_intention: e.target.value }
+                            basic_info: { ...content.basic_info, job_intention: e.target.value },
                           })}
                           className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
                         />
@@ -406,26 +720,26 @@ export default function ResumeEditorPage() {
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">个人简介</label>
-                      <textarea
-                        value={content.basic_info?.summary || ''}
-                        onChange={(e) => setContent({
+                      <RichTextEditor
+                        content={content.basic_info?.summary || ''}
+                        onChange={(html) => setContent({
                           ...content,
-                          basic_info: { ...content.basic_info, summary: e.target.value }
+                          basic_info: { ...content.basic_info, summary: html },
                         })}
-                        rows={3}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                        placeholder="简要介绍您的专业背景和职业目标..."
+                        className="min-h-[100px]"
                       />
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">自我介绍</label>
-                      <textarea
-                        value={content.basic_info?.self_introduction || ''}
-                        onChange={(e) => setContent({
+                      <RichTextEditor
+                        content={content.basic_info?.self_introduction || ''}
+                        onChange={(html) => setContent({
                           ...content,
-                          basic_info: { ...content.basic_info, self_introduction: e.target.value }
+                          basic_info: { ...content.basic_info, self_introduction: html },
                         })}
-                        rows={4}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                        placeholder="详细描述您的优势、经验和职业期望..."
+                        className="min-h-[120px]"
                       />
                     </div>
                   </div>
@@ -436,53 +750,33 @@ export default function ResumeEditorPage() {
                 <div className="space-y-6">
                   <div className="flex justify-between items-center mb-4">
                     <h2 className="text-xl font-semibold">教育经历</h2>
-                    <button onClick={addEducation} className="btn btn-primary">
-                      + 添加
+                    <button onClick={addEducation} className="btn btn-primary flex items-center gap-2">
+                      <Plus className="w-4 h-4" /> 添加
                     </button>
                   </div>
-                  <div className="space-y-4">
-                    {content.education?.map((edu, index) => (
-                      <div key={`edu-${index}-${edu.school || ''}`} className="card p-6 space-y-4">
-                        <div className="flex justify-end">
-                          <button
-                            onClick={() => removeEducation(index)}
-                            className="text-red-600 hover:text-red-800"
-                          >
-                            删除
-                          </button>
-                        </div>
-                        <div className="grid md:grid-cols-2 gap-4">
-                          <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">学校</label>
-                            <input
-                              type="text"
-                              value={edu.school || ''}
-                              onChange={(e) => updateEducation(index, 'school', e.target.value)}
-                              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
-                            />
-                          </div>
-                          <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">学位</label>
-                            <input
-                              type="text"
-                              value={edu.degree || ''}
-                              onChange={(e) => updateEducation(index, 'degree', e.target.value)}
-                              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
-                            />
-                          </div>
-                          <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">专业</label>
-                            <input
-                              type="text"
-                              value={edu.major || ''}
-                              onChange={(e) => updateEducation(index, 'major', e.target.value)}
-                              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
-                            />
-                          </div>
-                        </div>
+
+                  <DndContext
+                    sensors={sensors}
+                    collisionDetection={closestCenter}
+                    onDragEnd={handleDragEnd('education')}
+                  >
+                    <SortableContext
+                      items={(content.education || []).map((_, i) => `edu-${i}`)}
+                      strategy={verticalListSortingStrategy}
+                    >
+                      <div className="space-y-4">
+                        {(content.education || []).map((edu, index) => (
+                          <DraggableEduItem
+                            key={`edu-${index}-${edu.school || ''}`}
+                            edu={edu}
+                            index={index}
+                            onUpdate={updateEducation}
+                            onRemove={removeEducation}
+                          />
+                        ))}
                       </div>
-                    ))}
-                  </div>
+                    </SortableContext>
+                  </DndContext>
                 </div>
               )}
 
@@ -490,53 +784,33 @@ export default function ResumeEditorPage() {
                 <div className="space-y-6">
                   <div className="flex justify-between items-center mb-4">
                     <h2 className="text-xl font-semibold">工作经历</h2>
-                    <button onClick={addWork} className="btn btn-primary">
-                      + 添加
+                    <button onClick={addWork} className="btn btn-primary flex items-center gap-2">
+                      <Plus className="w-4 h-4" /> 添加
                     </button>
                   </div>
-                  <div className="space-y-4">
-                    {content.work_experience?.map((work, index) => (
-                      <div key={`work-${index}-${work.company || ''}`} className="card p-6 space-y-4">
-                        <div className="flex justify-end">
-                          <button
-                            onClick={() => removeWork(index)}
-                            className="text-red-600 hover:text-red-800"
-                          >
-                            删除
-                          </button>
-                        </div>
-                        <div className="grid md:grid-cols-2 gap-4">
-                          <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">公司</label>
-                            <input
-                              type="text"
-                              value={work.company || ''}
-                              onChange={(e) => updateWork(index, 'company', e.target.value)}
-                              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
-                            />
-                          </div>
-                          <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">职位</label>
-                            <input
-                              type="text"
-                              value={work.position || ''}
-                              onChange={(e) => updateWork(index, 'position', e.target.value)}
-                              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
-                            />
-                          </div>
-                        </div>
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">工作描述</label>
-                          <textarea
-                            value={work.description || ''}
-                            onChange={(e) => updateWork(index, 'description', e.target.value)}
-                            rows={4}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+
+                  <DndContext
+                    sensors={sensors}
+                    collisionDetection={closestCenter}
+                    onDragEnd={handleDragEnd('work_experience')}
+                  >
+                    <SortableContext
+                      items={(content.work_experience || []).map((_, i) => `work-${i}`)}
+                      strategy={verticalListSortingStrategy}
+                    >
+                      <div className="space-y-4">
+                        {(content.work_experience || []).map((work, index) => (
+                          <DraggableWorkItem
+                            key={`work-${index}-${work.company || ''}`}
+                            work={work}
+                            index={index}
+                            onUpdate={updateWork}
+                            onRemove={removeWork}
                           />
-                        </div>
+                        ))}
                       </div>
-                    ))}
-                  </div>
+                    </SortableContext>
+                  </DndContext>
                 </div>
               )}
 
@@ -544,53 +818,33 @@ export default function ResumeEditorPage() {
                 <div className="space-y-6">
                   <div className="flex justify-between items-center mb-4">
                     <h2 className="text-xl font-semibold">项目经历</h2>
-                    <button onClick={addProject} className="btn btn-primary">
-                      + 添加
+                    <button onClick={addProject} className="btn btn-primary flex items-center gap-2">
+                      <Plus className="w-4 h-4" /> 添加
                     </button>
                   </div>
-                  <div className="space-y-4">
-                    {content.projects?.map((project, index) => (
-                      <div key={`project-${index}-${project.name || ''}`} className="card p-6 space-y-4">
-                        <div className="flex justify-end">
-                          <button
-                            onClick={() => removeProject(index)}
-                            className="text-red-600 hover:text-red-800"
-                          >
-                            删除
-                          </button>
-                        </div>
-                        <div className="grid md:grid-cols-2 gap-4">
-                          <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">项目名称</label>
-                            <input
-                              type="text"
-                              value={project.name || ''}
-                              onChange={(e) => updateProject(index, 'name', e.target.value)}
-                              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
-                            />
-                          </div>
-                          <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">项目角色</label>
-                            <input
-                              type="text"
-                              value={project.role || ''}
-                              onChange={(e) => updateProject(index, 'role', e.target.value)}
-                              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
-                            />
-                          </div>
-                        </div>
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">项目描述</label>
-                          <textarea
-                            value={project.description || ''}
-                            onChange={(e) => updateProject(index, 'description', e.target.value)}
-                            rows={4}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+
+                  <DndContext
+                    sensors={sensors}
+                    collisionDetection={closestCenter}
+                    onDragEnd={handleDragEnd('projects')}
+                  >
+                    <SortableContext
+                      items={(content.projects || []).map((_, i) => `project-${i}`)}
+                      strategy={verticalListSortingStrategy}
+                    >
+                      <div className="space-y-4">
+                        {(content.projects || []).map((project, index) => (
+                          <DraggableProjectItem
+                            key={`project-${index}-${project.name || ''}`}
+                            project={project}
+                            index={index}
+                            onUpdate={updateProject}
+                            onRemove={removeProject}
                           />
-                        </div>
+                        ))}
                       </div>
-                    ))}
-                  </div>
+                    </SortableContext>
+                  </DndContext>
                 </div>
               )}
 
@@ -598,8 +852,8 @@ export default function ResumeEditorPage() {
                 <div className="space-y-6">
                   <div className="flex justify-between items-center mb-4">
                     <h2 className="text-xl font-semibold">技能特长</h2>
-                    <button onClick={addSkill} className="btn btn-primary">
-                      + 添加
+                    <button onClick={addSkill} className="btn btn-primary flex items-center gap-2">
+                      <Plus className="w-4 h-4" /> 添加
                     </button>
                   </div>
                   <div className="card p-6">
@@ -614,12 +868,12 @@ export default function ResumeEditorPage() {
                             onClick={() => removeSkill(index)}
                             className="text-red-600 hover:text-red-800"
                           >
-                            ×
+                            <X className="w-3 h-3" />
                           </button>
                         </span>
                       ))}
                       {(!content.skills || content.skills.length === 0) && (
-                        <p className="text-gray-500">暂无技能</p>
+                        <p className="text-gray-500">暂无技能，点击上方按钮添加</p>
                       )}
                     </div>
                   </div>

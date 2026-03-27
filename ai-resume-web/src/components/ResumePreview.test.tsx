@@ -1,7 +1,7 @@
-import { describe, it, expect, vi } from 'vitest';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { describe, it, expect } from 'vitest';
+import { render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
-import ResumePreview from '../ResumePreview';
+import ResumePreview from './ResumePreview';
 import type { ResumeContent } from '@ai-resume/shared/types';
 
 const mockContent: ResumeContent = {
@@ -20,16 +20,16 @@ const mockContent: ResumeContent = {
       school: '北京大学',
       degree: '学士',
       major: '计算机科学与技术',
-      start_year: '2018',
-      end_year: '2022',
+      start_date: '2018-09',
+      end_date: '2022-06',
     },
   ],
   work_experience: [
     {
       company: '某科技公司',
       position: '前端工程师',
-      start_year: '2022',
-      end_year: '至今',
+      start_date: '2022-07',
+      end_date: '至今',
       description: '负责前端开发工作',
     },
   ],
@@ -39,13 +39,13 @@ const mockContent: ResumeContent = {
       role: '核心开发者',
       description: '使用 React 开发的简历系统',
       tech_stack: ['React', 'TypeScript', 'Vite'],
-      url: 'https://example.com',
+      link: 'https://example.com',
     },
   ],
   skills: [
-    { name: 'JavaScript', level: '熟练' },
-    { name: 'TypeScript', level: '熟练' },
-    { name: 'React', level: '熟练' },
+    { name: 'JavaScript', level: 5 },
+    { name: 'TypeScript', level: 5 },
+    { name: 'React', level: 5 },
   ],
 };
 

@@ -3,41 +3,11 @@
  */
 import React, { useEffect, useState } from 'react';
 import { Card } from '../components/ui/Card';
-import { Text } from '../components/ui/Text';
 import { Spinner } from '../components/ui/Loading';
+import type { ResumeContent } from '@ai-resume/shared/types';
 
 interface ResumePreviewProps {
-  content: {
-    basic_info?: {
-      name?: string;
-      email?: string;
-      phone?: string;
-      title?: string;
-      summary?: string;
-      job_intention?: string;
-      self_introduction?: string;
-    };
-    education?: Array<{
-      school?: string;
-      degree?: string;
-      major?: string;
-      start_date?: string;
-      end_date?: string;
-    }>;
-    work_experience?: Array<{
-      company?: string;
-      position?: string;
-      start_date?: string;
-      end_date?: string;
-      description?: string;
-    }>;
-    projects?: Array<{
-      name?: string;
-      role?: string;
-      description?: string;
-    }>;
-    skills?: string[];
-  };
+  content: ResumeContent;
   template?: 'modern' | 'classic' | 'minimal';
 }
 
@@ -225,10 +195,10 @@ const ModernTemplate: React.FC<{ content: ResumePreviewProps['content'] }> = ({ 
           <div className="flex flex-wrap gap-2">
             {content.skills.map((skill) => (
               <span
-                key={`skill-${skill}`}
+                key={`skill-${skill.id || skill.name}`}
                 className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium"
               >
-                {skill}
+                {skill.name}
               </span>
             ))}
           </div>
