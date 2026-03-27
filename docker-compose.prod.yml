@@ -20,7 +20,7 @@ services:
       - ./logs/backend:/app/logs
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -30,8 +30,8 @@ services:
 
   frontend:
     build:
-      context: ./ai-resume-web
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: ai-resume-web/Dockerfile
     container_name: ai-resume-frontend
     ports:
       - "3000:80"
@@ -39,7 +39,7 @@ services:
       - backend
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost/"]
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1/"]
       interval: 30s
       timeout: 10s
       retries: 3
