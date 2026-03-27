@@ -1,5 +1,8 @@
 # 部署快速指南
 
+> **更新日期**: 2026-03-28
+> **版本**: v2.0 (包含性能优化和安全加固)
+
 ## 开发环境
 
 ### 启动开发服务器
@@ -11,10 +14,33 @@ source venv/bin/activate
 source .env
 python -m uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 
-# 前端
+# 前端 (支持 HMR 和代码分割)
 cd ~/ai-resume/ai-resume-web
 npm run dev
 ```
+
+### 构建前端
+
+```bash
+cd ~/ai-resume/ai-resume-web
+
+# 开发构建
+npm run build
+
+# 生产构建 (包含代码分割优化)
+NODE_ENV=production npm run build
+
+# 预览构建结果
+npm run preview
+```
+
+**构建输出说明** (优化后):
+- `index.js`: 主入口 (~78KB) - 减少 87%
+- `vendor-react.js`: React 核心库 (~163KB)
+- `vendor-editor.js`: 富文本编辑器 (~371KB, 按需加载)
+- `vendor-state.js`: 状态管理 (~47KB)
+- `vendor-dnd.js`: 拖拽库 (~45KB, 按需加载)
+- 页面 chunks: 各路由页面独立打包
 
 ## Docker 部署
 
@@ -41,14 +67,56 @@ docker-compose down -v
 
 ### 服务访问
 
-- **后端 API**: http://localhost:8000
-- **API 文档**: http://localhost:8000/docs
-- **前端**: http://localhost:3000
-- **Nginx**: http://localhost:80（生产环境）
+| 服务 | 地址 | 说明 |
+|------|------|------|
+| 后端 API | http://localhost:8000 | FastAPI 服务 |
+| API 文档 | http://localhost:8000/docs | Swagger UI |
+| 前端 | http://localhost:3000 | React 应用 |
+| Nginx | http://localhost:80 | 生产环境反向代理 |
+
+## 安全配置
+
+### 环境变量
+
+```bash
+# .env (生产环境必填)
+DEBUG=false
+SECRET_KEY=your-32-char-random-key-here
+CORS_ORIGINS=https://yourdomain.com,https://www.yourdomain.com
+
+# 数据库
+DATABASE_URL=mysql://airesume:password@db:3306/ai_resume
+
+# Redis (速率限制)
+REDIS_URL=redis://redis:6379/0
+```
+
+### 安全头部 (自动配置)
+
+应用自动添加以下安全头部：
+
+| 头部 | 值 | 作用 |
+|------|-----|------|
+| X-Content-Type-Options | nosniff | 防止 MIME 嗅探 |
+| X-Frame-Options | DENY | 防止点击劫持 |
+| X-XSS-Protection | 1; mode=block | XSS 过滤器 |
+| Referrer-Policy | strict-origin-when-cross-origin | 引用保护 |
+| Permissions-Policy | 限制敏感 API | 权限控制 |
+| Strict-Transport-Security | max-age=31536000 | 强制 HTTPS |
+| Content-Security-Policy | 严格策略 | XSS 防护 |
+
+### 速率限制
+
+| 操作 | 限制 |
+|------|------|
+| 注册 | 5/hour |
+| 登录 | 20/minute |
+| 密码重置 | 3/hour |
+| AI 生成 | 10/hour |
 
 ## 数据库操作
 
-### SQLite（默认）
+### SQLite（默认开发）
 
 ```bash
 # 进入后端容器
@@ -133,13 +201,14 @@ docker-compose logs db
 docker-compose exec db bash
 ```
 
-### 端口冲突
+### 前端构建问题
 
 ```bash
-# 修改 docker-compose.yml 中的端口映射
-ports:
-  - "9000:8000"  # 后端使用 9000
-  - "4000:80"    # 前端使用 4000
+# 清理缓存重新构建
+cd ai-resume-web
+rm -rf node_modules dist
+npm install
+npm run build
 ```
 
 ## 性能优化
@@ -205,19 +274,19 @@ curl http://localhost:3000
 - **Prometheus** - 指标收集
 - **ELK Stack** - 日志分析
 
-## 安全
+## HTTPS 配置
 
-### SSL/TLS
+### 使用 Let's Encrypt
 
 ```bash
-# 使用 Let's Encrypt 获取证书
+# 获取证书
 sudo certbot certonly --standalone -d yourdomain.com
 
-# 配置 Nginx 使用 SSL
-# 见 nginx.conf 配置
+# Nginx 配置 (已包含)
+# 见 nginx/nginx.conf
 ```
 
-### 防火墙
+### 防火墙配置
 
 ```bash
 # 只开放必要端口
@@ -244,3 +313,17 @@ restart: unless-stopped
 # 手动重启
 docker-compose restart
 ```
+
+## 部署检查清单
+
+生产环境部署前确认：
+
+- [ ] `DEBUG=false` 已设置
+- [ ] `SECRET_KEY` 已生成且安全存储
+- [ ] `CORS_ORIGINS` 仅包含生产域名
+- [ ] HTTPS 证书已配置
+- [ ] 数据库备份策略已启用
+- [ ] 速率限制已启用
+- [ ] 防火墙规则已配置
+- [ ] 日志轮转已配置
+- [ ] 健康检查端点可访问
