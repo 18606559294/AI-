@@ -1,32 +1,72 @@
 """
 邮件发送服务
 支持验证码、通知等邮件发送
+
+验证码存储优先使用 Redis（生产环境），内存作为后备（开发环境）
 """
-import random
+import secrets
 import string
 from datetime import datetime, timedelta, timezone
 from typing import Optional
 import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
+import redis.asyncio as redis
+
 from app.core.config import settings
 
 
 class EmailService:
-    """邮件服务类"""
+    """邮件服务类 - 使用 Redis 存储验证码（生产环境安全）"""
 
     def __init__(self):
-        # 验证码缓存（生产环境应使用Redis）
+        self.redis_url = settings.REDIS_URL
+        self._redis: Optional[redis.Redis] = None
+        # 内存后备（开发环境或 Redis 不可用时）
         self._verification_codes = {}
-        # 密码重置码缓存
         self._reset_codes = {}
 
-    def generate_code(self, length: int = 6) -> str:
-        """生成验证码"""
-        return ''.join(random.choices(string.digits, k=length))
+    async def get_redis(self):
+        """获取 Redis 连接"""
+        if self._redis is None:
+            try:
+                self._redis = redis.from_url(
+                    self.redis_url,
+                    encoding="utf-8",
+                    decode_responses=True
+                )
+            except:
+                self._redis = None
+        return self._redis
 
-    def save_code(self, email: str, code: str, expire_minutes: int = 5) -> None:
-        """保存验证码（带过期时间）"""
+    async def close_redis(self):
+        """关闭 Redis 连接"""
+        if self._redis:
+            try:
+                await self._redis.close()
+            except:
+                pass
+            self._redis = None
+
+    def generate_code(self, length: int = 6) -> str:
+        """生成验证码（使用 secrets 模块确保密码学安全）"""
+        return ''.join(secrets.choice(string.digits) for _ in range(length))
+
+    async def save_code(self, email: str, code: str, expire_minutes: int = 5) -> None:
+        """保存验证码到 Redis（带过期时间）"""
+        redis_client = await self.get_redis()
+
+        if redis_client:
+            try:
+                # 使用 Redis 存储验证码，自动过期
+                key = f"verification_code:{email}"
+                await redis_client.setex(key, expire_minutes * 60, code)
+                return
+            except:
+                # Redis 失败，使用内存后备
+                pass
+
+        # 内存后备存储
         expire_time = datetime.now(timezone.utc) + timedelta(minutes=expire_minutes)
         self._verification_codes[email] = {
             'code': code,
@@ -34,8 +74,30 @@ class EmailService:
             'used': False
         }
 
-    def verify_code(self, email: str, code: str) -> bool:
+    async def verify_code(self, email: str, code: str) -> bool:
         """验证验证码"""
+        redis_client = await self.get_redis()
+
+        if redis_client:
+            try:
+                key = f"verification_code:{email}"
+                stored_code = await redis_client.get(key)
+
+                if stored_code is None:
+                    # 验证码不存在或已过期
+                    return False
+
+                if stored_code == code:
+                    # 验证成功，删除验证码（一次性使用）
+                    await redis_client.delete(key)
+                    return True
+
+                return False
+            except:
+                # Redis 失败，使用内存后备
+                pass
+
+        # 内存后备验证
         if email not in self._verification_codes:
             return False
 
@@ -147,8 +209,8 @@ class EmailService:
             print(f"发送邮件失败: {e}")
             return False
 
-    def cleanup_expired_codes(self) -> None:
-        """清理过期的验证码"""
+    async def cleanup_expired_codes(self) -> None:
+        """清理过期的验证码（仅内存后备需要，Redis 自动过期）"""
         now = datetime.now(timezone.utc)
         expired_emails = [
             email for email, data in self._verification_codes.items()
@@ -157,8 +219,21 @@ class EmailService:
         for email in expired_emails:
             del self._verification_codes[email]
 
-    def save_reset_code(self, email: str, code: str, expire_minutes: int = 15) -> None:
-        """保存密码重置码（带过期时间）"""
+    async def save_reset_code(self, email: str, code: str, expire_minutes: int = 15) -> None:
+        """保存密码重置码到 Redis（带过期时间）"""
+        redis_client = await self.get_redis()
+
+        if redis_client:
+            try:
+                # 使用 Redis 存储重置码，自动过期
+                key = f"reset_code:{email}"
+                await redis_client.setex(key, expire_minutes * 60, code)
+                return
+            except:
+                # Redis 失败，使用内存后备
+                pass
+
+        # 内存后备存储
         expire_time = datetime.now(timezone.utc) + timedelta(minutes=expire_minutes)
         self._reset_codes[email] = {
             'code': code,
@@ -166,8 +241,30 @@ class EmailService:
             'used': False
         }
 
-    def verify_reset_code(self, email: str, code: str) -> bool:
+    async def verify_reset_code(self, email: str, code: str) -> bool:
         """验证密码重置码"""
+        redis_client = await self.get_redis()
+
+        if redis_client:
+            try:
+                key = f"reset_code:{email}"
+                stored_code = await redis_client.get(key)
+
+                if stored_code is None:
+                    # 重置码不存在或已过期
+                    return False
+
+                if stored_code == code:
+                    # 验证成功，删除重置码（一次性使用）
+                    await redis_client.delete(key)
+                    return True
+
+                return False
+            except:
+                # Redis 失败，使用内存后备
+                pass
+
+        # 内存后备验证
         if email not in self._reset_codes:
             return False
 

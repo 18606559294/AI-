@@ -1,7 +1,7 @@
 """
 用户数据模型
 """
-from datetime import datetime
+from datetime import datetime, timezone
 from sqlalchemy import Column, BigInteger, String, Boolean, Enum, DateTime, Text, Integer
 from sqlalchemy.orm import relationship
 from app.core.database import Base
@@ -52,8 +52,8 @@ class User(Base):
     is_verified = Column(Boolean, default=False, nullable=False)
 
     # 时间戳
-    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), nullable=False)
+    updated_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc), nullable=False)
     last_login_at = Column(DateTime, nullable=True)
 
     # 关系

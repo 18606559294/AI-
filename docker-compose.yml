@@ -11,15 +11,17 @@ services:
     container_name: ai-resume-backend
     ports:
       - "8000:8000"
+    env_file:
+      - .env.production
     environment:
       # 开发数据库配置 - 使用 SQLite（MySQL 连接问题待修复）
       - USE_SQLITE=true
       - DATABASE_URL=sqlite+aiosqlite:///./data/ai_resume.db
       # 生产环境使用 MySQL: 设置 USE_SQLITE=false, DATABASE_URL=mysql+aiomysql://airesume:airesume_password@host.docker.internal:3306/ai_resume
       - REDIS_URL=redis://redis:6379
-      - SECRET_KEY=TMbXg44EMiTSW4I2R4JCXF4LebBEvHKveUBJNCr289M
+      # SECRET_KEY 和 XIAOMI_API_KEY 从 .env.production 文件读取
+      # 警告: 请勿在版本控制中提交真实的密钥！
       - ACCESS_TOKEN_EXPIRE_MINUTES=30
-      - XIAOMI_API_KEY=sk-c0uo5p7vq8h9p0fm45978gvkky3dgtbhn68uai4y2pnyt12o
       - DEFAULT_AI_PROVIDER=xiaomi
       - DEBUG=false
       - CORS_ORIGINS=["http://localhost:3000","http://localhost:80"]

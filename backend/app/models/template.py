@@ -1,7 +1,7 @@
 """
 模板数据模型
 """
-from datetime import datetime
+from datetime import datetime, timezone
 from sqlalchemy import Column, BigInteger, String, Text, Boolean, DateTime, JSON, Integer, ForeignKey
 from sqlalchemy.orm import relationship
 from app.core.database import Base
@@ -42,8 +42,8 @@ class Template(Base):
     use_count = Column(Integer, default=0, nullable=False)
     
     # 时间戳
-    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), nullable=False)
+    updated_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc), nullable=False)
     
     # 关系
     resumes = relationship("Resume", back_populates="template", lazy="dynamic")
@@ -64,7 +64,7 @@ class Favorite(Base):
     target_id = Column(BigInteger, nullable=False)
     
     # 时间戳
-    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), nullable=False)
     
     # 关系
     user = relationship("User", back_populates="favorites")
@@ -91,7 +91,7 @@ class OperationLog(Base):
     user_agent = Column(String(500), nullable=True)
     
     # 时间戳
-    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), nullable=False)
     
     def __repr__(self):
         return f"<OperationLog(id={self.id}, action={self.action})>"

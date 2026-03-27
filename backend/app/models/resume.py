@@ -1,7 +1,7 @@
 """
 简历数据模型
 """
-from datetime import datetime
+from datetime import datetime, timezone
 from sqlalchemy import Column, BigInteger, String, Text, Enum, DateTime, ForeignKey, JSON, Integer
 from sqlalchemy.orm import relationship
 from app.core.database import Base
@@ -40,8 +40,8 @@ class Resume(Base):
     version = Column(Integer, default=1, nullable=False)
     
     # 时间戳
-    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), nullable=False)
+    updated_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc), nullable=False)
     
     # 关系
     user = relationship("User", back_populates="resumes")
@@ -68,7 +68,7 @@ class ResumeVersion(Base):
     change_note = Column(String(500), nullable=True)
     
     # 时间戳
-    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), nullable=False)
     
     # 关系
     resume = relationship("Resume", back_populates="versions")

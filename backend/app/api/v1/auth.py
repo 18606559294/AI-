@@ -252,7 +252,7 @@ async def request_password_reset(
     if user:
         # 生成重置码
         reset_code = email_service.generate_code()
-        email_service.save_reset_code(request_data.email, reset_code, expire_minutes=15)
+        await email_service.save_reset_code(request_data.email, reset_code, expire_minutes=15)
 
         # 发送重置邮件
         await email_service.send_password_reset_email(request_data.email, reset_code)
@@ -267,7 +267,7 @@ async def verify_password_reset(
 ):
     """验证密码重置码并重置密码"""
     # 验证重置码
-    if not email_service.verify_reset_code(reset_data.email, reset_data.code):
+    if not await email_service.verify_reset_code(reset_data.email, reset_data.code):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="验证码无效或已过期"

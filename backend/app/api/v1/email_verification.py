@@ -26,8 +26,8 @@ async def send_verification_code(request: SendCodeRequest):
         # 生成验证码
         code = email_service.generate_code(length=6)
 
-        # 保存验证码（5分钟有效期）
-        email_service.save_code(request.email, code, expire_minutes=5)
+        # 保存验证码到 Redis（5分钟有效期）
+        await email_service.save_code(request.email, code, expire_minutes=5)
 
         # 发送邮件
         success = await email_service.send_verification_email(
@@ -60,7 +60,7 @@ async def send_verification_code(request: SendCodeRequest):
 async def verify_code(request: VerifyCodeRequest):
     """验证验证码"""
     try:
-        is_valid = email_service.verify_code(request.email, request.code)
+        is_valid = await email_service.verify_code(request.email, request.code)
 
         if not is_valid:
             raise HTTPException(

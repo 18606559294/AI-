@@ -125,12 +125,13 @@ async def security_middleware(request: Request, call_next):
 async def global_exception_handler(request: Request, exc: Exception):
     import traceback
     logger.error(f"全局异常: {exc}\n{traceback.format_exc()}")
+    # 开发环境显示完整堆栈跟踪，生产环境仅显示通用错误消息
     return JSONResponse(
         status_code=500,
         content={
             "code": 500,
             "message": "服务器内部错误",
-            "detail": str(exc) if settings.DEBUG else traceback.format_exc()
+            "detail": traceback.format_exc() if settings.DEBUG else "内部错误，请稍后重试"
         }
     )
 

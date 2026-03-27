@@ -100,19 +100,19 @@ async def test_email_verification():
         code = email_service.generate_code(length=6)
         logger.info(f"生成的验证码: {code}")
 
-        # 保存验证码
-        email_service.save_code(test_email, code, expire_minutes=5)
+        # 保存验证码（现在使用异步方法）
+        await email_service.save_code(test_email, code, expire_minutes=5)
         logger.success(f"✅ 验证码已保存")
 
-        # 验证验证码
-        is_valid = email_service.verify_code(test_email, code)
+        # 验证验证码（现在使用异步方法）
+        is_valid = await email_service.verify_code(test_email, code)
         if is_valid:
             logger.success(f"✅ 验证码验证成功！")
         else:
             logger.error(f"❌ 验证码验证失败！")
 
         # 测试错误验证码
-        is_valid = email_service.verify_code(test_email, "000000")
+        is_valid = await email_service.verify_code(test_email, "000000")
         if not is_valid:
             logger.success(f"✅ 错误验证码被正确拒绝！")
         else:
