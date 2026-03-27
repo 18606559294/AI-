@@ -39,6 +39,12 @@ test-results/
 # Claude AI
 .claude/
 
+# OMC (oh-my-claudecode) state
+.omc/
+
+# Agent configurations (runtime)
+agents/
+
 # Scripts that were for one-time fixes
 fix_*.js
 fix_*.py
