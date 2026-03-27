@@ -1,4 +1,6 @@
-version: '3.8'
+# Docker Compose 配置文件
+# 注意: MySQL 运行在宿主机本地 (端口 3306)
+# 容器通过 host.docker.internal 访问宿主机服务
 
 services:
   # 后端服务
@@ -10,7 +12,10 @@ services:
     ports:
       - "8000:8000"
     environment:
-      - DATABASE_URL=sqlite+aiosqlite:///./data/ai_resume.db
+      # 生产数据库配置 - 使用 MySQL
+      - USE_SQLITE=false
+      - DATABASE_URL=mysql+aiomysql://airesume:airesume_password@host.docker.internal:3306/ai_resume
+      # 开发环境可使用 SQLite: 设置 USE_SQLITE=true, DATABASE_URL=sqlite+aiosqlite:///./data/ai_resume.db
       - REDIS_URL=redis://redis:6379
       - SECRET_KEY=TMbXg44EMiTSW4I2R4JCXF4LebBEvHKveUBJNCr289M
       - ACCESS_TOKEN_EXPIRE_MINUTES=30
@@ -18,6 +23,8 @@ services:
       - DEFAULT_AI_PROVIDER=xiaomi
       - DEBUG=false
       - CORS_ORIGINS=["http://localhost:3000","http://localhost:80"]
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     volumes:
       - ./backend:/app
       - backend_data:/app/data

@@ -109,6 +109,8 @@ class DataMigrator:
         columns_str = ", ".join([f"`{c}`" for c in columns])
 
         async with self.mysql_conn.cursor() as cursor:
+            # 禁用外键检查以允许孤儿数据
+            await cursor.execute("SET FOREIGN_KEY_CHECKS=0")
             # 清空现有数据
             await cursor.execute(f"DELETE FROM `{table_name}`")
 
@@ -133,6 +135,8 @@ class DataMigrator:
                 values
             )
             await self.mysql_conn.commit()
+            # 重新启用外键检查
+            await cursor.execute("SET FOREIGN_KEY_CHECKS=1")
             return cursor.rowcount
 
     async def migrate_table(self, table_name: str, order: str = "") -> int:

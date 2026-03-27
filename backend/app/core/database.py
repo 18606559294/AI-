@@ -3,7 +3,7 @@
 """
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
 from sqlalchemy.orm import declarative_base
-from sqlalchemy.pool import NullPool, QueuePool
+from sqlalchemy.pool import NullPool
 from app.core.config import settings
 
 # 根据数据库类型选择不同的连接池配置
@@ -16,14 +16,13 @@ if settings.USE_SQLITE or "sqlite" in settings.DATABASE_URL.lower():
         connect_args={"check_same_thread": False},
     )
 else:
-    # MySQL 使用 QueuePool
+    # MySQL 使用默认连接池 (async 引擎自动使用 AsyncAdaptedQueuePool)
     engine = create_async_engine(
         settings.DATABASE_URL,
         echo=settings.DEBUG,
         pool_size=settings.DATABASE_POOL_SIZE,
         max_overflow=settings.DATABASE_MAX_OVERFLOW,
         pool_pre_ping=True,
-        poolclass=QueuePool,
     )
 
 # 创建异步会话工厂
