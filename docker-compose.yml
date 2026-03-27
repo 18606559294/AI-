@@ -17,7 +17,7 @@ services:
       - XIAOMI_API_KEY=sk-c0uo5p7vq8h9p0fm45978gvkky3dgtbhn68uai4y2pnyt12o
       - DEFAULT_AI_PROVIDER=xiaomi
       - DEBUG=false
-      - CORS_ORIGINS=http://localhost:3000,http://localhost:80
+      - CORS_ORIGINS=["http://localhost:3000","http://localhost:80"]
     volumes:
       - ./backend:/app
       - backend_data:/app/data
