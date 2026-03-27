@@ -12,10 +12,10 @@ services:
     ports:
       - "8000:8000"
     environment:
-      # 生产数据库配置 - 使用 MySQL
-      - USE_SQLITE=false
-      - DATABASE_URL=mysql+aiomysql://airesume:airesume_password@host.docker.internal:3306/ai_resume
-      # 开发环境可使用 SQLite: 设置 USE_SQLITE=true, DATABASE_URL=sqlite+aiosqlite:///./data/ai_resume.db
+      # 开发数据库配置 - 使用 SQLite（MySQL 连接问题待修复）
+      - USE_SQLITE=true
+      - DATABASE_URL=sqlite+aiosqlite:///./data/ai_resume.db
+      # 生产环境使用 MySQL: 设置 USE_SQLITE=false, DATABASE_URL=mysql+aiomysql://airesume:airesume_password@host.docker.internal:3306/ai_resume
       - REDIS_URL=redis://redis:6379
       - SECRET_KEY=TMbXg44EMiTSW4I2R4JCXF4LebBEvHKveUBJNCr289M
       - ACCESS_TOKEN_EXPIRE_MINUTES=30
@@ -29,14 +29,10 @@ services:
       - ./backend:/app
       - backend_data:/app/data
     depends_on:
-      - redis
+      redis:
+        condition: service_healthy
     restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
+    # 使用 Dockerfile 内置的 Python urllib 健康检查
     networks:
       - ai-resume-network
 
