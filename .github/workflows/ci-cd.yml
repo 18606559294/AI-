@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
 
 env:
-  PYTHON_VERSION: '3.13'
+  PYTHON_VERSION: '3.11'
   NODE_VERSION: '20'
 
 jobs:
@@ -245,7 +245,7 @@ jobs:
         id: meta-backend
         uses: docker/metadata-action@v5
         with:
-          images: your-dockerhub-username/ai-resume-backend
+          images: ghcr.io/${{ github.repository }}/ai-resume-backend
           tags: |
             type=ref,event=branch
             type=semver,pattern={{version}}
@@ -260,14 +260,14 @@ jobs:
           push: true
           tags: ${{ steps.meta-backend.outputs.tags }}
           labels: ${{ steps.meta-backend.outputs.labels }}
-          cache-from: type=registry,ref=your-dockerhub-username/ai-resume-backend:buildcache
-          cache-to: type=registry,ref=your-dockerhub-username/ai-resume-backend:buildcache,mode=max
+          cache-from: type=registry,ref=ghcr.io/${{ github.repository }}/ai-resume-backend:buildcache
+          cache-to: type=registry,ref=ghcr.io/${{ github.repository }}/ai-resume-backend:buildcache,mode=max
 
       - name: Extract metadata for frontend
         id: meta-frontend
         uses: docker/metadata-action@v5
         with:
-          images: your-dockerhub-username/ai-resume-frontend
+          images: ghcr.io/${{ github.repository }}/ai-resume-frontend
           tags: |
             type=ref,event=branch
             type=semver,pattern={{version}}
@@ -281,10 +281,11 @@ jobs:
           push: true
           tags: ${{ steps.meta-frontend.outputs.tags }}
           labels: ${{ steps.meta-frontend.outputs.labels }}
-          cache-from: type=registry,ref=your-dockerhub-username/ai-resume-frontend:buildcache
-          cache-to: type=registry,ref=your-dockerhub-username/ai-resume-frontend:buildcache,mode=max
+          cache-from: type=registry,ref=ghcr.io/${{ github.repository }}/ai-resume-frontend:buildcache
+          cache-to: type=registry,ref=ghcr.io/${{ github.repository }}/ai-resume-frontend:buildcache,mode=max
 
-  # 部署到生产环境（示例）
+  # 部署到生产环境（需要配置 Secrets）
+  # Secrets 需要配置: PRODUCTION_HOST, PRODUCTION_USER, SSH_PRIVATE_KEY, PRODUCTION_URL
   deploy-production:
     name: Deploy to Production
     needs: [build-and-push]
@@ -292,7 +293,7 @@ jobs:
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     environment:
       name: production
-      url: https://yourdomain.com
+      url: ${{ secrets.PRODUCTION_URL || 'https://ai-resume.example.com' }}
 
     steps:
       - name: Checkout code
@@ -305,7 +306,7 @@ jobs:
           username: ${{ secrets.PRODUCTION_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
-            cd /path/to/ai-resume
+            cd ${{ secrets.PRODUCTION_PATH || '/opt/ai-resume' }}
             docker-compose pull
             docker-compose up -d
             docker image prune -f
@@ -314,8 +315,8 @@ jobs:
         run: |
           # 健康检查
           sleep 10
-          curl -f https://yourdomain.com/health || exit 1
-          curl -f https://yourdomain.com/api/v1/health || exit 1
+          curl -f ${{ secrets.PRODUCTION_URL || 'https://ai-resume.example.com' }}/health || exit 1
+          curl -f ${{ secrets.PRODUCTION_URL || 'https://ai-resume.example.com' }}/api/v1/health || exit 1
 
       - name: Notify deployment
         uses: 8398a7/action-slack@v3
