@@ -108,7 +108,15 @@ class Settings(BaseSettings):
 def get_settings() -> Settings:
     """获取配置单例"""
     settings = Settings()
-    
+
+    # 当 USE_SQLITE=True 时，强制使用 SQLite 数据库 URL
+    # 这会覆盖环境变量中的 DATABASE_URL 设置
+    if settings.USE_SQLITE:
+        import os
+        # 确保数据目录存在
+        os.makedirs("./data", exist_ok=True)
+        settings.DATABASE_URL = "sqlite+aiosqlite:///./data/ai_resume.db"
+
     # 生产环境安全检查
     if not settings.DEBUG:
         # 生产环境必须设置安全的SECRET_KEY
