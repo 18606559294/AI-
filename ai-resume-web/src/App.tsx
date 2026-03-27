@@ -1,21 +1,38 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, Suspense, lazy } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { useAuthStore } from './store/auth';
 import { ErrorBoundary } from './components/ErrorBoundary';
-import LoginPage from './pages/LoginPage';
-import RegisterPage from './pages/RegisterPage';
-import ForgotPasswordPage from './pages/ForgotPasswordPage';
-import TermsPage from './pages/TermsPage';
-import PrivacyPage from './pages/PrivacyPage';
-import HelpPage from './pages/HelpPage';
-import AboutPage from './pages/AboutPage';
-import HomePage from './pages/HomePage';
-import ResumeListPage from './pages/ResumeListPage';
-import ResumeEditorPage from './pages/ResumeEditorPage';
-import TemplatesPage from './pages/TemplatesPage';
-import ProfilePage from './pages/ProfilePage';
-import SettingsPage from './pages/SettingsPage';
 import { Spinner } from './components/UIComponents';
+
+// 懒加载页面组件 - 代码分割优化
+const LoginPage = lazy(() => import('./pages/LoginPage'));
+const RegisterPage = lazy(() => import('./pages/RegisterPage'));
+const ForgotPasswordPage = lazy(() => import('./pages/ForgotPasswordPage'));
+const TermsPage = lazy(() => import('./pages/TermsPage'));
+const PrivacyPage = lazy(() => import('./pages/PrivacyPage'));
+const HelpPage = lazy(() => import('./pages/HelpPage'));
+const AboutPage = lazy(() => import('./pages/AboutPage'));
+const HomePage = lazy(() => import('./pages/HomePage'));
+const ResumeListPage = lazy(() => import('./pages/ResumeListPage'));
+const ResumeEditorPage = lazy(() => import('./pages/ResumeEditorPage'));
+const TemplatesPage = lazy(() => import('./pages/TemplatesPage'));
+const ProfilePage = lazy(() => import('./pages/ProfilePage'));
+const SettingsPage = lazy(() => import('./pages/SettingsPage'));
+
+// 页面加载包装器
+function PageLoader({ children }: { children: React.ReactNode }) {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen flex items-center justify-center bg-slate-950">
+          <Spinner size="lg" />
+        </div>
+      }
+    >
+      {children}
+    </Suspense>
+  );
+}
 
 function App() {
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
@@ -47,49 +64,117 @@ function App() {
         {/* 公开路由 */}
         <Route
           path="/login"
-          element={!isAuthenticated ? <LoginPage /> : <Navigate to="/" replace />}
+          element={
+            <PageLoader>
+              {!isAuthenticated ? <LoginPage /> : <Navigate to="/" replace />}
+            </PageLoader>
+          }
         />
         <Route
           path="/register"
-          element={!isAuthenticated ? <RegisterPage /> : <Navigate to="/" replace />}
+          element={
+            <PageLoader>
+              {!isAuthenticated ? <RegisterPage /> : <Navigate to="/" replace />}
+            </PageLoader>
+          }
         />
         <Route
           path="/forgot-password"
-          element={<ForgotPasswordPage />}
+          element={
+            <PageLoader>
+              <ForgotPasswordPage />
+            </PageLoader>
+          }
         />
-        <Route path="/terms" element={<TermsPage />} />
-        <Route path="/privacy" element={<PrivacyPage />} />
-        <Route path="/help" element={<HelpPage />} />
-        <Route path="/about" element={<AboutPage />} />
+        <Route
+          path="/terms"
+          element={
+            <PageLoader>
+              <TermsPage />
+            </PageLoader>
+          }
+        />
+        <Route
+          path="/privacy"
+          element={
+            <PageLoader>
+              <PrivacyPage />
+            </PageLoader>
+          }
+        />
+        <Route
+          path="/help"
+          element={
+            <PageLoader>
+              <HelpPage />
+            </PageLoader>
+          }
+        />
+        <Route
+          path="/about"
+          element={
+            <PageLoader>
+              <AboutPage />
+            </PageLoader>
+          }
+        />
 
         {/* 受保护路由 */}
         <Route
           path="/"
-          element={isAuthenticated ? <HomePage /> : <Navigate to="/login" replace />}
+          element={
+            <PageLoader>
+              {isAuthenticated ? <HomePage /> : <Navigate to="/login" replace />}
+            </PageLoader>
+          }
         />
         <Route
           path="/resumes"
-          element={isAuthenticated ? <ResumeListPage /> : <Navigate to="/login" replace />}
+          element={
+            <PageLoader>
+              {isAuthenticated ? <ResumeListPage /> : <Navigate to="/login" replace />}
+            </PageLoader>
+          }
         />
         <Route
           path="/resumes/new"
-          element={isAuthenticated ? <ResumeEditorPage /> : <Navigate to="/login" replace />}
+          element={
+            <PageLoader>
+              {isAuthenticated ? <ResumeEditorPage /> : <Navigate to="/login" replace />}
+            </PageLoader>
+          }
         />
         <Route
           path="/resumes/:id"
-          element={isAuthenticated ? <ResumeEditorPage /> : <Navigate to="/login" replace />}
+          element={
+            <PageLoader>
+              {isAuthenticated ? <ResumeEditorPage /> : <Navigate to="/login" replace />}
+            </PageLoader>
+          }
         />
         <Route
           path="/templates"
-          element={isAuthenticated ? <TemplatesPage /> : <Navigate to="/login" replace />}
+          element={
+            <PageLoader>
+              {isAuthenticated ? <TemplatesPage /> : <Navigate to="/login" replace />}
+            </PageLoader>
+          }
         />
         <Route
           path="/profile"
-          element={isAuthenticated ? <ProfilePage /> : <Navigate to="/login" replace />}
+          element={
+            <PageLoader>
+              {isAuthenticated ? <ProfilePage /> : <Navigate to="/login" replace />}
+            </PageLoader>
+          }
         />
         <Route
           path="/settings"
-          element={isAuthenticated ? <SettingsPage /> : <Navigate to="/login" replace />}
+          element={
+            <PageLoader>
+              {isAuthenticated ? <SettingsPage /> : <Navigate to="/login" replace />}
+            </PageLoader>
+          }
         />
 
         {/* 404 */}
