@@ -30,10 +30,13 @@ def get_user_id(request: Request) -> str:
 # 生产环境使用Redis，开发环境使用内存
 _storage_uri = settings.REDIS_URL if settings.REDIS_URL else "memory://"
 
-# 创建一个假的 limiter，不进行任何限流（临时禁用）
-from unittest.mock import MagicMock
-limiter = MagicMock()
-limiter.limit = lambda limit: lambda func: func
+# 创建限流器
+# 生产环境使用 Redis，开发环境使用内存存储
+limiter = Limiter(
+    key_func=get_user_id,
+    storage_uri=_storage_uri,
+    default_limits=["200/hour"],  # 默认限流
+)
 
 
 # 限流策略定义

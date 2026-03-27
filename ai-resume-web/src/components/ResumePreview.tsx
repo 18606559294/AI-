@@ -4,7 +4,7 @@
 import React, { useEffect, useState } from 'react';
 import { Card } from '../components/ui/Card';
 import { Text } from '../components/ui/Text';
-import { Loading } from '../components/ui/Loading';
+import { Spinner } from '../components/ui/Loading';
 
 interface ResumePreviewProps {
   content: {
@@ -52,7 +52,7 @@ export const ResumePreview: React.FC<ResumePreviewProps> = ({
   }, []);
 
   if (!mounted) {
-    return <Loading />;
+    return <Spinner />;
   }
 
   return (

@@ -68,9 +68,8 @@ app = FastAPI(
 )
 
 # 添加限流器到app state
-# 临时禁用异常处理器（开发环境）
-# app.state.limiter = limiter
-# app.add_exception_handler(RateLimitExceeded, rate_limit_exceeded_handler)
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, rate_limit_exceeded_handler)
 
 # 配置 CORS
 app.add_middleware(

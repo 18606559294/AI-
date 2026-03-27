@@ -130,3 +130,16 @@ __pycache__/
 *.db
 *.sqlite
 *.sqlite3
+
+# Test reports
+test-report-*.md
+*_TEST_*.md
+*_REPORT*.md
+
+# Pid files
+*.pid
+backend.pid
+backend_prod.pid
+web.pid
+
+# Temporary files
