@@ -74,6 +74,10 @@ AI-/
 .env.production
 *.env
 .env.*
+# 但保留示例模板文件
+!.env.example
+!.env.*.example
+!.env.production.template
 
 # Log files
 logcat.txt

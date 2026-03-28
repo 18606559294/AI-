@@ -14,10 +14,10 @@ services:
     env_file:
       - .env.production
     environment:
-      # 开发数据库配置 - 使用 SQLite（MySQL 连接问题待修复）
-      - USE_SQLITE=true
-      - DATABASE_URL=sqlite+aiosqlite:///./data/ai_resume.db
-      # 生产环境使用 MySQL: 设置 USE_SQLITE=false, DATABASE_URL=mysql+aiomysql://airesume:airesume_password@host.docker.internal:3306/ai_resume
+      # 生产数据库配置 - 使用 MySQL
+      - USE_SQLITE=false
+      - DATABASE_URL=mysql+aiomysql://airesume:airesume_password@host.docker.internal:3306/ai_resume
+      # 容器内 MySQL 连接: - DATABASE_URL=mysql+aiomysql://airesume:airesume_password@db:3306/ai_resume
       - REDIS_URL=redis://redis:6379
       # SECRET_KEY 和 XIAOMI_API_KEY 从 .env.production 文件读取
       # 警告: 请勿在版本控制中提交真实的密钥！
