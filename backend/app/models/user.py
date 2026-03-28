@@ -62,6 +62,7 @@ class User(Base):
     ai_usage_limit = relationship("AIUsageLimit", back_populates="user", uselist=False, cascade="all, delete-orphan")
     ai_usage_records = relationship("AIUsageRecord", back_populates="user", cascade="all, delete-orphan")
     ai_billings = relationship("AIBilling", back_populates="user", cascade="all, delete-orphan")
+    export_tasks = relationship("ExportTask", back_populates="user", cascade="all, delete-orphan")
 
     def __repr__(self):
         return f"<User(id={self.id}, email={self.email})>"

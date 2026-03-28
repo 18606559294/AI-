@@ -5,6 +5,7 @@ AI服务工厂和配置管理
 from typing import Dict, Any, Optional
 from enum import Enum
 
+from app.core.config import settings
 from app.services.ai.base import AIProviderBase
 from app.services.ai.providers import (
     OpenAIProvider,
@@ -23,36 +24,44 @@ class AIProvider(str, Enum):
 
 
 class AIModelConfig:
-    """AI模型配置"""
+    """AI模型配置 - 从环境变量读取"""
 
-    # OpenAI配置
-    OPENAI_API_KEY: str = ""
-    OPENAI_MODEL: str = "gpt-4"
-    OPENAI_MAX_TOKENS: int = 4000
-    OPENAI_TEMPERATURE: float = 0.7
+    def __init__(self):
+        """从 settings 读取配置"""
+        # OpenAI配置
+        self.OPENAI_API_KEY: str = settings.OPENAI_API_KEY
+        self.OPENAI_MODEL: str = settings.OPENAI_MODEL
+        self.OPENAI_MAX_TOKENS: int = settings.OPENAI_MAX_TOKENS
+        self.OPENAI_TEMPERATURE: float = settings.OPENAI_TEMPERATURE
 
-    # OpenAI V2 配置（优化版）
-    OPENAI_V2_API_KEY: str = ""  # 复用 OPENAI_API_KEY
-    OPENAI_V2_MODEL: str = "gpt-4"
-    OPENAI_V2_MAX_TOKENS: int = 4000
-    OPENAI_V2_TEMPERATURE: float = 0.7
+        # OpenAI V2 配置（优化版）
+        self.OPENAI_V2_API_KEY: str = settings.OPENAI_API_KEY  # 复用 OPENAI_API_KEY
+        self.OPENAI_V2_MODEL: str = settings.OPENAI_MODEL
+        self.OPENAI_V2_MAX_TOKENS: int = settings.OPENAI_MAX_TOKENS
+        self.OPENAI_V2_TEMPERATURE: float = settings.OPENAI_TEMPERATURE
 
-    # DeepSeek配置
-    DEEPSEEK_API_KEY: str = ""
-    DEEPSEEK_MODEL: str = "deepseek-chat"
-    DEEPSEEK_BASE_URL: str = "https://api.deepseek.com"
-    DEEPSEEK_MAX_TOKENS: int = 4000
-    DEEPSEEK_TEMPERATURE: float = 0.7
+        # DeepSeek配置
+        self.DEEPSEEK_API_KEY: str = settings.DEEPSEEK_API_KEY
+        self.DEEPSEEK_MODEL: str = settings.DEEPSEEK_MODEL
+        self.DEEPSEEK_BASE_URL: str = settings.DEEPSEEK_BASE_URL
+        self.DEEPSEEK_MAX_TOKENS: int = settings.DEEPSEEK_MAX_TOKENS
+        self.DEEPSEEK_TEMPERATURE: float = settings.DEEPSEEK_TEMPERATURE
 
-    # 小米配置
-    XIAOMI_API_KEY: str = ""
-    XIAOMI_MODEL: str = "xiaoai-chat"
-    XIAOMI_BASE_URL: str = "https://api.xiaomi.com/v1"
-    XIAOMI_MAX_TOKENS: int = 4000
-    XIAOMI_TEMPERATURE: float = 0.7
+        # 小米配置
+        self.XIAOMI_API_KEY: str = settings.XIAOMI_API_KEY
+        self.XIAOMI_MODEL: str = settings.XIAOMI_MODEL
+        self.XIAOMI_BASE_URL: str = settings.XIAOMI_BASE_URL
+        self.XIAOMI_MAX_TOKENS: int = settings.XIAOMI_MAX_TOKENS
+        self.XIAOMI_TEMPERATURE: float = settings.XIAOMI_TEMPERATURE
 
-    # 默认使用的提供商
-    DEFAULT_PROVIDER: AIProvider = AIProvider.OPENAI_V2  # 默认使用优化版
+        # 默认使用的提供商
+        provider_map = {
+            "openai": AIProvider.OPENAI,
+            "xiaomi": AIProvider.XIAOMI,
+            "deepseek": AIProvider.DEEPSEEK,
+        }
+        default = settings.DEFAULT_AI_PROVIDER or "openai_v2"
+        self.DEFAULT_PROVIDER: AIProvider = provider_map.get(default, AIProvider.OPENAI_V2)
 
 
 class AIServiceFactory:
@@ -155,6 +164,15 @@ class AIServiceFactory:
             提供商信息列表
         """
         providers_info = []
+
+        # 检查OpenAI V2（优化版，默认）
+        openai_v2 = self._create_provider(AIProvider.OPENAI_V2)
+        providers_info.append({
+            "provider": AIProvider.OPENAI_V2.value,
+            "name": openai_v2.provider_name,
+            "available": openai_v2.is_available,
+            "model": self.config.OPENAI_V2_MODEL
+        })
 
         # 检查OpenAI
         openai = self._create_provider(AIProvider.OPENAI)

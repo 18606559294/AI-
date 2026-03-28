@@ -12,7 +12,7 @@ from app.core.database import get_db
 from app.core.security import (
     verify_password, get_password_hash,
     create_access_token, create_refresh_token,
-    get_current_user
+    get_current_user, decode_token
 )
 from app.core.config import settings
 from app.core.rate_limit import limiter, RateLimit

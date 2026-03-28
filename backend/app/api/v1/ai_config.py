@@ -149,6 +149,14 @@ async def get_available_models(
 ):
     """获取可用的模型列表"""
     models = {
+        "openai_v2": {
+            "name": "OpenAI (优化版)",
+            "models": [
+                {"id": "gpt-4", "name": "GPT-4", "description": "最强大的模型，三元协同Agent架构"},
+                {"id": "gpt-4-turbo", "name": "GPT-4 Turbo", "description": "更快更经济的GPT-4"}
+            ],
+            "website": "https://platform.openai.com"
+        },
         "openai": {
             "name": "OpenAI",
             "models": [
@@ -169,9 +177,10 @@ async def get_available_models(
         "xiaomi": {
             "name": "小米AI",
             "models": [
-                {"id": "xiaoai-chat", "name": "小爱对话", "description": "小米对话模型"}
+                {"id": "MiMo-V2-Flash", "name": "MiMo V2 Flash", "description": "小米MiMo V2 Flash模型"},
+                {"id": "mimo-v2-pro", "name": "MiMo V2 Pro", "description": "小米MiMo V2 Pro模型"}
             ],
-            "website": "https://ai.mi.com"
+            "website": "https://platform.xiaomimimo.com"
         }
     }
 
