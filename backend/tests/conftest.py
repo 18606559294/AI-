@@ -14,6 +14,7 @@ from app.core.database import get_db, Base
 from app.core.config import settings
 from app.models.user import User
 from app.models.resume import Resume, ResumeVersion
+from app.models.export_task import ExportTask, ExportFormat, ExportStatus
 
 
 # 测试数据库 - 使用内存 SQLite
@@ -125,3 +126,20 @@ async def test_resume(db_session: AsyncSession, test_user: User) -> Resume:
     await db_session.commit()
     await db_session.refresh(resume)
     return resume
+
+
+@pytest.fixture
+async def test_export_task(db_session: AsyncSession, test_user: User, test_resume: Resume) -> ExportTask:
+    """创建测试导出任务"""
+    export_task = ExportTask(
+        user_id=test_user.id,
+        resume_ids=[test_resume.id],
+        export_format=ExportFormat.PDF,
+        status=ExportStatus.PENDING,
+        progress=0.0,
+        options={}
+    )
+    db_session.add(export_task)
+    await db_session.commit()
+    await db_session.refresh(export_task)
+    return export_task
