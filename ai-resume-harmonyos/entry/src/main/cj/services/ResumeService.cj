@@ -138,29 +138,25 @@ public class ResumeService {
         return resume
     }
 
-    // 序列化简历
+    // 序列化简历 - 使用安全的 JSON 序列化
     private func serializeResume(resume: Resume): String {
-        let sb = StringBuilder()
-        sb.append("{")
-        sb.append("\"title\": \"${resume.title}\", ")
-        sb.append("\"content\": \"${escapeJson(resume.content)}\", ")
-        sb.append("\"template_id\": ${resume.templateId}, ")
-        sb.append("\"status\": \"${resume.status}\"")
-        sb.append("}")
-        return sb.toString()
+        let obj = JsonObject()
+        obj.put("title", resume.title)
+        obj.put("content", resume.content)
+        obj.put("template_id", resume.templateId)
+        obj.put("status", resume.status)
+        return obj.toJson()
     }
 
-    // 序列化AI生成请求
+    // 序列化AI生成请求 - 使用安全的 JSON 序列化
     private func serializeAIGenerateRequest(request: AIGenerateRequest): String {
-        let sb = StringBuilder()
-        sb.append("{")
-        sb.append("\"resume_id\": ${request.resumeId}, ")
-        sb.append("\"section\": \"${request.section}\", ")
-        sb.append("\"prompt\": \"${escapeJson(request.prompt)}\", ")
-        sb.append("\"context\": \"${escapeJson(request.context)}\", ")
-        sb.append("\"template_id\": ${request.templateId}")
-        sb.append("}")
-        return sb.toString()
+        let obj = JsonObject()
+        obj.put("resume_id", request.resumeId)
+        obj.put("section", request.section)
+        obj.put("prompt", request.prompt)
+        obj.put("context", request.context)
+        obj.put("template_id", request.templateId)
+        return obj.toJson()
     }
 
     // 解析AI生成响应
@@ -176,14 +172,5 @@ public class ResumeService {
             println("Failed to parse AI response: ${e.message}")
         }
         return response
-    }
-
-    // JSON字符串转义
-    private func escapeJson(s: String): String {
-        return s.replace("\\", "\\\\")
-                .replace("\"", "\\\"")
-                .replace("\n", "\\n")
-                .replace("\r", "\\r")
-                .replace("\t", "\\t")
     }
 }

@@ -6,6 +6,7 @@ import ohos.arkui.state.*
 import ohos.arkui.node.*
 import services.*
 import models.*
+import utils.*
 
 @Entry
 @Component
@@ -16,6 +17,7 @@ public struct LoginPage {
     @State private var errorMessage: String = ""
 
     private let authService: AuthService = AuthService()
+    private static let logger = Logger("LoginPage")
 
     public func build(): void {
         Column() {
@@ -132,14 +134,19 @@ public struct LoginPage {
     }
 
     private func handleLogin(): void {
-        // 验证输入
-        if (email == "" || password == "") {
-            errorMessage = "请输入邮箱和密码"
+        // 清空错误信息
+        errorMessage = ""
+
+        // 使用 Validator 验证输入
+        let validationResult = Validator.validateLogin(email, password)
+
+        if (!validationResult.isSuccess()) {
+            errorMessage = validationResult.getError()
+            logger.debug("Login validation failed: ${errorMessage}")
             return
         }
 
         isLoading = true
-        errorMessage = ""
 
         // 调用登录服务
         let result = authService.login(email, password)
@@ -147,10 +154,12 @@ public struct LoginPage {
         isLoading = false
 
         if (result.isSuccess()) {
+            logger.info("Login successful for user: ${email}")
             // 登录成功，导航到主页
             Router.replace({ url: "pages/HomePage" })
         } else {
             errorMessage = result.getError()
+            logger.error("Login failed: ${errorMessage}")
         }
     }
 }

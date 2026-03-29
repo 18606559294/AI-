@@ -5,11 +5,18 @@ import models.*
 import services.*
 import ohos.arkui.state.*
 
-public class AuthViewModel {
-    @State private var currentUser: ?User = None
-    @State private var isAuthenticated: Bool = false
-    @State private var isLoading: Bool = false
-    @State private var errorMessage: String = ""
+/**
+ * 认证视图模型
+ *
+ * 管理用户认证状态，提供登录、注册、登出等功能
+ * 使用 Observable 模式通知 UI 更新
+ */
+@Observed
+public class AuthViewModel extends Observable {
+    private var currentUser: ?User = None
+    private var isAuthenticated: Bool = false
+    private var isLoading: Bool = false
+    private var errorMessage: String = ""
 
     private let authService: AuthService
 
@@ -23,15 +30,18 @@ public class AuthViewModel {
     public func login(email: String, password: String): Bool {
         isLoading = true
         errorMessage = ""
+        notifyUIUpdate()
 
         let result = authService.login(email, password)
         isLoading = false
 
         if (result.isSuccess()) {
             isAuthenticated = true
+            notifyUIUpdate()
             return true
         } else {
             errorMessage = result.getError()
+            notifyUIUpdate()
             return false
         }
     }
@@ -40,6 +50,7 @@ public class AuthViewModel {
     public func register(email: String, username: String, password: String, fullName: String): Bool {
         isLoading = true
         errorMessage = ""
+        notifyUIUpdate()
 
         let result = authService.register(email, username, password, fullName)
         isLoading = false
@@ -49,9 +60,11 @@ public class AuthViewModel {
             if (value is Some<User>) {
                 currentUser = Some(value.get())
             }
+            notifyUIUpdate()
             return true
         } else {
             errorMessage = result.getError()
+            notifyUIUpdate()
             return false
         }
     }
@@ -61,6 +74,7 @@ public class AuthViewModel {
         authService.logout()
         currentUser = None
         isAuthenticated = false
+        notifyUIUpdate()
     }
 
     // 刷新Token
@@ -84,5 +98,11 @@ public class AuthViewModel {
 
     public func getError(): String {
         return errorMessage
+    }
+
+    // 通知 UI 更新
+    private func notifyUIUpdate(): Unit {
+        // Observable 模式会自动通知观察者
+        update()
     }
 }

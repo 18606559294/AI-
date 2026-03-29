@@ -4,10 +4,12 @@ package services
 import models.*
 import std.collection.*
 import std.json.*
+import utils.*
 
 public class AuthService {
     private let httpClient: HttpClient
     private let tokenStorage: TokenStorage
+    private static let logger = Logger("AuthService")
 
     public init() {
         this.httpClient = HttpClient(ApiConfig.BASE_URL + ApiConfig.API_VERSION)
@@ -21,15 +23,21 @@ public class AuthService {
         let response = httpClient.post(ApiConfig.AUTH_LOGIN, jsonBody)
 
         if (response.isSuccess()) {
-            let token = parseAuthToken(response.body)
-            if (token.accessToken != "") {
+            let result = parseAuthToken(response.body)
+            if (result.isSuccess()) {
+                let token = result.getValue()!!
                 tokenStorage.saveToken(token)
                 httpClient.setAuthToken(token.accessToken)
+                logger.info("User logged in successfully: ${email}")
                 return Result<AuthToken>.success(token)
+            } else {
+                return Result<AuthToken>.failure(result.getError())
             }
+        } else {
+            let error = ErrorHandler.handleHttpError(response.statusCode, response.body)
+            ErrorHandler.logError(error)
+            return Result<AuthToken>.failure(error.message)
         }
-
-        return Result<AuthToken>.failure(response.error)
     }
 
     // 用户注册
@@ -39,38 +47,68 @@ public class AuthService {
         let response = httpClient.post(ApiConfig.AUTH_REGISTER, jsonBody)
 
         if (response.isSuccess()) {
-            let user = parseUser(response.body)
-            return Result<User>.success(user)
+            let result = parseUser(response.body)
+            if (result.isSuccess()) {
+                logger.info("User registered successfully: ${email}")
+                return Result<User>.success(result.getValue()!!)
+            } else {
+                return Result<User>.failure(result.getError())
+            }
+        } else {
+            let error = ErrorHandler.handleHttpError(response.statusCode, response.body)
+            ErrorHandler.logError(error)
+            return Result<User>.failure(error.message)
         }
-
-        return Result<User>.failure(response.error)
     }
 
     // 刷新Token
     public func refreshToken(): Result<AuthToken> {
         let savedToken = tokenStorage.getToken()
         if (savedToken.refreshToken == "") {
-            return Result<AuthToken>.failure("No refresh token available")
+            let error = AppError(
+                type: ErrorType.AUTH_ERROR,
+                code: "AUTH_003",
+                message: "没有可用的刷新令牌"
+            )
+            ErrorHandler.logError(error)
+            return Result<AuthToken>.failure(error.message)
         }
 
-        let body = "{\"refresh_token\": \"${savedToken.refreshToken}\"}"
+        let obj = JsonObject()
+        obj.put("refresh_token", savedToken.refreshToken)
+        let body = obj.toJson()
+
         let response = httpClient.post(ApiConfig.AUTH_REFRESH, body)
 
         if (response.isSuccess()) {
-            let token = parseAuthToken(response.body)
-            tokenStorage.saveToken(token)
-            httpClient.setAuthToken(token.accessToken)
-            return Result<AuthToken>.success(token)
+            let result = parseAuthToken(response.body)
+            if (result.isSuccess()) {
+                let token = result.getValue()!!
+                tokenStorage.saveToken(token)
+                httpClient.setAuthToken(token.accessToken)
+                logger.info("Token refreshed successfully")
+                return Result<AuthToken>.success(token)
+            } else {
+                return Result<AuthToken>.failure(result.getError())
+            }
+        } else {
+            let error = ErrorHandler.handleHttpError(response.statusCode, response.body)
+            ErrorHandler.logError(error)
+            return Result<AuthToken>.failure(error.message)
         }
-
-        return Result<AuthToken>.failure(response.error)
     }
 
     // 登出
     public func logout(): Unit {
-        httpClient.post(ApiConfig.AUTH_LOGOUT, "{}")
+        try {
+            httpClient.post(ApiConfig.AUTH_LOGOUT, "{}")
+        } catch (e: Exception) {
+            logger.warn("Logout request failed: ${e.message}")
+        }
+
         tokenStorage.clearToken()
         httpClient.clearAuthToken()
+        logger.info("User logged out")
     }
 
     // 检查是否已登录
@@ -84,36 +122,51 @@ public class AuthService {
         return tokenStorage.getToken()
     }
 
-    // 序列化登录请求
+    // 序列化登录请求 - 使用安全的 JSON 序列化
     private func serializeLoginRequest(request: LoginRequest): String {
-        return "{\"email\": \"${request.email}\", \"password\": \"${request.password}\"}"
+        let obj = JsonObject()
+        obj.put("email", request.email)
+        obj.put("password", request.password)
+        return obj.toJson()
     }
 
-    // 序列化注册请求
+    // 序列化注册请求 - 使用安全的 JSON 序列化
     private func serializeRegisterRequest(request: RegisterRequest): String {
-        return "{\"email\": \"${request.email}\", \"username\": \"${request.username}\", \"password\": \"${request.password}\", \"full_name\": \"${request.fullName}\"}"
+        let obj = JsonObject()
+        obj.put("email", request.email)
+        obj.put("username", request.username)
+        obj.put("password", request.password)
+        obj.put("full_name", request.fullName)
+        return obj.toJson()
     }
 
-    // 解析AuthToken
-    private func parseAuthToken(json: String): AuthToken {
-        let token = AuthToken()
+    // 解析AuthToken - 返回 Result 类型
+    private func parseAuthToken(json: String): Result<AuthToken> {
         try {
             let obj = JsonParser.parse(json)
-            token.accessToken = obj.getString("access_token")
-            token.refreshToken = obj.getString("refresh_token")
+            let token = AuthToken()
+            token.accessToken = obj.getString("access_token", "")
+            token.refreshToken = obj.getString("refresh_token", "")
             token.tokenType = obj.getString("token_type", "bearer")
             token.expiresIn = obj.getInt64("expires_in", 0)
+
+            if (token.accessToken == "") {
+                return Result<AuthToken>.failure("无效的访问令牌")
+            }
+
+            return Result<AuthToken>.success(token)
         } catch (e: Exception) {
-            println("Failed to parse auth token: ${e.message}")
+            let error = ErrorHandler.handleParseException(e, "parseAuthToken")
+            ErrorHandler.logError(error)
+            return Result<AuthToken>.failure(error.message)
         }
-        return token
     }
 
-    // 解析User
-    private func parseUser(json: String): User {
-        let user = User()
+    // 解析User - 返回 Result 类型
+    private func parseUser(json: String): Result<User> {
         try {
             let obj = JsonParser.parse(json)
+            let user = User()
             user.id = obj.getInt64("id", 0)
             user.email = obj.getString("email", "")
             user.username = obj.getString("username", "")
@@ -123,16 +176,20 @@ public class AuthService {
             user.isVerified = obj.getBool("is_verified", false)
             user.createdAt = obj.getString("created_at", "")
             user.updatedAt = obj.getString("updated_at", "")
+
+            return Result<User>.success(user)
         } catch (e: Exception) {
-            println("Failed to parse user: ${e.message}")
+            let error = ErrorHandler.handleParseException(e, "parseUser")
+            ErrorHandler.logError(error)
+            return Result<User>.failure(error.message)
         }
-        return user
     }
 }
 
 // Token存储类
 public class TokenStorage {
     private let prefs: Preferences
+    private static let logger = Logger("TokenStorage")
 
     public init() {
         this.prefs = Preferences.get("auth_prefs")
@@ -144,6 +201,7 @@ public class TokenStorage {
         prefs.putString("token_type", token.tokenType)
         prefs.putInt64("expires_in", token.expiresIn)
         prefs.flush()
+        logger.debug("Token saved to storage")
     }
 
     public func getToken(): AuthToken {
@@ -161,6 +219,7 @@ public class TokenStorage {
         prefs.remove("token_type")
         prefs.remove("expires_in")
         prefs.flush()
+        logger.debug("Token cleared from storage")
     }
 }
 

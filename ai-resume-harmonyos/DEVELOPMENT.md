@@ -1,4 +1,4 @@
-# AI Resume - HarmonyOS 开发指南
+ # AI Resume - HarmonyOS 开发指南
 
 ## 项目概述
 
