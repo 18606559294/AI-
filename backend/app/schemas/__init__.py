@@ -11,6 +11,10 @@ from app.schemas.resume import (
     ResumeCreate, ResumeUpdate, ResumeResponse, ResumeListResponse,
     ResumeVersionResponse, AIGenerateRequest, AIOptimizeRequest, AIOptimizeResponse
 )
+from app.schemas.export import (
+    ExportTaskCreate, ExportTaskResponse, ExportTaskListResponse,
+    ExportDownloadResponse, ExportFormat, ExportStatus
+)
 from app.schemas.common import Response, PageResponse, ErrorResponse
 
 __all__ = [
@@ -22,6 +26,9 @@ __all__ = [
     "Project", "Skill", "Certification", "CustomSection", "StyleConfig",
     "ResumeCreate", "ResumeUpdate", "ResumeResponse", "ResumeListResponse",
     "ResumeVersionResponse", "AIGenerateRequest", "AIOptimizeRequest", "AIOptimizeResponse",
+    # Export
+    "ExportTaskCreate", "ExportTaskResponse", "ExportTaskListResponse",
+    "ExportDownloadResponse", "ExportFormat", "ExportStatus",
     # Common
     "Response", "PageResponse", "ErrorResponse",
 ]
