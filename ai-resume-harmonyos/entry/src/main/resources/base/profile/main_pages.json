@@ -1,0 +1,10 @@
+{
+  "src": [
+    "pages/LoginPage",
+    "pages/HomePage",
+    "pages/RegisterPage",
+    "pages/ResumeEditorPage",
+    "pages/TemplateSelectPage",
+    "pages/ProfilePage"
+  ]
+}
