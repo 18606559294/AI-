@@ -6,8 +6,8 @@
 [![License](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
 [![HarmonyOS](https://img.shields.io/badge/HarmonyOS-Next%20API%2010+-red)](https://developer.harmonyos.com)
 [![Code Quality](https://img.shields.io/badge/code%20quality-95%2F100-brightgreen)](CODE_REVIEW_REPORT.md)
-[![Test Coverage](https://img.shields.io/badge/test%20coverage-55%25-yellow)](TESTING_GUIDE.md)
-[![Tests](https://img.shields.io/badge/tests-255%20methods-brightgreen)](TESTING_WORK_SUMMARY.md)
+[![Test Coverage](https://img.shields.io/badge/test%20coverage-65%25-brightgreen)](TESTING_GUIDE.md)
+[![Tests](https://img.shields.io/badge/tests-366%20methods-brightgreen)](TESTING_WORK_SUMMARY.md)
 
 ## ✨ 特性
 
@@ -110,9 +110,9 @@ hvigorw test coverage
 ## 📊 项目统计
 
 - **源代码**: 25 个文件，4,306 行
-- **测试代码**: 9 个文件，5,146 行，255 个测试方法
-- **文档**: 7 个完整文档，总计 80+ KB
-- **测试覆盖率**: 55% (Utils: 90%, Models: 80%, ViewModels: 60%, Services: 50%)
+- **测试代码**: 15 个文件，7,172 行，366 个测试方法
+- **文档**: 10 个完整文档，总计 120+ KB
+- **测试覆盖率**: 65% (Utils: 90%, Models: 80%, Views: 70%, ViewModels: 60%, Services: 50%)
 - **代码质量**: 95/100
 - **Git 提交**: 规范化提交管理
 
@@ -128,6 +128,9 @@ hvigorw test coverage
 - [测试开发总结](TEST_DEVELOPMENT_SUMMARY.md) - 测试基础设施建设
 - [测试验证报告](TEST_VERIFICATION_REPORT.md) - 静态分析验证
 - [测试工作总结](TESTING_WORK_SUMMARY.md) - 完整测试成果
+- [Views测试总结](VIEWS_TESTING_SUMMARY.md) - Views层测试完成报告
+- [Views测试规划](VIEW_TESTING_PLAN.md) - Views层测试详细规划
+- [项目进度追踪](PROJECT_PROGRESS.md) - 完整项目进度和里程碑
 
 ### 质量报告
 - [代码审查报告](CODE_REVIEW_REPORT.md) - 代码质量分析
@@ -169,7 +172,8 @@ hvigorw test coverage
 | Services | 2 | 53 | 50% | ✅ |
 | Models | 2 | 68 | 80% | ✅ |
 | ViewModels | 2 | 65 | 60% | ✅ |
-| **总计** | **9** | **255** | **55%** | ✅ |
+| Views | 6 | 111 | 70% | ✅ |
+| **总计** | **15** | **366** | **65%** | ✅ |
 
 ### 功能模块状态
 
@@ -218,14 +222,15 @@ hvigorw test coverage
 - [x] 安全加固
 - [x] 错误处理完善
 - [x] 输入验证
-- [x] **测试基础设施建立** (255个测试方法)
-- [x] **单元测试覆盖** (55%覆盖率)
+- [x] **测试基础设施建立** (366个测试方法)
+- [x] **单元测试覆盖** (65%覆盖率)
+- [x] **Views层UI测试** (111个测试方法，70%覆盖)
 - [x] **代码质量提升** (95/100)
 
 ### Phase 2 (进行中) 🔄
 - [ ] 完善测试覆盖率（目标 80%+）
+  - [x] Views层UI测试 ✅
   - [ ] 集成测试开发
-  - [ ] Views层UI测试
   - [ ] E2E测试
 - [ ] CI/CD集成
   - [ ] 自动化测试
