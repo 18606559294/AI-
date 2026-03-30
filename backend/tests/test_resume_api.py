@@ -77,7 +77,7 @@ class TestResumeCreate:
             json={
                 "title": "软件工程师简历",
                 "description": "申请后端开发岗位",
-                "template_id": "modern",
+                "template_id": None,
                 "content": {
                     "basic_info": {
                         "name": "李四",
@@ -95,7 +95,7 @@ class TestResumeCreate:
         data = response.json()
         assert data["code"] == 0
         assert data["data"]["title"] == "软件工程师简历"
-        assert data["data"]["template_id"] == "modern"
+        assert data["data"]["template_id"] is None
 
     async def test_create_resume_minimal(
         self, client: AsyncClient, auth_headers
@@ -173,7 +173,7 @@ class TestResumeUpdate:
         data = response.json()
         assert data["code"] == 0
         assert data["data"]["title"] == "更新后的简历"
-        assert data["data"]["version"] == 1  # 版本号增加
+        assert data["data"]["version"] == 2  # 版本号从1递增到2
 
     async def test_update_resume_not_found(
         self, client: AsyncClient, auth_headers

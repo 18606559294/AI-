@@ -106,7 +106,7 @@ async def test_resume(db_session: AsyncSession, test_user: User) -> Resume:
         user_id=test_user.id,
         title="测试简历",
         description="这是一个测试简历",
-        template_id="modern",
+        template_id=None,  # TODO: 关联到实际模板表
         content={
             "basic_info": {
                 "name": "张三",

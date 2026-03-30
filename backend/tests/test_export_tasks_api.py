@@ -30,7 +30,7 @@ class TestExportTasksAPI:
 
         assert response.status_code == 200
         data = response.json()
-        assert data["code"] == 200
+        assert data["code"] == 0
         assert "data" in data
         assert data["data"]["export_format"] == "pdf"
         assert data["data"]["status"] == "pending"
@@ -86,7 +86,7 @@ class TestExportTasksAPI:
 
         assert response.status_code == 200
         data = response.json()
-        assert data["code"] == 200
+        assert data["code"] == 0
         assert "data" in data
         assert data["data"]["total"] >= 1
         assert len(data["data"]["items"]) >= 1
@@ -104,7 +104,7 @@ class TestExportTasksAPI:
 
         assert response.status_code == 200
         data = response.json()
-        assert data["code"] == 200
+        assert data["code"] == 0
         assert "data" in data
 
     async def test_list_export_tasks_with_status_filter(
@@ -121,7 +121,7 @@ class TestExportTasksAPI:
 
         assert response.status_code == 200
         data = response.json()
-        assert data["code"] == 200
+        assert data["code"] == 0
         assert "data" in data
 
     async def test_get_export_task(
@@ -138,7 +138,7 @@ class TestExportTasksAPI:
 
         assert response.status_code == 200
         data = response.json()
-        assert data["code"] == 200
+        assert data["code"] == 0
         assert data["data"]["id"] == test_export_task.id
         assert data["data"]["export_format"] == test_export_task.export_format
 
@@ -183,7 +183,7 @@ class TestExportTasksAPI:
 
         assert response.status_code == 200
         data = response.json()
-        assert data["code"] == 200
+        assert data["code"] == 0
         assert "message" in data["data"]
 
         # 验证任务已删除

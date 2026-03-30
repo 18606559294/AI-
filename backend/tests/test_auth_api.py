@@ -71,7 +71,7 @@ class TestAuthLogin:
     async def test_login_success(self, client: AsyncClient, test_user):
         """测试成功登录"""
         response = await client.post(
-            "/api/v1/auth/login_json",
+            "/api/v1/auth/login/json",
             json={
                 "email": test_user.email,
                 "password": "TestPassword123!"
@@ -87,7 +87,7 @@ class TestAuthLogin:
     async def test_login_wrong_password(self, client: AsyncClient, test_user):
         """测试错误密码"""
         response = await client.post(
-            "/api/v1/auth/login_json",
+            "/api/v1/auth/login/json",
             json={
                 "email": test_user.email,
                 "password": "WrongPassword123!"
@@ -100,7 +100,7 @@ class TestAuthLogin:
     async def test_login_nonexistent_user(self, client: AsyncClient):
         """测试不存在的用户"""
         response = await client.post(
-            "/api/v1/auth/login_json",
+            "/api/v1/auth/login/json",
             json={
                 "email": "nonexistent@example.com",
                 "password": "Password123!"
@@ -131,7 +131,8 @@ class TestAuthMe:
         assert response.status_code == 200
         data = response.json()
         assert data["code"] == 0
-        assert "user" in data["data"]
+        assert "email" in data["data"]
+        assert data["data"]["email"] == "test@example.com"
 
     async def test_get_me_no_token(self, client: AsyncClient):
         """测试无 token 获取用户"""
