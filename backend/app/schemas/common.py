@@ -9,8 +9,8 @@ T = TypeVar('T')
 
 
 class ResponseBase(BaseModel):
-    """基础响应"""
-    code: int = Field(default=200, description="响应状态码")
+    """基础响应 - 使用中文 API 惯例 (code=0 表示成功)"""
+    code: int = Field(default=0, description="响应状态码: 0=成功, 非0=错误")
     message: str = Field(default="success", description="响应消息")
 
 

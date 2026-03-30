@@ -2,7 +2,7 @@
 异步导出任务 API 端点
 支持后台导出任务队列，支持进度查询和文件下载
 """
-from fastapi import APIRouter, Depends, HTTPException, status, Query, BackgroundTasks
+from fastapi import APIRouter, Depends, HTTPException, status, Query, BackgroundTasks, Request
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, and_
 from typing import List, Optional
@@ -140,6 +140,7 @@ async def process_export_task(task_id: int, db: AsyncSession):
 @router.post("", response_model=Response[ExportTaskResponse])
 @limiter.limit(RateLimit.RESUME_EXPORT)
 async def create_export_task(
+    request: Request,
     task_data: ExportTaskCreate,
     background_tasks: BackgroundTasks,
     current_user: User = Depends(get_current_user),
