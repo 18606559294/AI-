@@ -156,3 +156,4 @@ backend_prod.pid
 web.pid
 
 # Temporary files
+.gstack/
