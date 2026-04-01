@@ -48,7 +48,6 @@ describe('RegisterPage Component', () => {
   let queryClient: QueryClient;
   let mockRegister: ReturnType<typeof vi.fn>;
   let mockClearError: ReturnType<typeof vi.fn>;
-  let mockSendCode: ReturnType<typeof vi.fn>;
   let mockError: string | null;
 
   beforeEach(() => {
@@ -63,7 +62,6 @@ describe('RegisterPage Component', () => {
     mockError = null;
     mockRegister = vi.fn().mockResolvedValue(undefined);
     mockClearError = vi.fn();
-    mockSendCode = vi.fn().mockResolvedValue(undefined);
 
     (useAuthStore as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
       register: mockRegister,

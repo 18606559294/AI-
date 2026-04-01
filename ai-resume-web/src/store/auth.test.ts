@@ -4,6 +4,7 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
 import { useAuthStore } from './auth';
+import { UserRole } from '@ai-resume/shared/types';
 
 // Mock the shared module
 vi.mock('@ai-resume/shared', () => ({
@@ -32,6 +33,8 @@ describe('Auth Store', () => {
     username: 'testuser',
     is_verified: true,
     is_active: true,
+    role: UserRole.USER,
+    created_at: '2024-01-01T00:00:00Z',
   };
 
   beforeEach(() => {
@@ -60,6 +63,7 @@ describe('Auth Store', () => {
       vi.mocked(api.auth.login).mockResolvedValue({
         access_token: 'test-access-token',
         refresh_token: 'test-refresh-token',
+        token_type: 'bearer',
         user: mockUser,
       });
 
@@ -104,10 +108,11 @@ describe('Auth Store', () => {
 
   describe('register', () => {
     it('成功注册应该更新状态', async () => {
-      const { api, storage } = await import('@ai-resume/shared');
+      const { api } = await import('@ai-resume/shared');
       vi.mocked(api.auth.register).mockResolvedValue({
         access_token: 'new-access-token',
         refresh_token: 'new-refresh-token',
+        token_type: 'bearer',
         user: mockUser,
       });
 

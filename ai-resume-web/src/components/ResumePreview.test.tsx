@@ -72,7 +72,7 @@ describe('ResumePreview Component', () => {
     render(<ResumePreview content={mockContent} template="modern" />);
     expect(screen.getByText('北京大学')).toBeInTheDocument();
     // major 和 degree 用 · 分隔，使用模糊匹配
-    expect(screen.getByText((content, element) => {
+    expect(screen.getByText((_content, element) => {
       return element?.textContent === '学士 · 计算机科学与技术';
     })).toBeInTheDocument();
   });
