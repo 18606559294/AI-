@@ -423,10 +423,9 @@ class TestEmailService:
         service: EmailService
     ):
         """测试: 保存验证码到内存后备"""
-        # 确保没有Redis连接
-        service._redis = None
-
-        await service.save_code("test@example.com", "123456", expire_minutes=5)
+        # Mock get_redis 返回 None 以强制使用内存后备
+        with patch.object(service, 'get_redis', return_value=None):
+            await service.save_code("test@example.com", "123456", expire_minutes=5)
 
         assert "test@example.com" in service._verification_codes
         assert service._verification_codes["test@example.com"]["code"] == "123456"
@@ -437,10 +436,10 @@ class TestEmailService:
         service: EmailService
     ):
         """测试: 验证有效验证码 (内存)"""
-        service._redis = None
-        await service.save_code("test@example.com", "654321", expire_minutes=5)
-
-        is_valid = await service.verify_code("test@example.com", "654321")
+        # Mock get_redis 返回 None 以强制使用内存后备
+        with patch.object(service, 'get_redis', return_value=None):
+            await service.save_code("test@example.com", "654321", expire_minutes=5)
+            is_valid = await service.verify_code("test@example.com", "654321")
 
         assert is_valid is True
         # 验证后应标记为已使用
@@ -463,7 +462,6 @@ class TestEmailService:
         service: EmailService
     ):
         """测试: 验证过期验证码 (内存)"""
-        service._redis = None
         # 保存一个过期的验证码
         past_time = datetime.now(timezone.utc) - timedelta(minutes=10)
         service._verification_codes["test@example.com"] = {
@@ -472,7 +470,9 @@ class TestEmailService:
             "used": False
         }
 
-        is_valid = await service.verify_code("test@example.com", "654321")
+        # Mock get_redis 返回 None 以强制使用内存后备
+        with patch.object(service, 'get_redis', return_value=None):
+            is_valid = await service.verify_code("test@example.com", "654321")
 
         assert is_valid is False
         assert "test@example.com" not in service._verification_codes
@@ -495,9 +495,9 @@ class TestEmailService:
 
     async def test_save_reset_code(self, service: EmailService):
         """测试: 保存密码重置码"""
-        service._redis = None
-
-        await service.save_reset_code("test@example.com", "999888", expire_minutes=15)
+        # Mock get_redis 返回 None 以强制使用内存后备
+        with patch.object(service, 'get_redis', return_value=None):
+            await service.save_reset_code("test@example.com", "999888", expire_minutes=15)
 
         assert "test@example.com" in service._reset_codes
         assert service._reset_codes["test@example.com"]["code"] == "999888"
