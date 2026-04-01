@@ -482,13 +482,14 @@ class TestEmailService:
         service: EmailService
     ):
         """测试: 验证码只能使用一次"""
-        service._redis = None
-        await service.save_code("test@example.com", "654321", expire_minutes=5)
+        # Mock get_redis 返回 None 以强制使用内存后备
+        with patch.object(service, 'get_redis', return_value=None):
+            await service.save_code("test@example.com", "654321", expire_minutes=5)
 
-        # 第一次验证
-        is_valid1 = await service.verify_code("test@example.com", "654321")
-        # 第二次验证
-        is_valid2 = await service.verify_code("test@example.com", "654321")
+            # 第一次验证
+            is_valid1 = await service.verify_code("test@example.com", "654321")
+            # 第二次验证
+            is_valid2 = await service.verify_code("test@example.com", "654321")
 
         assert is_valid1 is True
         assert is_valid2 is False
@@ -504,10 +505,11 @@ class TestEmailService:
 
     async def test_verify_reset_code_valid(self, service: EmailService):
         """测试: 验证有效重置码"""
-        service._redis = None
-        await service.save_reset_code("test@example.com", "888777", expire_minutes=15)
+        # Mock get_redis 返回 None 以强制使用内存后备
+        with patch.object(service, 'get_redis', return_value=None):
+            await service.save_reset_code("test@example.com", "888777", expire_minutes=15)
 
-        is_valid = await service.verify_reset_code("test@example.com", "888777")
+            is_valid = await service.verify_reset_code("test@example.com", "888777")
 
         assert is_valid is True
 
