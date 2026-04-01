@@ -1,7 +1,7 @@
 """
 简历相关的 Pydantic 模式
 """
-from datetime import datetime, date
+from datetime import datetime, date, timezone
 from typing import Optional, List, Dict, Any
 from pydantic import BaseModel, Field, ConfigDict
 

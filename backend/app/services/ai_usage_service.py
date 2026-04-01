@@ -93,7 +93,12 @@ class AIUsageService:
         now = datetime.now(timezone.utc)
         today_start = now.replace(hour=0, minute=0, second=0, microsecond=0)
 
-        if limit.last_daily_reset < today_start:
+        # 确保 last_daily_reset 是 timezone-aware
+        last_reset = limit.last_daily_reset
+        if last_reset.tzinfo is None:
+            last_reset = last_reset.replace(tzinfo=timezone.utc)
+
+        if last_reset < today_start:
             # 重置计数
             limit.last_daily_reset = now
             await db.commit()
@@ -133,7 +138,12 @@ class AIUsageService:
         now = datetime.now(timezone.utc)
         month_start = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
 
-        if limit.last_monthly_reset < month_start:
+        # 确保 last_monthly_reset 是 timezone-aware
+        last_reset = limit.last_monthly_reset
+        if last_reset.tzinfo is None:
+            last_reset = last_reset.replace(tzinfo=timezone.utc)
+
+        if last_reset < month_start:
             limit.last_monthly_reset = now
             await db.commit()
 

@@ -169,13 +169,13 @@ async def preview_resume(
         select(Resume).where(Resume.id == resume_id, Resume.user_id == current_user.id)
     )
     resume = result.scalar_one_or_none()
-    
+
     if not resume:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="简历不存在"
         )
-    
+
     # 获取模板HTML（如果有）
     template_html = None
     if resume.template_id:
@@ -185,14 +185,49 @@ async def preview_resume(
         template = result.scalar_one_or_none()
         if template and template.html_content:
             template_html = template.html_content
-    
+
     html_content = await export_service.to_html(
         resume_content=resume.content or {},
         style_config=resume.style_config,
         template_html=template_html
     )
-    
+
     return StreamingResponse(
         io.BytesIO(html_content.encode('utf-8')),
         media_type="text/html; charset=utf-8"
     )
+
+
+@router.get("/styles")
+async def get_export_styles():
+    """获取可用的导出样式"""
+    styles = export_service.get_available_styles()
+
+    # 样式描述映射
+    style_descriptions = {
+        "modern": "适合大多数行业的现代简约风格，蓝色主调",
+        "professional": "适合传统行业和商务职位的经典风格",
+        "creative": "适合设计、艺术类创意职位的活力风格",
+        "minimal": "简洁黑白配色，突出内容本身",
+        "executive": "适合高管和管理职位的庄重风格",
+        "tech": "适合程序员和技术职位的代码风格",
+        "academic": "适合教育和研究职位的学术风格",
+        "startup": "适合互联网创业公司的活力风格",
+        "elegant": "优雅棕色系，适合需要展现品味的职位",
+        "fresh": "清新绿色系，充满活力和朝气"
+    }
+
+    # 转换为更友好的格式
+    style_list = []
+    for style_id, style_config in styles.items():
+        style_list.append({
+            "id": style_id,
+            "name": style_config["name"],
+            "description": style_descriptions.get(style_id, f"{style_config['name']}风格，{style_config['layout']}布局"),
+            "primary_color": style_config["primary_color"],
+            "secondary_color": style_config["secondary_color"],
+            "font_family": style_config["font_family"],
+            "layout": style_config["layout"]
+        })
+
+    return Response(data=style_list, message="获取成功")

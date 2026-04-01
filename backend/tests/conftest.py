@@ -6,9 +6,37 @@ import os
 import tempfile
 import pytest
 from typing import AsyncGenerator, Generator
+from unittest.mock import patch, MagicMock, AsyncMock
 from httpx import AsyncClient, ASGITransport
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine, async_sessionmaker
 
+# 强制测试环境使用 SQLite，覆盖任何环境变量设置
+os.environ["USE_SQLITE"] = "True"
+os.environ["DATABASE_URL"] = "sqlite+aiosqlite:///:memory:"
+
+# Create a mock limiter BEFORE importing app modules
+class MockLimiter:
+    """Mock rate limiter that doesn't limit anything"""
+    def __init__(self, *args, **kwargs):
+        pass
+
+    def limit(self, limit_string: str):
+        """Decorator that returns the function unchanged"""
+        def decorator(func):
+            return func
+        return decorator
+
+    def reset(self):
+        pass
+
+mock_limiter = MockLimiter()
+
+# Monkey-patch slowapi Limiter before any imports
+import slowapi
+slowapi.Limiter = MockLimiter
+slowapi.extension.Limiter = MockLimiter
+
+# Now import app modules
 from app.main import app
 from app.core.database import get_db, Base
 from app.core.config import settings

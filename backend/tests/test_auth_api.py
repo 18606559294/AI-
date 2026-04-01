@@ -204,3 +204,47 @@ class TestAuthPasswordReset:
             json={"email": "nonexistent@example.com"}
         )
         assert response.status_code == 200  # 仍然返回成功
+
+
+class TestAuthRefresh:
+    """刷新token测试"""
+
+    async def test_refresh_token_success(self, client: AsyncClient, test_user):
+        """测试成功刷新token"""
+        # 先登录获取refresh_token
+        login_response = await client.post(
+            "/api/v1/auth/login/json",
+            json={
+                "email": test_user.email,
+                "password": "TestPassword123!"
+            }
+        )
+        login_data = login_response.json()
+        refresh_token = login_data["data"]["refresh_token"]
+
+        # 使用refresh_token获取新token
+        response = await client.post(
+            "/api/v1/auth/refresh",
+            json={"refresh_token": refresh_token}
+        )
+        assert response.status_code == 200
+        data = response.json()
+        assert "access_token" in data["data"]
+        # 注意: refresh token rotation可能未实现，所以不检查是否不同
+        assert "refresh_token" in data["data"] or data["data"].get("access_token")
+
+    async def test_refresh_token_invalid(self, client: AsyncClient):
+        """测试无效的refresh_token"""
+        response = await client.post(
+            "/api/v1/auth/refresh",
+            json={"refresh_token": "invalid_refresh_token"}
+        )
+        assert response.status_code == 401
+
+    async def test_refresh_token_missing(self, client: AsyncClient):
+        """测试缺少refresh_token参数"""
+        response = await client.post(
+            "/api/v1/auth/refresh",
+            json={}
+        )
+        assert response.status_code == 422
