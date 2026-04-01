@@ -127,7 +127,7 @@ async def search_templates(
             Template.name.like(search_pattern),
             Template.description.like(search_pattern),
             Template.category.like(search_pattern),
-            Template.tags.like(search_pattern)
+            Template.sub_category.like(search_pattern)
         )
     ]
 
@@ -135,9 +135,10 @@ async def search_templates(
     if category:
         conditions.append(Template.category == category)
 
-    # 添加行业筛选
+    # 添加子分类筛选
     if industry:
-        conditions.append(Template.industry == industry)
+        # 使用 sub_category 作为 industry 的替代
+        conditions.append(Template.sub_category == industry)
 
     # 执行查询
     from sqlalchemy import func
@@ -177,16 +178,16 @@ async def get_search_categories(
     )
     categories = [r[0] for r in result.all() if r[0]]
 
-    # 获取所有行业
+    # 获取所有子分类
     result = await db.execute(
-        select(distinct(Template.industry)).where(Template.industry.isnot(None))
+        select(distinct(Template.sub_category)).where(Template.sub_category.isnot(None))
     )
-    industries = [r[0] for r in result.all() if r[0]]
+    sub_categories = [r[0] for r in result.all() if r[0]]
 
     return Response(
         data=[
             {"type": "category", "name": "分类", "options": categories},
-            {"type": "industry", "name": "行业", "options": industries}
+            {"type": "sub_category", "name": "子分类", "options": sub_categories}
         ],
         message="获取成功"
     )
