@@ -28,6 +28,10 @@ class PerformanceMetrics:
         else:
             self.error_count += 1
 
+    @property
+    def total_requests(self) -> int:
+        return len(self.response_times)
+
     def get_stats(self) -> dict:
         if not self.response_times:
             return {"message": "No data"}
@@ -40,11 +44,10 @@ class PerformanceMetrics:
             "min_ms": min(self.response_times) * 1000,
             "max_ms": max(self.response_times) * 1000,
             "median_ms": statistics.median(self.response_times) * 1000,
-            "p95_ms": statistics.quantiles(self.response_times, n=20)[18] * 1000 if len(self.response_times) >= 20 else max(self.response_times) * 1000,
         }
 
 
-async def test_endpoint_performance(
+async def _test_endpoint_performance(
     client: AsyncClient,
     url: str,
     iterations: int = 10
@@ -65,7 +68,7 @@ async def test_endpoint_performance(
     return metrics
 
 
-async def test_concurrent_requests(
+async def _test_concurrent_requests(
     base_url: str,
     endpoint: str,
     concurrent_users: int = 10,
@@ -126,18 +129,18 @@ class TestPerformance:
     async def test_health_endpoint(self):
         """测试健康检查端点性能"""
         async with AsyncClient(base_url="http://127.0.0.1:8000") as client:
-            metrics = await test_endpoint_performance(client, "/health", 20)
+            metrics = await _test_endpoint_performance(client, "/health", 20)
 
             stats = metrics.get_stats()
             print(f"✅ Health 端点性能: {stats['avg_ms']:.2f}ms (平均)")
 
             assert stats["avg_ms"] < 10, f"Health 端点响应太慢: {stats['avg_ms']:.2f}ms"
-            assert metrics.success_count == metrics.total_requests, "所有请求都应该成功"
+            assert metrics.success_count == stats["total_requests"], "所有请求都应该成功"
 
     async def test_templates_endpoint_performance(self):
         """测试模板列表端点性能"""
         async with AsyncClient(base_url="http://127.0.0.1:8000") as client:
-            metrics = await test_endpoint_performance(client, "/api/v1/templates", 10)
+            metrics = await _test_endpoint_performance(client, "/api/v1/templates", 10)
 
             stats = metrics.get_stats()
             print(f"✅ Templates 端点性能: {stats['avg_ms']:.2f}ms (平均)")
@@ -146,7 +149,7 @@ class TestPerformance:
 
     async def test_concurrent_load(self):
         """测试并发负载"""
-        stats = await test_concurrent_requests(
+        stats = await _test_concurrent_requests(
             "http://127.0.0.1:8000",
             "/health",
             concurrent_users=20,
