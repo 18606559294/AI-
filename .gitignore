@@ -158,3 +158,10 @@ web.pid
 # Temporary files
 .gstack/
 .coverage
+
+# Backend data and coverage
+backend/data/
+backend/.coverage
+backend/htmlcov/
+backend/.pytest_cache/
+
