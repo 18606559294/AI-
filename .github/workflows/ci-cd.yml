@@ -284,6 +284,55 @@ jobs:
           cache-from: type=registry,ref=ghcr.io/${{ github.repository }}/ai-resume-frontend:buildcache
           cache-to: type=registry,ref=ghcr.io/${{ github.repository }}/ai-resume-frontend:buildcache,mode=max
 
+  # 部署到 Dokploy (Docker Compose 部署)
+  deploy-dokploy:
+    name: Deploy via Dokploy
+    needs: [build-and-push]
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    environment:
+      name: production
+      url: ${{ secrets.DOKPLOY_URL }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Trigger Dokploy deployment
+        run: |
+          # Dokploy Webhook 触发部署
+          curl -X POST "${{ secrets.DOKPLOY_URL }}/api/deploy" \
+            -H "Content-Type: application/json" \
+            -H "Authorization: Bearer ${{ secrets.DOKPLOY_API_KEY }}" \
+            -d '{
+              "ref": "main",
+              "config": "dokploy.config.json"
+            }'
+
+      - name: Wait for deployment
+        run: |
+          echo "等待部署完成..."
+          sleep 60
+
+      - name: Health check
+        run: |
+          # 健康检查
+          max_attempts=10
+          attempt=0
+
+          while [ $attempt -lt $max_attempts ]; do
+            if curl -f ${{ secrets.DOKPLOY_URL }}/health; then
+              echo "✅ 健康检查通过"
+              exit 0
+            fi
+            attempt=$((attempt + 1))
+            echo "尝试 $attempt/$max_attempts 失败，等待 30 秒..."
+            sleep 30
+          done
+
+          echo "❌ 健康检查失败"
+          exit 1
+
   # 部署到生产环境（需要配置 Secrets）
   # Secrets 需要配置: PRODUCTION_HOST, PRODUCTION_USER, SSH_PRIVATE_KEY, PRODUCTION_URL
   deploy-production:
@@ -299,6 +348,16 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Run backup before deployment
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.PRODUCTION_HOST }}
+          username: ${{ secrets.PRODUCTION_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            cd ${{ secrets.PRODUCTION_PATH || '/opt/ai-resume' }}
+            ./scripts/backup.sh
+
       - name: Deploy via SSH
         uses: appleboy/ssh-action@v1.0.3
         with:
@@ -307,8 +366,21 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
             cd ${{ secrets.PRODUCTION_PATH || '/opt/ai-resume' }}
-            docker-compose pull
-            docker-compose up -d
+
+            # 拉取最新代码
+            git pull origin main
+
+            # 拉取最新镜像
+            docker-compose -f docker-compose.prod.yml pull
+
+            # 滚动更新服务
+            docker-compose -f docker-compose.prod.yml up -d --no-deps --build backend
+            sleep 30
+
+            docker-compose -f docker-compose.prod.yml up -d --no-deps --build frontend
+            sleep 15
+
+            # 清理旧镜像
             docker image prune -f
 
       - name: Run smoke tests
@@ -317,6 +389,16 @@ jobs:
           sleep 10
           curl -f ${{ secrets.PRODUCTION_URL || 'https://ai-resume.example.com' }}/health || exit 1
           curl -f ${{ secrets.PRODUCTION_URL || 'https://ai-resume.example.com' }}/api/v1/health || exit 1
+
+      - name: Run health check script
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.PRODUCTION_HOST }}
+          username: ${{ secrets.PRODUCTION_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            cd ${{ secrets.PRODUCTION_PATH || '/opt/ai-resume' }}
+            ./scripts/health-check.sh
 
       - name: Notify deployment
         uses: 8398a7/action-slack@v3

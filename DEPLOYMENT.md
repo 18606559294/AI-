@@ -1,7 +1,7 @@
 # 部署快速指南
 
-> **更新日期**: 2026-03-28
-> **版本**: v2.0 (包含性能优化和安全加固)
+> **更新日期**: 2026-04-02
+> **版本**: v3.0 (包含监控告警、自动备份、Dokploy 部署)
 
 ## 开发环境
 
@@ -270,9 +270,67 @@ curl http://localhost:3000
 
 ### 监控工具
 
-- **Grafana** - 可视化监控
-- **Prometheus** - 指标收集
-- **ELK Stack** - 日志分析
+- **Grafana** - 可视化监控 (http://localhost:3001)
+- **Prometheus** - 指标收集 (http://localhost:9090)
+- **Alertmanager** - 告警管理 (http://localhost:9093)
+- **Loki** - 日志聚合 (http://localhost:3100)
+
+### 启动监控服务
+
+```bash
+# 启动所有监控组件
+docker-compose -f docker-compose.prod.yml \
+  -f docker-compose.monitoring.yml \
+  --profile monitoring up -d
+
+# 查看监控服务状态
+docker-compose -f docker-compose.monitoring.yml ps
+```
+
+### 访问监控界面
+
+| 服务 | 地址 | 凭据 |
+|------|------|------|
+| Grafana | http://localhost:3001 | admin/admin |
+| Prometheus | http://localhost:9090 | - |
+| Alertmanager | http://localhost:9093 | - |
+
+### 健康检查脚本
+
+```bash
+# 运行完整健康检查
+./scripts/health-check.sh
+
+# 配置告警通知
+export ALERT_WEBHOOK="https://hooks.slack.com/..."
+./scripts/health-check.sh
+```
+
+### 自动备份
+
+```bash
+# 手动备份
+./scripts/backup.sh
+
+# 配置定时备份
+crontab -e
+# 添加: 0 2 * * * cd /home/hongfu/ai-resume && ./scripts/backup.sh
+
+# 测试备份功能
+./scripts/backup-test.sh
+```
+
+### Dokploy 一键部署
+
+```bash
+# Dokploy 会自动读取 dokploy.config.json
+# 在 Dokploy 控制台点击 "Deploy" 即可
+
+# 或通过 API 触发部署
+curl -X POST "$DOKPLOY_URL/api/deploy" \
+  -H "Authorization: Bearer $DOKPLOY_API_KEY" \
+  -H "Content-Type: application/json"
+```
 
 ## HTTPS 配置
 
@@ -318,12 +376,31 @@ docker-compose restart
 
 生产环境部署前确认：
 
+### 基础配置
 - [ ] `DEBUG=false` 已设置
 - [ ] `SECRET_KEY` 已生成且安全存储
 - [ ] `CORS_ORIGINS` 仅包含生产域名
 - [ ] HTTPS 证书已配置
-- [ ] 数据库备份策略已启用
-- [ ] 速率限制已启用
 - [ ] 防火墙规则已配置
+
+### 数据库
+- [ ] 数据库备份策略已启用
+- [ ] 备份测试通过 (`./scripts/backup-test.sh`)
+- [ ] 数据库连接池配置正确
+
+### 监控告警
+- [ ] Prometheus 和 Grafana 已启动
+- [ ] 告警规则已加载
+- [ ] Slack/Email 通知已配置
+- [ ] 健康检查脚本可执行
+
+### 性能优化
+- [ ] 速率限制已启用
 - [ ] 日志轮转已配置
 - [ ] 健康检查端点可访问
+- [ ] 容器资源限制已设置
+
+### CI/CD
+- [ ] GitHub Secrets 已配置
+- [ ] Dokploy API 密钥已设置
+- [ ] 部署脚本测试通过

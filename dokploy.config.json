@@ -1,0 +1,95 @@
+{
+  "name": "ai-resume-platform",
+  "description": "AI Resume Platform - 智能简历生成系统",
+  "version": "1.0.0",
+  "type": "docker-compose",
+  "repository": {
+    "url": "https://github.com/18606559294/AI-.git",
+    "branch": "main"
+  },
+  "build": {
+    "context": ".",
+    "dockerCompose": "docker-compose.prod.yml"
+  },
+  "services": {
+    "backend": {
+      "name": "ai-resume-backend",
+      "containerName": "ai-resume-backend",
+      "port": 8000,
+      "healthCheckPath": "/health",
+      "healthCheckInterval": 30,
+      "resources": {
+        "memory": "2048Mi",
+        "cpu": "2"
+      }
+    },
+    "frontend": {
+      "name": "ai-resume-frontend",
+      "containerName": "ai-resume-frontend",
+      "port": 3000,
+      "healthCheckPath": "/",
+      "healthCheckInterval": 30,
+      "resources": {
+        "memory": "512Mi",
+        "cpu": "0.5"
+      }
+    },
+    "redis": {
+      "name": "ai-resume-redis",
+      "containerName": "ai-resume-redis",
+      "image": "redis:7-alpine",
+      "port": 6379,
+      "resources": {
+        "memory": "512Mi",
+        "cpu": "0.5"
+      }
+    },
+    "mysql": {
+      "name": "ai-resume-mysql",
+      "containerName": "ai-resume-mysql",
+      "image": "mysql:8.0",
+      "port": 3306,
+      "resources": {
+        "memory": "2048Mi",
+        "cpu": "2"
+      },
+      "volumeSize": "10Gi"
+    }
+  },
+  "domains": [
+    {
+      "domain": "api.yourdomain.com",
+      "service": "backend",
+      "port": 8000,
+      "https": true
+    },
+    {
+      "domain": "yourdomain.com",
+      "service": "frontend",
+      "port": 3000,
+      "https": true
+    }
+  ],
+  "envFile": ".env.production",
+  "deploy": {
+    "strategy": "rolling",
+    "zeroDowntime": true,
+    "healthCheckTimeout": 300
+  },
+  "backup": {
+    "enabled": true,
+    "schedule": "0 2 * * *",
+    "retentionDays": 7
+  },
+  "monitoring": {
+    "enabled": true,
+    "prometheus": {
+      "enabled": true,
+      "port": 9090
+    },
+    "grafana": {
+      "enabled": true,
+      "port": 3001
+    }
+  }
+}
