@@ -14,6 +14,32 @@ from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine, async_sess
 os.environ["USE_SQLITE"] = "True"
 os.environ["DATABASE_URL"] = "sqlite+aiosqlite:///:memory:"
 
+# 设置测试用的 Redis URL（使用 fake:// 协议避免真实连接）
+os.environ["REDIS_URL"] = "fake://localhost:6379/0"
+os.environ["CACHE_REDIS_URL"] = "fake://localhost:6379/1"
+
+# Mock Redis 客户端
+import redis.asyncio as aioredis
+from unittest.mock import MagicMock, AsyncMock
+
+# 创建 mock Redis 客户端
+mock_redis_client = AsyncMock()
+mock_redis_client.get = AsyncMock(return_value=None)
+mock_redis_client.set = AsyncMock(return_value=True)
+mock_redis_client.delete = AsyncMock(return_value=1)
+mock_redis_client.exists = AsyncMock(return_value=0)
+mock_redis_client.incr = AsyncMock(return_value=1)
+mock_redis_client.expire = AsyncMock(return_value=True)
+mock_redis_client.ping = AsyncMock(return_value=True)
+mock_redis_client.close = AsyncMock()
+
+# Mock redis.from_url
+original_from_url = aioredis.from_url
+def mock_from_url(url, **kwargs):
+    return mock_redis_client
+
+aioredis.from_url = mock_from_url
+
 # Create a mock limiter BEFORE importing app modules
 class MockLimiter:
     """Mock rate limiter that doesn't limit anything"""

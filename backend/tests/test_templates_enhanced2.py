@@ -32,9 +32,10 @@ class TestListTemplates:
         assert response.status_code == 200
         data = response.json()
         assert data["code"] == 0
-        assert "total" in data["data"]
-        assert "items" in data["data"]
-        assert isinstance(data["data"]["items"], list)
+        # PageResponse 结构: data 是数组, total/page/page_size 在根级别
+        assert "total" in data
+        assert "data" in data
+        assert isinstance(data["data"], list)
 
     async def test_list_templates_with_pagination(
         self, client: AsyncClient, db_session
@@ -59,9 +60,10 @@ class TestListTemplates:
 
         assert response.status_code == 200
         data = response.json()
-        assert data["data"]["page"] == 1
-        assert data["data"]["page_size"] == 5
-        assert len(data["data"]["items"]) <= 5
+        # PageResponse 结构: page 和 page_size 在根级别
+        assert data["page"] == 1
+        assert data["page_size"] == 5
+        assert len(data["data"]) <= 5
 
     async def test_list_templates_by_category(
         self, client: AsyncClient
@@ -117,7 +119,7 @@ class TestListTemplates:
         data = response.json()
         assert data["code"] == 0
         # 验证所有返回的模板都是免费的
-        for template in data["data"]["items"]:
+        for template in data["data"]:
             assert template["is_premium"] is False
 
     async def test_list_templates_premium_only(
@@ -602,7 +604,7 @@ class TestTemplateFilters:
 
         assert response.status_code == 200
         data = response.json()
-        items = data["data"]["items"]
+        items = data["data"]
 
         # 验证是按使用次数降序排列
         if len(items) >= 2:
