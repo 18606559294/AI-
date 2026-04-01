@@ -29,9 +29,27 @@ export default function ResumeListPage() {
     }
   };
 
-  const handleExport = async () => {
-    // TODO: 实现导出功能
-    alert('导出功能开发中...');
+  const handleExport = async (id: number, format: 'pdf' | 'word' | 'html' = 'pdf') => {
+    try {
+      let url: string;
+      switch (format) {
+        case 'pdf':
+          url = api.resume.getPdfExportUrl(id);
+          break;
+        case 'word':
+          url = api.resume.getWordExportUrl(id);
+          break;
+        case 'html':
+          url = api.resume.getHtmlExportUrl(id);
+          break;
+        default:
+          url = api.resume.getPdfExportUrl(id);
+      }
+      // 在新窗口中打开导出URL
+      window.open(url, '_blank');
+    } catch (error) {
+      alert(error instanceof Error ? error.message : '导出失败');
+    }
   };
 
   const getStatusBadge = (status: string) => {
@@ -156,9 +174,9 @@ export default function ResumeListPage() {
                     </Link>
                     <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                       <button
-                        onClick={(e) => { e.preventDefault(); handleExport(); }}
+                        onClick={(e) => { e.preventDefault(); handleExport(resume.id, 'pdf'); }}
                         className="p-1 text-gray-500 hover:text-primary-600"
-                        title="导出"
+                        title="导出为PDF"
                       >
                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
