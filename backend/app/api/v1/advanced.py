@@ -2,6 +2,7 @@
 高级功能路由 - JD匹配分析、隐私脱敏、面试问题预测
 """
 import re
+import logging
 from typing import List, Optional
 from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File
 from pydantic import BaseModel, Field
@@ -14,6 +15,7 @@ from app.models.resume import Resume
 from app.schemas.common import Response
 from app.services.ai.openai_client import OpenAIService
 
+logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/advanced", tags=["高级功能"])
 ai_service = OpenAIService()
 
@@ -249,7 +251,7 @@ async def predict_interview_questions(
 ):
     """
     面试问题预测 - 基于简历生成可能的面试问题
-    
+
     功能：
     - 分析简历内容生成相关问题
     - 根据目标职位定制问题
@@ -260,35 +262,57 @@ async def predict_interview_questions(
         select(Resume).where(Resume.id == request.resume_id, Resume.user_id == current_user.id)
     )
     resume = result.scalar_one_or_none()
-    
+
     if not resume:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="简历不存在"
         )
-    
-    # 生成面试问题
-    questions = await ai_service.predict_interview_questions(
-        resume_content=resume.content,
-        target_position=request.target_position,
-        company_type=request.company_type
-    )
-    
-    # 转换为响应格式
-    interview_questions = [
-        InterviewQuestion(
-            question=q.get("question", ""),
-            category=q.get("category", "综合"),
-            difficulty=q.get("difficulty", "中等"),
-            suggested_answer=q.get("suggested_answer")
+
+    try:
+        # 生成面试问题
+        questions = await ai_service.predict_interview_questions(
+            resume_content=resume.content,
+            target_position=request.target_position,
+            company_type=request.company_type
         )
-        for q in questions
-    ]
-    
-    return Response(
-        data=interview_questions,
-        message=f"生成了 {len(interview_questions)} 个预测问题"
-    )
+
+        # 转换为响应格式
+        interview_questions = [
+            InterviewQuestion(
+                question=q.get("question", ""),
+                category=q.get("category", "综合"),
+                difficulty=q.get("difficulty", "中等"),
+                suggested_answer=q.get("suggested_answer")
+            )
+            for q in questions
+        ]
+
+        return Response(
+            data=interview_questions,
+            message=f"生成了 {len(interview_questions)} 个预测问题"
+        )
+    except Exception as e:
+        logger.error(f"面试问题预测失败: {e}")
+        # 返回默认问题而不是抛出异常
+        default_questions = [
+            InterviewQuestion(
+                question="请简单介绍一下你自己",
+                category="自我介绍",
+                difficulty="简单",
+                suggested_answer="简要说明您的教育背景、工作经验和核心技能"
+            ),
+            InterviewQuestion(
+                question=f"您为什么申请{request.target_position}这个职位？",
+                category="动机",
+                difficulty="简单",
+                suggested_answer="结合您的职业规划和岗位匹配度来回答"
+            )
+        ]
+        return Response(
+            data=default_questions,
+            message="AI 服务暂时不可用，返回默认面试问题"
+        )
 
 
 # ============ 简历解析（导入） ============
