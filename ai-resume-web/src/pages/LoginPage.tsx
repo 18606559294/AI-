@@ -107,7 +107,11 @@ export default function LoginPage() {
                 label="邮箱地址"
                 type="email"
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                onChange={(e) => {
+                  setEmail(e.target.value);
+                  // 用户输入时清除之前的错误
+                  clearError();
+                }}
                 placeholder="your@email.com"
                 required
                 icon={
@@ -151,6 +155,7 @@ export default function LoginPage() {
                   checked={rememberPassword}
                   onChange={(e) => setRememberPassword(e.target.checked)}
                   className="w-4 h-4 rounded border-slate-600 text-sky-500 focus:ring-sky-500 focus:ring-offset-slate-900"
+                  data-testid="remember-password"
                 />
                 <label htmlFor="remember-password" className="text-xs text-slate-300 cursor-pointer select-none">
                   记住密码

@@ -54,7 +54,8 @@ describe('ResumePreview Component', () => {
     render(<ResumePreview content={mockContent} template="modern" />);
     expect(screen.getByText('测试用户')).toBeInTheDocument();
     expect(screen.getByText('软件工程师')).toBeInTheDocument();
-    expect(screen.getByText('test@example.com')).toBeInTheDocument();
+    // 邮箱前面有 emoji 前缀，使用模糊匹配
+    expect(screen.getByText((content) => content.includes('test@example.com'))).toBeInTheDocument();
   });
 
   it('渲染简历预览（经典模板）', () => {
@@ -70,7 +71,10 @@ describe('ResumePreview Component', () => {
   it('显示教育经历', () => {
     render(<ResumePreview content={mockContent} template="modern" />);
     expect(screen.getByText('北京大学')).toBeInTheDocument();
-    expect(screen.getByText('计算机科学与技术')).toBeInTheDocument();
+    // major 和 degree 用 · 分隔，使用模糊匹配
+    expect(screen.getByText((content, element) => {
+      return element?.textContent === '学士 · 计算机科学与技术';
+    })).toBeInTheDocument();
   });
 
   it('显示工作经历', () => {

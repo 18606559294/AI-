@@ -75,7 +75,8 @@ describe('RegisterPage Component', () => {
     (api.auth.sendVerificationCode as ReturnType<typeof vi.fn>).mockResolvedValue(undefined);
 
     vi.clearAllMocks();
-    vi.useFakeTimers();
+    // 移除 fake timers 以避免阻塞 React 状态更新
+    // vi.useFakeTimers();
   });
 
   afterEach(() => {
