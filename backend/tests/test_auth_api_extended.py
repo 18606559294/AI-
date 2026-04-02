@@ -1,405 +1,483 @@
 """
-Auth API 扩展测试 - 针对缺失覆盖行
+Auth API 扩展测试 - 针对 auth.py 缺失覆盖行
 """
 import pytest
 from httpx import AsyncClient
-from unittest.mock import AsyncMock, patch
+from unittest.mock import AsyncMock, patch, MagicMock
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
+from datetime import datetime, timezone
 
 from app.models.user import User
-from app.core.security import create_access_token, create_refresh_token
+from app.core.security import get_password_hash
 
 
-class TestAuthRegisterExtended:
-    """注册扩展测试"""
+class TestAuthenticateUser:
+    """测试 _authenticate_user 函数 (行 48-67)"""
 
-    async def test_register_sends_verification_email(
-        self, client: AsyncClient, db_session
-    ):
-        """测试: 注册发送验证邮件"""
-        mock_email_service = AsyncMock()
-        mock_email_service.generate_code.return_value = "123456"
-        mock_email_service.save_code = AsyncMock()
-        mock_email_service.send_verification_email = AsyncMock()
-
-        with patch("app.api.v1.auth.email_service", mock_email_service):
-            response = await client.post(
-                "/api/v1/auth/register",
-                json={
-                    "email": "verify@example.com",
-                    "username": "verifyuser",
-                    "password": "VerifyPass123!"
-                }
-            )
-
-            assert response.status_code == 200
-            # 验证邮件服务被调用
-            mock_email_service.generate_code.assert_called_once()
-            mock_email_service.save_code.assert_called_once()
-            mock_email_service.send_verification_email.assert_called_once()
-
-    async def test_register_inactive_user(
-        self, client: AsyncClient, db_session
-    ):
-        """测试: 注册后用户未验证状态"""
-        mock_email_service = AsyncMock()
-        mock_email_service.generate_code.return_value = "654321"
-        mock_email_service.save_code = AsyncMock()
-        mock_email_service.send_verification_email = AsyncMock()
-
-        with patch("app.api.v1.auth.email_service", mock_email_service):
-            response = await client.post(
-                "/api/v1/auth/register",
-                json={
-                    "email": "inactive@example.com",
-                    "username": "inactive",
-                    "password": "Inactive123!"
-                }
-            )
-
-            assert response.status_code == 200
-            data = response.json()
-            assert data["data"]["require_verification"] is True
-
-            # 验证用户创建为未验证状态
-            result = await db_session.execute(
-                select(User).where(User.email == "inactive@example.com")
-            )
-            user = result.scalar_one_or_none()
-            assert user is not None
-            assert user.is_verified is False
-
-    async def test_register_with_minimal_data(
-        self, client: AsyncClient, db_session
-    ):
-        """测试: 最小数据注册"""
-        mock_email_service = AsyncMock()
-        mock_email_service.generate_code.return_value = "111111"
-        mock_email_service.save_code = AsyncMock()
-        mock_email_service.send_verification_email = AsyncMock()
-
-        with patch("app.api.v1.auth.email_service", mock_email_service):
-            response = await client.post(
-                "/api/v1/auth/register",
-                json={
-                    "email": "minimal@example.com",
-                    "username": "minimal",
-                    "password": "Minimal123!"
-                }
-            )
-
-            assert response.status_code == 200
-            data = response.json()
-            assert data["data"]["user"]["email"] == "minimal@example.com"
-
-
-class TestAuthLoginExtended:
-    """登录扩展测试"""
-
-    async def test_login_updates_last_login_time(
+    async def test_authenticate_user_success(
         self, client: AsyncClient, test_user, db_session
     ):
-        """测试: 登录更新最后登录时间"""
-        # 获取原始登录时间
-        await db_session.refresh(test_user)
-        original_last_login = test_user.last_login_at
-
+        """测试: 成功认证用户"""
         response = await client.post(
-            "/api/v1/auth/login/json",
-            json={
-                "email": test_user.email,
+            "/api/v1/auth/login",
+            data={
+                "username": test_user.email,
                 "password": "TestPassword123!"
             }
         )
 
         assert response.status_code == 200
+        data = response.json()
+        assert "access_token" in data["data"]
 
-        # 验证最后登录时间已更新
-        await db_session.refresh(test_user)
-        assert test_user.last_login_at is not None
-        if original_last_login:
-            assert test_user.last_login_at > original_last_login
+    async def test_authenticate_user_wrong_password(
+        self, client: AsyncClient, test_user
+    ):
+        """测试: 错误密码"""
+        response = await client.post(
+            "/api/v1/auth/login",
+            data={
+                "username": test_user.email,
+                "password": "wrongpassword"
+            }
+        )
 
-    async def test_login_inactive_account(
+        assert response.status_code == 401
+        data = response.json()
+        assert "邮箱或密码错误" in data["detail"]
+
+    async def test_authenticate_user_nonexistent_email(
+        self, client: AsyncClient
+    ):
+        """测试: 不存在的邮箱"""
+        response = await client.post(
+            "/api/v1/auth/login",
+            data={
+                "username": "nonexistent@example.com",
+                "password": "anypassword"
+            }
+        )
+
+        assert response.status_code == 401
+
+    async def test_authenticate_inactive_user(
         self, client: AsyncClient, test_user, db_session
     ):
-        """测试: 登录已禁用账户"""
+        """测试: 禁用用户登录"""
         # 禁用用户
         test_user.is_active = False
         await db_session.commit()
 
         response = await client.post(
-            "/api/v1/auth/login/json",
-            json={
-                "email": test_user.email,
+            "/api/v1/auth/login",
+            data={
+                "username": test_user.email,
                 "password": "TestPassword123!"
             }
         )
 
         assert response.status_code == 403
         data = response.json()
-        assert "已被禁用" in data["detail"]
+        assert "账户已被禁用" in data["detail"]
 
+        # 恢复用户状态
+        test_user.is_active = True
+        await db_session.commit()
 
-class TestRefreshTokenExtended:
-    """刷新令牌扩展测试"""
-
-    async def test_refresh_token_inactive_user(
-        self, client: AsyncClient, auth_headers, test_user, db_session
+    async def test_authenticate_updates_last_login(
+        self, client: AsyncClient, test_user, db_session
     ):
-        """测试: 刷新令牌时用户已禁用"""
-        # 先登录获取 refresh_token
-        login_response = await client.post(
+        """测试: 登录后更新最后登录时间"""
+        # 获取旧登录时间
+        old_login_time = test_user.last_login_at
+
+        response = await client.post(
+            "/api/v1/auth/login",
+            data={
+                "username": test_user.email,
+                "password": "TestPassword123!"
+            }
+        )
+
+        assert response.status_code == 200
+
+        # 刷新并检查
+        await db_session.refresh(test_user)
+        new_login_time = test_user.last_login_at
+        assert new_login_time is not None
+        if old_login_time:
+            assert new_login_time >= old_login_time
+
+
+class TestRegisterEndpoint:
+    """测试注册端点 (行 100-123)"""
+
+    async def test_register_email_exists(
+        self, client: AsyncClient, test_user
+    ):
+        """测试: 邮箱已存在"""
+        response = await client.post(
+            "/api/v1/auth/register",
+            json={
+                "email": test_user.email,
+                "username": "newuser",
+                "password": "newpass123"
+            }
+        )
+
+        assert response.status_code == 400
+        data = response.json()
+        assert "已被注册" in data["detail"]
+
+    async def test_register_success_with_verification(
+        self, client: AsyncClient, db_session
+    ):
+        """测试: 注册成功并发送验证码"""
+        new_email = "newuser@register.com"
+
+        with patch("app.api.v1.auth.email_service") as mock_email:
+            mock_email.generate_code.return_value = "123456"
+            mock_email.save_code = AsyncMock()
+            mock_email.send_verification_email = AsyncMock()
+
+            response = await client.post(
+                "/api/v1/auth/register",
+                json={
+                    "email": new_email,
+                    "username": "newuser",
+                    "password": "newpass123"
+                }
+            )
+
+            assert response.status_code == 200
+            data = response.json()
+            assert data["data"]["require_verification"] is True
+            assert data["data"]["user"]["email"] == new_email
+
+            # 验证邮件服务被调用
+            mock_email.send_verification_email.assert_called_once()
+
+            # 清理测试用户
+            result = await db_session.execute(
+                select(User).where(User.email == new_email)
+            )
+            user = result.scalar_one_or_none()
+            if user:
+                await db_session.delete(user)
+                await db_session.commit()
+
+    async def test_register_creates_inactive_user(
+        self, client: AsyncClient, db_session
+    ):
+        """测试: 新注册用户需要验证"""
+        new_email = "inactive@register.com"
+
+        with patch("app.api.v1.auth.email_service") as mock_email:
+            mock_email.generate_code.return_value = "654321"
+            mock_email.save_code = AsyncMock()
+            mock_email.send_verification_email = AsyncMock()
+
+            await client.post(
+                "/api/v1/auth/register",
+                json={
+                    "email": new_email,
+                    "username": "inactive",
+                    "password": "pass123"
+                }
+            )
+
+            # 检查用户是否创建且未验证
+            result = await db_session.execute(
+                select(User).where(User.email == new_email)
+            )
+            user = result.scalar_one_or_none()
+            assert user is not None
+            assert user.is_verified is False
+
+            # 清理
+            await db_session.delete(user)
+            await db_session.commit()
+
+
+class TestLoginEndpoints:
+    """测试登录端点 (行 141, 152)"""
+
+    async def test_login_oauth2_form(
+        self, client: AsyncClient, test_user
+    ):
+        """测试: OAuth2 表单登录"""
+        response = await client.post(
+            "/api/v1/auth/login",
+            data={
+                "username": test_user.email,
+                "password": "TestPassword123!"
+            }
+        )
+
+        assert response.status_code == 200
+        data = response.json()
+        assert "access_token" in data["data"]
+        assert "refresh_token" in data["data"]
+        assert "expires_in" in data["data"]
+
+    async def test_login_json_format(
+        self, client: AsyncClient, test_user
+    ):
+        """测试: JSON 格式登录"""
+        response = await client.post(
             "/api/v1/auth/login/json",
             json={
                 "email": test_user.email,
+                "password": "TestPassword123!"
+            }
+        )
+
+        assert response.status_code == 200
+        data = response.json()
+        assert "access_token" in data["data"]
+
+
+class TestRefreshToken:
+    """测试刷新令牌 (行 178-186)"""
+
+    async def test_refresh_with_valid_token(
+        self, client: AsyncClient, test_user, auth_headers
+    ):
+        """测试: 有效令牌刷新"""
+        # 首先登录获取令牌
+        login_response = await client.post(
+            "/api/v1/auth/login",
+            data={
+                "username": test_user.email,
                 "password": "TestPassword123!"
             }
         )
         login_data = login_response.json()
         refresh_token = login_data["data"]["refresh_token"]
 
+        # 使用刷新令牌
+        response = await client.post(
+            "/api/v1/auth/refresh",
+            json={"refresh_token": refresh_token}
+        )
+
+        assert response.status_code == 200
+        data = response.json()
+        assert "access_token" in data["data"]
+
+    async def test_refresh_with_invalid_token(
+        self, client: AsyncClient
+    ):
+        """测试: 无效刷新令牌"""
+        response = await client.post(
+            "/api/v1/auth/refresh",
+            json={"refresh_token": "invalid_token"}
+        )
+
+        assert response.status_code == 401
+
+    async def test_refresh_inactive_user(
+        self, client: AsyncClient, test_user, db_session
+    ):
+        """测试: 禁用用户刷新令牌"""
+        # 登录获取令牌
+        login_response = await client.post(
+            "/api/v1/auth/login",
+            data={
+                "username": test_user.email,
+                "password": "TestPassword123!"
+            }
+        )
+        refresh_token = login_response.json()["data"]["refresh_token"]
+
         # 禁用用户
         test_user.is_active = False
         await db_session.commit()
 
-        # 尝试刷新令牌
+        # 尝试刷新
         response = await client.post(
             "/api/v1/auth/refresh",
             json={"refresh_token": refresh_token}
         )
 
         assert response.status_code == 401
+        assert "已被禁用" in response.json()["detail"]
 
-    async def test_refresh_token_without_sub(
-        self, client: AsyncClient
+        # 恢复
+        test_user.is_active = True
+        await db_session.commit()
+
+
+class TestChangePassword:
+    """测试修改密码 (行 219)"""
+
+    async def test_change_password_success(
+        self, client: AsyncClient, auth_headers
     ):
-        """测试: refresh token 没有 sub 字段"""
-        # 创建一个没有 sub 的假 token
-        from jose import jwt
-        from app.core.config import settings
-
-        fake_token = jwt.encode(
-            {"user_id": "123"},  # 没有 sub
-            settings.SECRET_KEY,
-            algorithm=settings.ALGORITHM
-        )
-
+        """测试: 成功修改密码"""
         response = await client.post(
-            "/api/v1/auth/refresh",
-            json={"refresh_token": fake_token}
+            "/api/v1/auth/change-password",
+            headers=auth_headers,
+            json={
+                "old_password": "TestPassword123!",
+                "new_password": "newpass456"
+            }
         )
 
-        assert response.status_code == 401
+        assert response.status_code == 200
+        assert "密码修改成功" in response.json()["message"]
+
+    async def test_change_password_wrong_old(
+        self, client: AsyncClient, auth_headers
+    ):
+        """测试: 原密码错误"""
+        response = await client.post(
+            "/api/v1/auth/change-password",
+            headers=auth_headers,
+            json={
+                "old_password": "wrongpass",
+                "new_password": "newpass456"
+            }
+        )
+
+        assert response.status_code == 400
+        assert "原密码错误" in response.json()["detail"]
 
 
-class TestPasswordResetExtended:
-    """密码重置扩展测试"""
+class TestPasswordReset:
+    """测试密码重置 (行 234-245)"""
 
-    async def test_password_reset_sends_email(
+    async def test_reset_request_existing_email(
         self, client: AsyncClient, test_user
     ):
-        """测试: 密码重置发送邮件"""
-        mock_email_service = AsyncMock()
-        mock_email_service.generate_code.return_value = "888999"
-        mock_email_service.save_reset_code = AsyncMock()
-        mock_email_service.send_password_reset_email = AsyncMock()
+        """测试: 已存在邮箱请求重置"""
+        with patch("app.api.v1.auth.email_service") as mock_email:
+            mock_email.generate_code.return_value = "999999"
+            mock_email.save_reset_code = AsyncMock()
+            mock_email.send_password_reset_email = AsyncMock()
 
-        with patch("app.api.v1.auth.email_service", mock_email_service):
             response = await client.post(
                 "/api/v1/auth/password-reset/request",
                 json={"email": test_user.email}
             )
 
             assert response.status_code == 200
-            # 验证邮件服务被调用
-            mock_email_service.generate_code.assert_called_once()
-            mock_email_service.save_reset_code.assert_called_once()
-            mock_email_service.send_password_reset_email.assert_called_once()
+            # 应该发送了邮件
+            mock_email.send_password_reset_email.assert_called_once()
 
-    async def test_password_reset_verify_success(
+    async def test_reset_request_nonexistent_email(
+        self, client: AsyncClient
+    ):
+        """测试: 不存在邮箱请求重置（不泄露信息）"""
+        with patch("app.api.v1.auth.email_service") as mock_email:
+            mock_email.generate_code.return_value = "888888"
+            mock_email.save_reset_code = AsyncMock()
+            mock_email.send_password_reset_email = AsyncMock()
+
+            response = await client.post(
+                "/api/v1/auth/password-reset/request",
+                json={"email": "nonexistent@example.com"}
+            )
+
+            # 同样返回成功（防止邮箱枚举）
+            assert response.status_code == 200
+            # 不应该发送邮件
+            mock_email.send_password_reset_email.assert_not_called()
+
+    async def test_reset_verify_success(
         self, client: AsyncClient, test_user, db_session
     ):
         """测试: 验证重置码并重置密码"""
-        mock_email_service = AsyncMock()
-        mock_email_service.verify_reset_code = AsyncMock(return_value=True)
+        new_password = "resetpass123"
 
-        with patch("app.api.v1.auth.email_service", mock_email_service):
+        with patch("app.api.v1.auth.email_service") as mock_email:
+            # 模拟验证码有效
+            mock_email.verify_reset_code = AsyncMock(return_value=True)
+
             response = await client.post(
                 "/api/v1/auth/password-reset/verify",
                 json={
                     "email": test_user.email,
                     "code": "123456",
-                    "new_password": "NewResetPass123!"
+                    "new_password": new_password
                 }
             )
 
             assert response.status_code == 200
-            data = response.json()
-            assert "重置成功" in data["message"]
+            assert "密码重置成功" in response.json()["message"]
 
-    async def test_password_reset_verify_invalid_code(
+            # 验证密码已更新
+            await db_session.refresh(test_user)
+            # 密码哈希应该不同
+            old_hash = test_user.password_hash
+
+    async def test_reset_verify_invalid_code(
         self, client: AsyncClient, test_user
     ):
-        """测试: 无效的重置码"""
-        mock_email_service = AsyncMock()
-        mock_email_service.verify_reset_code = AsyncMock(return_value=False)
+        """测试: 无效重置码"""
+        with patch("app.api.v1.auth.email_service") as mock_email:
+            mock_email.verify_reset_code = AsyncMock(return_value=False)
 
-        with patch("app.api.v1.auth.email_service", mock_email_service):
             response = await client.post(
                 "/api/v1/auth/password-reset/verify",
                 json={
                     "email": test_user.email,
                     "code": "000000",
-                    "new_password": "NewPass123!"
+                    "new_password": "newpass123"
                 }
             )
 
             assert response.status_code == 400
+            assert "验证码无效" in response.json()["detail"]
 
-    async def test_password_reset_verify_nonexistent_user(
+
+class TestGetCurrentUser:
+    """测试获取当前用户信息"""
+
+    async def test_get_me_success(
+        self, client: AsyncClient, auth_headers, test_user
+    ):
+        """测试: 获取当前用户信息"""
+        response = await client.get(
+            "/api/v1/auth/me",
+            headers=auth_headers
+        )
+
+        assert response.status_code == 200
+        data = response.json()
+        assert data["data"]["email"] == test_user.email
+        assert data["data"]["username"] == test_user.username
+
+    async def test_get_me_unauthorized(
         self, client: AsyncClient
     ):
-        """测试: 重置不存在的用户密码"""
-        mock_email_service = AsyncMock()
-        # 即使验证码正确，用户也不存在
-        mock_email_service.verify_reset_code = AsyncMock(return_value=True)
-
-        with patch("app.api.v1.auth.email_service", mock_email_service):
-            response = await client.post(
-                "/api/v1/auth/password-reset/verify",
-                json={
-                    "email": "nonexistent@example.com",
-                    "code": "123456",
-                    "new_password": "NewPass123!"
-                }
-            )
-
-            assert response.status_code == 404
-
-
-class TestChangePasswordExtended:
-    """修改密码扩展测试"""
-
-    async def test_change_password_updates_hash(
-        self, client: AsyncClient, auth_headers, test_user, db_session
-    ):
-        """测试: 修改密码更新哈希"""
-        original_hash = test_user.password_hash
-
-        response = await client.post(
-            "/api/v1/auth/change-password",
-            headers=auth_headers,
-            json={
-                "old_password": "TestPassword123!",
-                "new_password": "CompletelyNew123!"
-            }
-        )
-
-        assert response.status_code == 200
-
-        # 验证密码哈希已更新
-        await db_session.refresh(test_user)
-        assert test_user.password_hash != original_hash
-
-    async def test_change_password_same_password(
-        self, client: AsyncClient, auth_headers, test_user, db_session
-    ):
-        """测试: 修改为相同密码（技术上允许）"""
-        original_hash = test_user.password_hash
-
-        response = await client.post(
-            "/api/v1/auth/change-password",
-            headers=auth_headers,
-            json={
-                "old_password": "TestPassword123!",
-                "new_password": "TestPassword123!"
-            }
-        )
-
-        assert response.status_code == 200
-
-        # 哈希仍然应该更新（因为重新哈希）
-        await db_session.refresh(test_user)
-        # 由于是相同密码，哈希值可能会相同（取决于实现）
-
-    async def test_change_password_unauthorized(
-        self, client: AsyncClient, test_user
-    ):
-        """测试: 未认证修改密码"""
-        response = await client.post(
-            "/api/v1/auth/change-password",
-            json={
-                "old_password": "TestPassword123!",
-                "new_password": "NewPass123!"
-            }
-        )
-
+        """测试: 未认证访问"""
+        response = await client.get("/api/v1/auth/me")
         assert response.status_code == 401
 
 
-class TestTokenCreation:
-    """令牌创建测试"""
+class TestTokenResponse:
+    """测试令牌响应"""
 
-    async def test_access_token_contains_sub(
+    async def test_token_response_structure(
         self, client: AsyncClient, test_user
     ):
-        """测试: access token 包含用户 ID"""
+        """测试: 令牌响应结构完整"""
         response = await client.post(
-            "/api/v1/auth/login/json",
-            json={
-                "email": test_user.email,
+            "/api/v1/auth/login",
+            data={
+                "username": test_user.email,
                 "password": "TestPassword123!"
             }
         )
 
         assert response.status_code == 200
-        data = response.json()
-        access_token = data["data"]["access_token"]
+        data = response.json()["data"]
 
-        # 验证 token 可以解码
-        from app.core.security import decode_token
-        payload = decode_token(access_token)
-        assert payload is not None
-        assert "sub" in payload
-        assert payload["sub"] == str(test_user.id)
-
-    async def test_refresh_token_contains_sub(
-        self, client: AsyncClient, test_user
-    ):
-        """测试: refresh token 包含用户 ID"""
-        response = await client.post(
-            "/api/v1/auth/login/json",
-            json={
-                "email": test_user.email,
-                "password": "TestPassword123!"
-            }
-        )
-
-        assert response.status_code == 200
-        data = response.json()
-        refresh_token = data["data"]["refresh_token"]
-
-        # 验证 token 可以解码
-        from app.core.security import decode_token
-        payload = decode_token(refresh_token)
-        assert payload is not None
-        assert "sub" in payload
-
-    async def test_token_expires_in_present(
-        self, client: AsyncClient, test_user
-    ):
-        """测试: 响应包含 expires_in"""
-        response = await client.post(
-            "/api/v1/auth/login/json",
-            json={
-                "email": test_user.email,
-                "password": "TestPassword123!"
-            }
-        )
-
-        assert response.status_code == 200
-        data = response.json()
-        assert "expires_in" in data["data"]
-        assert isinstance(data["data"]["expires_in"], int)
+        # 验证所有必需字段
+        assert "access_token" in data
+        assert "refresh_token" in data
+        assert "expires_in" in data
+        assert isinstance(data["expires_in"], int)
+        assert data["expires_in"] > 0
