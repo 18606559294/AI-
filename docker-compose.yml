@@ -1,6 +1,6 @@
 services:
   backend:
-    image: ghcr.io/18606559294/ai-resume-backend:latest
+    image: ghcr.io/18606559294/ai-resume-backend:lite
     container_name: ai-resume-backend
     ports:
       - "8000:8000"
