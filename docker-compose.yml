@@ -1,9 +1,4 @@
-# Docker Compose 配置文件
-# 注意: MySQL 运行在宿主机本地 (端口 3306)
-# 容器通过 host.docker.internal 访问宿主机服务
-
 services:
-  # 后端服务
   backend:
     build:
       context: ./backend
@@ -14,35 +9,34 @@ services:
     env_file:
       - .env.production
     environment:
-      # 生产数据库配置 - 使用 MySQL
-      - USE_SQLITE=false
-      - DATABASE_URL=mysql+aiomysql://airesume:airesume_password@host.docker.internal:3306/ai_resume
-      # 容器内 MySQL 连接: - DATABASE_URL=mysql+aiomysql://airesume:airesume_password@db:3306/ai_resume
-      - REDIS_URL=redis://redis:6379
-      # SECRET_KEY 和 XIAOMI_API_KEY 从 .env.production 文件读取
-      # 警告: 请勿在版本控制中提交真实的密钥！
-      - ACCESS_TOKEN_EXPIRE_MINUTES=30
-      - DEFAULT_AI_PROVIDER=xiaomi
+      - USE_SQLITE=true
+      - DATABASE_URL=sqlite+aiosqlite:///./data/ai_resume.db
+      - REDIS_URL=redis://redis:6379/0
       - DEBUG=false
+      - HOST=0.0.0.0
+      - PORT=8000
       - CORS_ORIGINS=["http://localhost:3000","http://localhost:80"]
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
+      - ACCESS_TOKEN_EXPIRE_MINUTES=60
+      - DEFAULT_AI_PROVIDER=xiaomi
     volumes:
-      - ./backend:/app
       - backend_data:/app/data
     depends_on:
       redis:
         condition: service_healthy
     restart: unless-stopped
-    # 使用 Dockerfile 内置的 Python urllib 健康检查
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
     networks:
       - ai-resume-network
 
-  # 前端服务
   frontend:
     build:
-      context: ./ai-resume-web
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: ai-resume-web/Dockerfile
     container_name: ai-resume-frontend
     ports:
       - "3000:80"
@@ -58,15 +52,12 @@ services:
     networks:
       - ai-resume-network
 
-  # Redis 服务
   redis:
     image: redis:7-alpine
     container_name: ai-resume-redis
-    ports:
-      - "6379:6379"
+    command: redis-server --appendonly yes
     volumes:
       - redis_data:/data
-    command: redis-server --appendonly yes
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
@@ -76,62 +67,8 @@ services:
     networks:
       - ai-resume-network
 
-  # MySQL 数据库（可选，生产环境推荐）
-  db:
-    image: mysql:8.0
-    container_name: ai-resume-db
-    environment:
-      - MYSQL_ROOT_PASSWORD=rootpassword
-      - MYSQL_DATABASE=ai_resume
-      - MYSQL_USER=airesume
-      - MYSQL_PASSWORD=airesume_password
-    volumes:
-      - mysql_data:/var/lib/mysql
-      - ./mysql/conf.d:/etc/mysql/conf.d:ro
-      - ./mysql/init:/docker-entrypoint-initdb.d:ro
-    ports:
-      - "3306:3306"
-    command:
-      - --default-authentication-plugin=mysql_native_password
-      - --character-set-server=utf8mb4
-      - --collation-server=utf8mb4_unicode_ci
-      - --max-connections=200
-      - --innodb-buffer-pool-size=256M
-    restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 30s
-    networks:
-      - ai-resume-network
-    profiles:
-      - production  # 使用 --profile production 启动
-
-  # Nginx 反向代理（生产环境）
-  nginx:
-    image: nginx:alpine
-    container_name: ai-resume-nginx
-    ports:
-      - "80:80"
-      - "443:443"
-    volumes:
-      - ./nginx.conf:/etc/nginx/nginx.conf:ro
-      - ./ssl:/etc/nginx/ssl:ro
-    depends_on:
-      - backend
-      - frontend
-    restart: unless-stopped
-    networks:
-      - ai-resume-network
-    profiles:
-      - production  # 使用 --profile production 启动
-
 volumes:
   backend_data:
-    driver: local
-  mysql_data:
     driver: local
   redis_data:
     driver: local
