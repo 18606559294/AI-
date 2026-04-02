@@ -140,9 +140,10 @@ class TestGenerateResumeContent:
             user_info={},
             target_position="高级工程师",
             user_profile=user_profile,
-            enhance=False
+            enhance=True  # 需要启用 enhance 才会使用 strategy
         )
 
+        # enhance=True 时应该包含 strategy
         assert "strategy" in result["meta"]
         assert result["meta"]["strategy"]["angle"] == "专家导向"
 
@@ -164,9 +165,10 @@ class TestGenerateResumeContent:
             user_info={},
             target_position="工程师",
             job_description="需要 Python、Django 技能",
-            enhance=False
+            enhance=True  # 需要启用 enhance 才会进行 ATS 分析
         )
 
+        # enhance=True 且有 JD 时应该包含 ATS 分数
         assert "ats_score" in result["meta"]
 
     async def test_generate_json_decode_error(self):
