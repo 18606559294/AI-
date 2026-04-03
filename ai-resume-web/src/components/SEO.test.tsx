@@ -1,10 +1,9 @@
 /**
  * SEO 组件测试
  */
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
-import { Helmet } from 'react-helmet-async';
 import { SEO } from './SEO';
 
 // Mock Helmet

@@ -110,7 +110,7 @@ describe('GradientText Component', () => {
   });
 
   it('空字符串也能渲染', () => {
-    const { container } = render(<GradientText></GradientText>);
+    const { container } = render(<GradientText>{''}</GradientText>);
 
     const text = container.firstChild as HTMLElement;
     expect(text).toBeInTheDocument();
