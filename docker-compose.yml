@@ -1,6 +1,8 @@
 services:
   backend:
-    image: ghcr.io/18606559294/ai-resume-backend:lite
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.lite
     ports:
       - "8000:8000"
     environment:
@@ -21,7 +23,9 @@ services:
     restart: unless-stopped
 
   frontend:
-    image: ghcr.io/18606559294/ai-resume-frontend:latest
+    build:
+      context: .
+      dockerfile: ai-resume-web/Dockerfile
     ports:
       - "3000:80"
     restart: unless-stopped
