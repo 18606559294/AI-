@@ -3,6 +3,28 @@
  * 支持：撤销/重做、富文本编辑、拖拽排序
  */
 import { useState, useEffect } from 'react';
+
+// 模板类型定义
+type ResumeTemplate = 'modern' | 'classic' | 'minimal';
+
+// 初始简历内容（移到组件外部避免重新创建）
+const INITIAL_RESUME_CONTENT: ResumeContent = {
+  basic_info: {
+    name: '',
+    email: '',
+    phone: '',
+    location: '',
+    title: '',
+    summary: '',
+    job_intention: '',
+    self_introduction: '',
+  },
+  education: [],
+  work_experience: [],
+  projects: [],
+  skills: [],
+};
+
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import useUndo from 'use-undo';
@@ -271,30 +293,12 @@ export default function ResumeEditorPage() {
 
   // 实时预览相关状态
   const [showPreview, setShowPreview] = useState(false);
-  const [previewTemplate, setPreviewTemplate] = useState<'modern' | 'classic' | 'minimal'>('modern');
+  const [previewTemplate, setPreviewTemplate] = useState<ResumeTemplate>('modern');
 
-  // 简历内容
-  const initialContent: ResumeContent = {
-    basic_info: {
-      name: '',
-      email: '',
-      phone: '',
-      location: '',
-      title: '',
-      summary: '',
-      job_intention: '',
-      self_introduction: '',
-    },
-    education: [],
-    work_experience: [],
-    projects: [],
-    skills: [],
-  };
-
-  const [content, setContent] = useState<ResumeContent>(initialContent);
+  const [content, setContent] = useState<ResumeContent>(INITIAL_RESUME_CONTENT);
 
   // 撤销/重做功能
-  const [_undoState, { set: setUndoState, reset: resetUndo, undo: undoAction, redo: redoAction, canUndo, canRedo }] = useUndo(initialContent);
+  const [, { set: setUndoState, reset: resetUndo, undo: undoAction, redo: redoAction, canUndo, canRedo }] = useUndo(INITIAL_RESUME_CONTENT);
 
   // 同步 content 到 undo state
   useEffect(() => {
@@ -311,7 +315,7 @@ export default function ResumeEditorPage() {
   useEffect(() => {
     if (resume) {
       setTitle(resume.title);
-      const resumeContent = resume.content ?? initialContent;
+      const resumeContent = resume.content ?? INITIAL_RESUME_CONTENT;
       setContent(resumeContent);
       resetUndo(resumeContent);
     }
@@ -563,7 +567,7 @@ export default function ResumeEditorPage() {
               {showPreview && (
                 <select
                   value={previewTemplate}
-                  onChange={(e) => setPreviewTemplate(e.target.value as any)}
+                  onChange={(e) => setPreviewTemplate(e.target.value as ResumeTemplate)}
                   className="btn btn-secondary px-3 py-2"
                 >
                   <option value="modern">现代模板</option>

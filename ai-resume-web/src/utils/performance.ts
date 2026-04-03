@@ -98,7 +98,7 @@ export async function initPerformanceMonitoring(): Promise<void> {
     const { onCLS, onFID, onLCP, onFCP, onTTFB } = webvitals;
 
     // 监控 CLS
-    onCLS((metric: any) => {
+    onCLS((metric) => {
       const vitalMetric: VitalMetric = {
         name: 'CLS',
         value: Math.round(metric.value * 1000) / 1000,
@@ -113,7 +113,7 @@ export async function initPerformanceMonitoring(): Promise<void> {
     });
 
     // 监控 FID
-    onFID((metric: any) => {
+    onFID((metric) => {
       const vitalMetric: VitalMetric = {
         name: 'FID',
         value: Math.round(metric.value),
@@ -128,7 +128,7 @@ export async function initPerformanceMonitoring(): Promise<void> {
     });
 
     // 监控 LCP
-    onLCP((metric: any) => {
+    onLCP((metric) => {
       const vitalMetric: VitalMetric = {
         name: 'LCP',
         value: Math.round(metric.value),
@@ -143,7 +143,7 @@ export async function initPerformanceMonitoring(): Promise<void> {
     });
 
     // 监控 FCP
-    onFCP((metric: any) => {
+    onFCP((metric) => {
       const vitalMetric: VitalMetric = {
         name: 'FCP',
         value: Math.round(metric.value),
@@ -154,7 +154,7 @@ export async function initPerformanceMonitoring(): Promise<void> {
     });
 
     // 监控 TTFB
-    onTTFB((metric: any) => {
+    onTTFB((metric) => {
       const vitalMetric: VitalMetric = {
         name: 'TTFB',
         value: Math.round(metric.value),

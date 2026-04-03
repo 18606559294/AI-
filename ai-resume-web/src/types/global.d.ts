@@ -16,10 +16,10 @@ declare module 'web-vitals' {
 }
 
 declare module 'clsx' {
-  function clsx(...inputs: any[]): string;
+  function clsx(...inputs: (string | number | boolean | undefined | null | Record<string, boolean>)[]): string;
   export default clsx;
 }
 
 declare module 'tailwind-merge' {
-  export function twMerge(...inputs: any[]): string;
+  export function twMerge(...inputs: (string | number | boolean | undefined | null)[]): string;
 }
