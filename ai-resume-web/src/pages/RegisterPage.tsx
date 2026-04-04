@@ -88,7 +88,7 @@ export default function RegisterPage() {
         username: username || undefined,
         verification_code: verificationCode || undefined,
       });
-      navigate('/');
+      navigate('/dashboard');
     } catch {
       // Error handled by store
     }

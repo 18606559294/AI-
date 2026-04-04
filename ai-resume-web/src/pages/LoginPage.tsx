@@ -43,7 +43,7 @@ export default function LoginPage() {
         localStorage.removeItem(SAVED_EMAIL_KEY);
       }
 
-      navigate('/');
+      navigate('/dashboard');
     } catch {
       // Error handled by store
     }

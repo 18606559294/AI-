@@ -38,7 +38,7 @@ export default function HomePage() {
       <nav className="nav-glass">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-8">
-            <Link to="/" className="flex items-center gap-3">
+            <Link to="/dashboard" className="flex items-center gap-3">
               <div
                 className="w-10 h-10 rounded-xl bg-gradient-to-br from-sky-400 to-accent-500 flex items-center justify-center shadow-neon-blue"
                 style={{ width: '40px', height: '40px' }}

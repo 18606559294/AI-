@@ -5,6 +5,7 @@ import { ErrorBoundary } from './components/ErrorBoundary';
 import { Spinner } from './components/UIComponents';
 
 // 懒加载页面组件 - 代码分割优化
+const LandingPage = lazy(() => import('./pages/LandingPage'));
 const LoginPage = lazy(() => import('./pages/LoginPage'));
 const RegisterPage = lazy(() => import('./pages/RegisterPage'));
 const ForgotPasswordPage = lazy(() => import('./pages/ForgotPasswordPage'));
@@ -61,12 +62,22 @@ function App() {
   return (
     <ErrorBoundary>
       <Routes>
+        {/* 公开首页 - Landing Page */}
+        <Route
+          path="/"
+          element={
+            <PageLoader>
+              <LandingPage />
+            </PageLoader>
+          }
+        />
+
         {/* 公开路由 */}
         <Route
           path="/login"
           element={
             <PageLoader>
-              {!isAuthenticated ? <LoginPage /> : <Navigate to="/" replace />}
+              {!isAuthenticated ? <LoginPage /> : <Navigate to="/dashboard" replace />}
             </PageLoader>
           }
         />
@@ -74,7 +85,7 @@ function App() {
           path="/register"
           element={
             <PageLoader>
-              {!isAuthenticated ? <RegisterPage /> : <Navigate to="/" replace />}
+              {!isAuthenticated ? <RegisterPage /> : <Navigate to="/dashboard" replace />}
             </PageLoader>
           }
         />
@@ -121,7 +132,7 @@ function App() {
 
         {/* 受保护路由 */}
         <Route
-          path="/"
+          path="/dashboard"
           element={
             <PageLoader>
               {isAuthenticated ? <HomePage /> : <Navigate to="/login" replace />}

@@ -72,7 +72,7 @@ export default function TemplatesPage() {
       <header className="bg-white shadow-sm sticky top-0 z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
-            <Link to="/" className="text-xl font-bold text-primary-600">
+            <Link to="/dashboard" className="text-xl font-bold text-primary-600">
               AI 简历
             </Link>
             <div className="flex items-center gap-4">
