@@ -12,8 +12,11 @@ import './index.css';
 initApiClient(() => storage.getToken());
 
 // 设置API Base URL
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000/api/v1';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api/v1';
 getApiClient().setBaseURL(API_BASE_URL);
+
+// 获取 basename（用于子路径部署）
+const basename = import.meta.env.BASE_URL === '/' ? undefined : import.meta.env.BASE_URL?.replace(/\/$/, '');
 
 // 初始化性能监控 (仅在web-vitals安装完成后启用)
 // if (import.meta.env.PROD) {
@@ -35,7 +38,7 @@ createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <HelmetProvider>
       <QueryClientProvider client={queryClient}>
-        <BrowserRouter>
+        <BrowserRouter basename={basename}>
           <App />
         </BrowserRouter>
       </QueryClientProvider>
