@@ -13,19 +13,41 @@ vi.mock('../components/SEO', () => ({
 }));
 
 // Mock UIComponents
+interface MockButtonProps {
+  children: React.ReactNode;
+  loading?: boolean;
+  disabled?: boolean;
+  'data-testid'?: string;
+  onClick?: () => void;
+  type?: 'button' | 'submit' | 'reset';
+}
+
+interface MockInputProps {
+  label?: string;
+  'data-testid'?: string;
+  type?: string;
+  placeholder?: string;
+  value?: string;
+  required?: boolean;
+}
+
+interface MockGradientTextProps {
+  children: React.ReactNode;
+}
+
 vi.mock('../components/UIComponents', () => ({
-  Button: ({ children, loading, disabled, ...props }: any) => (
+  Button: ({ children, loading, disabled, ...props }: MockButtonProps) => (
     <button {...props} disabled={disabled || loading} data-testid={props['data-testid']}>
       {children}
     </button>
   ),
-  Input: ({ label, ...props }: any) => (
+  Input: ({ label, ...props }: MockInputProps) => (
     <div>
       {label && <label>{label}</label>}
       <input {...props} data-testid={props['data-testid']} />
     </div>
   ),
-  GradientText: ({ children }: any) => <span>{children}</span>,
+  GradientText: ({ children }: MockGradientTextProps) => <span>{children}</span>,
   Orb: () => null,
 }));
 

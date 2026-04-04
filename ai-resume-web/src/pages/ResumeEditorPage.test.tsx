@@ -48,6 +48,22 @@ vi.mock('@ai-resume/shared/api', () => ({
 const mockGetResume = api.resume.getResume as ReturnType<typeof vi.fn>;
 const mockCreateResume = api.resume.createResume as ReturnType<typeof vi.fn>;
 
+// Mock Resume 类型
+interface MockResume {
+  id: number;
+  title: string;
+  content: {
+    basic_info: {
+      name?: string;
+      email?: string;
+    };
+    education: unknown[];
+    work_experience: unknown[];
+    projects: unknown[];
+    skills: unknown[];
+  };
+}
+
 describe('ResumeEditorPage Component', () => {
   let queryClient: QueryClient;
 
@@ -79,7 +95,7 @@ describe('ResumeEditorPage Component', () => {
     );
   };
 
-  const mockResume = {
+  const mockResume: MockResume = {
     id: 1,
     title: '测试简历',
     content: {
@@ -95,7 +111,7 @@ describe('ResumeEditorPage Component', () => {
   };
 
   it.skip('渲染编辑器页面', async () => {
-    mockGetResume.mockResolvedValue(mockResume as any);
+    mockGetResume.mockResolvedValue(mockResume);
 
     renderWithProviders(<ResumeEditorPage />);
 
@@ -106,7 +122,7 @@ describe('ResumeEditorPage Component', () => {
   });
 
   it.skip('渲染标签页导航', async () => {
-    mockGetResume.mockResolvedValue(mockResume as any);
+    mockGetResume.mockResolvedValue(mockResume);
 
     renderWithProviders(<ResumeEditorPage />);
 
@@ -117,7 +133,7 @@ describe('ResumeEditorPage Component', () => {
   });
 
   it('切换到预览模式', async () => {
-    mockGetResume.mockResolvedValue(mockResume as any);
+    mockGetResume.mockResolvedValue(mockResume);
 
     renderWithProviders(<ResumeEditorPage />);
 
@@ -133,7 +149,7 @@ describe('ResumeEditorPage Component', () => {
   });
 
   it.skip('创建新简历', async () => {
-    mockCreateResume.mockResolvedValue({
+    const newResume: MockResume = {
       id: 1,
       title: '新简历',
       content: {
@@ -143,7 +159,8 @@ describe('ResumeEditorPage Component', () => {
         projects: [],
         skills: [],
       },
-    } as any);
+    };
+    mockCreateResume.mockResolvedValue(newResume);
 
     renderWithProviders(<ResumeEditorPage />, ['/resumes/new']);
 
@@ -154,7 +171,7 @@ describe('ResumeEditorPage Component', () => {
   });
 
   it('显示模板选择器（预览模式）', async () => {
-    mockGetResume.mockResolvedValue(mockResume as any);
+    mockGetResume.mockResolvedValue(mockResume);
 
     renderWithProviders(<ResumeEditorPage />);
 

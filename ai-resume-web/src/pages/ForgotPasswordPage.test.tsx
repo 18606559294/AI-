@@ -8,19 +8,41 @@ import { MemoryRouter } from 'react-router-dom';
 import ForgotPasswordPage from './ForgotPasswordPage';
 
 // Mock UIComponents
+interface MockButtonProps {
+  children: React.ReactNode;
+  loading?: boolean;
+  disabled?: boolean;
+  'data-testid'?: string;
+  onClick?: () => void;
+  type?: 'button' | 'submit' | 'reset';
+}
+
+interface MockInputProps {
+  label?: string;
+  'data-testid'?: string;
+  type?: string;
+  placeholder?: string;
+  value?: string;
+  required?: boolean;
+}
+
+interface MockGradientTextProps {
+  children: React.ReactNode;
+}
+
 vi.mock('../components/UIComponents', () => ({
-  Button: ({ children, loading, disabled, ...props }: any) => (
+  Button: ({ children, loading, disabled, ...props }: MockButtonProps) => (
     <button {...props} disabled={disabled || loading} data-testid={props['data-testid']}>
       {children}
     </button>
   ),
-  Input: ({ label, ...props }: any) => (
+  Input: ({ label, ...props }: MockInputProps) => (
     <div>
       {label && <label>{label}</label>}
       <input {...props} data-testid={props['data-testid']} />
     </div>
   ),
-  GradientText: ({ children }: { children: React.ReactNode }) => <span className="gradient-text">{children}</span>,
+  GradientText: ({ children }: MockGradientTextProps) => <span className="gradient-text">{children}</span>,
   Orb: () => null,
 }));
 

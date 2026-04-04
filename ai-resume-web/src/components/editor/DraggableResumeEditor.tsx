@@ -5,18 +5,19 @@
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, type DragEndEvent } from '@dnd-kit/core';
 import { SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy } from '@dnd-kit/sortable';
 
-interface SortableItem {
+// 使用泛型使组件更灵活
+interface SortableItem<T = unknown> {
   id: string;
-  content: any;
+  content: T;
 }
 
-interface DraggableResumeEditorProps {
-  items: SortableItem[];
-  onReorder: (items: SortableItem[]) => void;
-  renderItem: (item: SortableItem, index: number) => React.ReactNode;
+interface DraggableResumeEditorProps<T = unknown> {
+  items: SortableItem<T>[];
+  onReorder: (items: SortableItem<T>[]) => void;
+  renderItem: (item: SortableItem<T>, index: number) => React.ReactNode;
 }
 
-export function DraggableResumeEditor({ items, onReorder, renderItem }: DraggableResumeEditorProps) {
+export function DraggableResumeEditor<T = unknown>({ items, onReorder, renderItem }: DraggableResumeEditorProps<T>) {
   const sensors = useSensors(
     useSensor(PointerSensor),
     useSensor(KeyboardSensor, {

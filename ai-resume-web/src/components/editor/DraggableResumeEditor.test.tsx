@@ -6,15 +6,21 @@ import { render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { DraggableResumeEditor } from './DraggableResumeEditor';
 
+// 测试用 MockItem 类型
+interface MockItem {
+  id: string;
+  content: string;
+}
+
 describe('DraggableResumeEditor', () => {
-  const mockItems = [
+  const mockItems: MockItem[] = [
     { id: '1', content: '项目 1' },
     { id: '2', content: '项目 2' },
     { id: '3', content: '项目 3' },
   ];
 
   it('渲染所有项目', () => {
-    const renderItem = (item: { id: string; content: string }) => (
+    const renderItem = (item: MockItem) => (
       <div key={item.id}>{item.content}</div>
     );
 
@@ -46,7 +52,7 @@ describe('DraggableResumeEditor', () => {
   });
 
   it('使用自定义渲染函数', () => {
-    const customRender = (item: { id: string; content: string }, index: number) => (
+    const customRender = (item: MockItem, index: number) => (
       <div key={item.id}>
         {index + 1}. {item.content}
       </div>
@@ -69,7 +75,7 @@ describe('DraggableResumeEditor', () => {
     // 注意: 由于 DnD Kit 的复杂性，这个测试验证了组件结构
     // 实际的拖拽交互需要 E2E 测试
     const onReorder = vi.fn();
-    const renderItem = (item: { id: string; content: string }) => (
+    const renderItem = (item: MockItem) => (
       <div key={item.id}>{item.content}</div>
     );
 

@@ -137,8 +137,12 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
   }
 }
 
+export default ErrorBoundary;
+
+/* eslint-disable react-refresh/only-export-components */
 /**
- * 带有自定义fallback的Hook版本
+ * 带有自定义fallback的HOC
+ * 注意：此函数与 ErrorBoundary 类在同一文件，但这是设计决策
  */
 export function withErrorBoundary<P extends object>(
   Component: React.ComponentType<P>,
@@ -150,5 +154,4 @@ export function withErrorBoundary<P extends object>(
     </ErrorBoundary>
   );
 }
-
-export default ErrorBoundary;
+/* eslint-enable react-refresh/only-export-components */

@@ -110,7 +110,7 @@ export default function ForgotPasswordPage() {
 
   const handleResendCode = async () => {
     if (countdown > 0) return;
-    await handleSendCode(new Event('submit') as any);
+    await handleSendCode({ preventDefault: () => {} } as React.FormEvent);
   };
 
   return (
