@@ -10,9 +10,9 @@ interface SEOProps {
   canonicalUrl?: string;
 }
 
-const SITE_NAME = 'AI Resume';
-const DEFAULT_DESCRIPTION = '使用 AI 技术快速创建专业简历。支持多种模板，智能生成，导出 PDF。';
-const DEFAULT_KEYWORDS = 'AI简历,简历生成器,在线简历,简历模板,智能简历,PDF简历';
+const SITE_NAME = 'ndtool AI简历生成器';
+const DEFAULT_DESCRIPTION = '免费AI简历生成器，一键生成专业简历。50+精美模板，AI智能优化，支持PDF/Word导出。应届生、职场转型首选在线简历工具。';
+const DEFAULT_KEYWORDS = 'AI简历,简历生成器,在线简历,简历模板,智能简历,PDF简历,AI简历生成,求职简历模板,应届生简历,简历怎么写';
 const DEFAULT_OG_IMAGE = '/og-image.png';
 
 export function SEO({

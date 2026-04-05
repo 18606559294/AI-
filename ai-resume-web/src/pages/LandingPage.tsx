@@ -8,8 +8,8 @@ export default function LandingPage() {
   return (
     <>
       <SEO
-        title="Trae.ai - 革命性的AI编程IDE | 让编程效率提升10倍"
-        description="Trae.ai是最强大的AI驱动编程IDE，智能代码补全、实时错误修复、自动重构，让您的编程效率飞速提升。"
+        title="AI简历生成器 - 免费在线智能简历制作工具 | ndtool"
+        description="免费AI简历生成器，一键生成专业简历。50+精美模板，AI智能优化，支持PDF/Word导出。应届生、职场转型首选在线简历工具。"
       />
       <div className="landing-page">
         {/* Navigation */}
@@ -32,10 +32,10 @@ export default function LandingPage() {
           <div className="lp-container lp-hero-content">
             <div className="lp-badge">
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" width="16" height="16"><path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09ZM18.259 8.715 18 9.75l-.259-1.035a3.375 3.375 0 0 0-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 0 0 2.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 0 0 2.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 0 0-2.456 2.456Z" /></svg>
-              AI-Powered IDE
+              AI 驱动简历生成
             </div>
-            <h1>编程效率提升 10 倍</h1>
-            <p className="lp-hero-sub">AI 驱动的革命性编程IDE - Trae.ai</p>
+            <h1>AI 一键生成专业简历</h1>
+            <p className="lp-hero-sub">50+ 精美模板 · AI 智能优化 · PDF/Word 导出</p>
             <div className="lp-hero-cta-group">
               <a href={TRAE_URL} target="_blank" rel="noopener" className="lp-hero-cta">
                 立即免费体验
