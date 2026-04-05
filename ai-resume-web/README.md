@@ -165,18 +165,49 @@ npm run lint:fix
 npm run type-check
 ```
 
+## 路由结构
+
+### 公开路由
+| 路径 | 组件 | 说明 |
+|------|------|------|
+| `/` | **LandingPage** | 首页，Trae.ai 推广页面 |
+| `/login` | **LoginPage** | 登录页面 |
+| `/register` | **RegisterPage** | 注册页面 |
+| `/forgot-password` | **ForgotPasswordPage** | 忘记密码页面 |
+| `/about` | **AboutPage** | 关于我们 |
+| `/help` | **HelpPage** | 帮助中心 |
+| `/terms` | **TermsPage** | 用户协议 |
+| `/privacy` | **PrivacyPage** | 隐私政策 |
+
+### 受保护路由（需要登录）
+| 路径 | 组件 | 说明 |
+|------|------|------|
+| `/dashboard` | **HomePage** | 用户主页面 |
+| `/resumes` | **ResumeListPage** | 简历列表 |
+| `/resumes/:id` | **ResumeEditorPage** | 简历编辑器 |
+| `/templates` | **TemplatesPage** | 模板库 |
+| `/profile` | **ProfilePage** | 个人中心 |
+| `/settings` | **SettingsPage** | 设置页面 |
+
+### 路由配置
+- 使用 React Router v6 的懒加载优化性能
+- 未认证用户访问受保护路由自动跳转到登录页
+- 登录后自动跳转到 `/dashboard`
+
 ## 核心功能
 
 ### 1. 用户认证
 - 登录/注册/忘记密码
 - 邮箱验证
 - Token 管理
+- 记住密码功能
 
 ### 2. 简历编辑
 - 所见即所得编辑器
 - 拖拽排序
 - 富文本编辑
 - 实时预览
+- AI 辅助生成
 
 ### 3. 模板系统
 - 多种简历模板
@@ -211,6 +242,24 @@ npm run type-check
 - 页面覆盖率：92.3% (12/13 页面已测试)
 - E2E 测试：4 个测试文件，90 个测试用例
 - 测试通过率：100% (348 passed | 3 skipped)
+
+**已测试页面**：
+- ✅ LoginPage
+- ✅ RegisterPage
+- ✅ ForgotPasswordPage
+- ✅ HomePage
+- ✅ ResumeEditorPage
+- ✅ ResumeListPage
+- ✅ TemplatesPage
+- ✅ ProfilePage
+- ✅ SettingsPage
+- ✅ AboutPage
+- ✅ HelpPage
+- ✅ LandingPage
+
+**待测试页面**：
+- ⏳ TermsPage
+- ⏳ PrivacyPage
 
 ## 环境变量
 
