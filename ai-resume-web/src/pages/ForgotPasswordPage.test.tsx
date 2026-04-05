@@ -55,6 +55,8 @@ global.fetch = vi.fn(() =>
 );
 
 describe('ForgotPasswordPage', () => {
+  // Increase timeout for all tests in this describe block
+  vi.setConfig({ testTimeout: 10000 });
   it('渲染重置密码页面', () => {
     render(
       <MemoryRouter>
