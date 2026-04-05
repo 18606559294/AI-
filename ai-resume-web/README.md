@@ -127,6 +127,13 @@ npm run test:e2e:headed
 
 ## 项目质量指标
 
+### 项目规模
+- **源文件**: 71 个 TypeScript/TSX 文件
+- **组件**: 17 个可复用组件（含编辑器组件）
+- **页面**: 14 个页面组件
+- **测试文件**: 30 个测试文件
+- **测试用例**: 351 个测试用例
+
 ### 代码质量 ✅
 - TypeScript 严格模式，0 类型错误
 - ESLint 检查通过，仅有测试 mock 警告
@@ -138,12 +145,13 @@ npm run test:e2e:headed
 - **Bundle 优化**: 手动分包（vendor chunks）
 - **压缩**: esbuild 最快压缩
 - **性能监控**: Web Vitals (CLS, FID, LCP, FCP, TTFB)
-- **构建大小**: 858 KB (gzip 后 ~250 KB)
+- **构建大小**: 972 KB (gzip 后 ~280 KB)
 
 ### 测试覆盖 ✅
-- 单元测试：92.3% 覆盖率
+- 单元测试：30 个测试文件，348 个测试用例（3 个跳过）
+- 测试通过率：100% (348/348)
 - E2E 测试：多设备覆盖（桌面、移动端）
-- 测试通过率：100%
+- 测试框架：Vitest + Testing Library + Playwright
 
 ## 代码质量
 
