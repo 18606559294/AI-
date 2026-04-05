@@ -12,7 +12,7 @@ services:
       - .env.production
     environment:
       - DATABASE_URL=sqlite+aiosqlite:///./data/ai_resume.db
-      - REDIS_URL=redis://redis:6379
+      - REDIS_URL=redis://redis:6379/0
     depends_on:
       - redis
     volumes:
