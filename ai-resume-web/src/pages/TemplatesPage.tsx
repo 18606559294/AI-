@@ -63,9 +63,9 @@ export default function TemplatesPage() {
   return (
     <>
       <SEO
-        title="简历模板库 - 50+ 精美模板"
-        description="浏览 50+ 专业设计的简历模板，涵盖互联网、金融、教育、医疗等各行业。免费使用 AI 技术快速生成专业简历。"
-        keywords="简历模板,简历范例,专业简历,简历格式,简历下载"
+        title="免费简历模板 - 应届生/校招/行业 50+精美模板在线制作"
+        description="50+免费专业简历模板，涵盖应届生、校招、互联网、金融、教育等行业。AI智能填写，一键导出PDF，在线制作更高效。"
+        keywords="简历模板,应届生简历模板,校招简历模板,免费简历模板,简历模板下载,行业简历模板"
       />
       <div className="min-h-screen bg-gray-50">
       {/* 顶部导航栏 */}
@@ -88,7 +88,7 @@ export default function TemplatesPage() {
       </header>
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <h1 className="text-2xl font-bold mb-6">模板库</h1>
+        <h1 className="text-2xl font-bold mb-6">免费简历模板 - 应届生·校招·行业 50+精美模板</h1>
 
         {/* 搜索和筛选 */}
         <div className="card p-4 mb-6">

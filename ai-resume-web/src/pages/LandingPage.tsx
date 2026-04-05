@@ -19,6 +19,7 @@ export default function LandingPage() {
             <div className="lp-nav-links">
               <Link to="/login" className="lp-nav-link">AI 简历</Link>
               <a href="/resources/" className="lp-nav-link">资源工具</a>
+              <a href="/blog/ai-resume-guide.html" className="lp-nav-link">简历攻略</a>
               <a href={TRAE_URL} target="_blank" rel="noopener" className="lp-cta-btn">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" width="16" height="16"><path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" /></svg>
                 立即体验
@@ -172,6 +173,8 @@ export default function LandingPage() {
               <Link to="/login" style={{ color: '#38BDF8' }}>AI 简历</Link>
               {' | '}
               <a href="/resources/">资源激活工具站</a>
+              <a href="/blog/ai-resume-guide.html">AI简历生成指南</a>
+              <a href="/blog/fresh-graduate-resume.html">应届生简历怎么写</a>
             </p>
             <p className="lp-footer-disclaimer">此网站用于个人学习交流使用，如有侵权请联系 641600780@qq.com 删除</p>
           </div>

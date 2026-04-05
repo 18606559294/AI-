@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import { GradientText, Orb } from '../components/UIComponents';
+import { SEO } from '../components/SEO';
 
 export default function HelpPage() {
   const faqs = [
@@ -31,6 +32,12 @@ export default function HelpPage() {
 
   return (
     <div className="min-h-screen relative overflow-x-hidden bg-slate-950">
+      <SEO
+        title="简历怎么写 - 帮助中心"
+        description="AI简历使用指南：简历怎么写、应届生简历模板、自我评价怎么写、项目经验描述技巧。STAR法则、面试准备全攻略。"
+        keywords="简历怎么写,应届生简历怎么写,简历自我评价怎么写,简历项目经验,简历star法则,求职攻略"
+        canonicalUrl="https://ndtool.cn/help"
+      />
       {/* Background Orbs */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden">
         <Orb color="primary" size={200} className="top-0 left-0 -translate-x-1/2 -translate-y-1/2 opacity-20" />
@@ -63,7 +70,7 @@ export default function HelpPage() {
         <main className="max-w-4xl mx-auto px-4 py-12">
           <div className="card-glass">
             <h1 className="text-3xl font-bold mb-2">
-              <GradientText>帮助中心</GradientText>
+              <GradientText>简历怎么写 - 帮助中心</GradientText>
             </h1>
             <p className="text-slate-400 text-sm mb-8">
               常见问题解答和使用指南
