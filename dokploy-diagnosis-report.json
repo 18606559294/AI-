@@ -1,0 +1,45 @@
+{
+  "timestamp": "2026-04-05T20:31:09.068Z",
+  "summary": {
+    "status": "unknown",
+    "issues": [
+      "Backend 无法连接 (超时)",
+      "Backend Health 无法连接 (超时)",
+      "Backend API 无法连接 (超时)",
+      "Redis 无法连接: Connection timeout"
+    ]
+  },
+  "services": {
+    "backend": {
+      "url": "http://113.45.64.145:8000",
+      "status": "timeout",
+      "reachable": false
+    },
+    "frontend": {
+      "url": "http://113.45.64.145:3000",
+      "status": 200,
+      "contentType": "text/html; charset=utf-8",
+      "reachable": true
+    },
+    "backend_health": {
+      "url": "http://113.45.64.145:8000/health",
+      "status": "timeout",
+      "reachable": false
+    },
+    "backend_api": {
+      "url": "http://113.45.64.145:8000/api",
+      "status": "timeout",
+      "reachable": false
+    },
+    "redis": {
+      "host": "113.45.64.145",
+      "port": 6379,
+      "status": "unreachable",
+      "error": "Connection timeout",
+      "reachable": false
+    }
+  },
+  "containers": [],
+  "logs": [],
+  "errors": []
+}

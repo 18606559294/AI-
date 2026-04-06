@@ -64,7 +64,7 @@ describe('TemplatesPage', () => {
     const Wrapper = createWrapper();
     render(<TemplatesPage />, { wrapper: Wrapper });
 
-    expect(screen.getByText('模板库')).toBeInTheDocument();
+    expect(screen.getByText(/免费简历模板/)).toBeInTheDocument();
   });
 
   it('有导航链接', () => {

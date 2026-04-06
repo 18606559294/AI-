@@ -1,0 +1,56 @@
+{
+  "timestamp": "2026-04-05T20:44:43.484Z",
+  "dokployUrl": "http://113.45.64.145:3000",
+  "loginSuccess": true,
+  "projectFound": true,
+  "projectName": "AI智能体简历",
+  "servicesFound": true,
+  "serviceCount": 1,
+  "services": [
+    {
+      "index": 0,
+      "selector": "text=Services",
+      "text": "AI智能体简历/productionProduction environmentProject EnvironmentCreate ServiceSelect All Bulk ActionsRecently deployedSelect types...All serversai-resumeAI智能体简历平台Created 2 days ago"
+    }
+  ],
+  "availableActions": [
+    {
+      "selector": "button:has-text(\"Create\")",
+      "text": "Create Service"
+    },
+    {
+      "selector": "button:has-text(\"Deploy\")",
+      "text": "Recently deployed"
+    }
+  ],
+  "serviceStatus": [
+    {
+      "selector": "[class*=\"state\"]",
+      "text": "My Organization"
+    },
+    {
+      "selector": "[class*=\"state\"]",
+      "text": "Projects"
+    },
+    {
+      "selector": "[class*=\"state\"]",
+      "text": "Deployments"
+    },
+    {
+      "selector": "[class*=\"state\"]",
+      "text": "Monitoring"
+    },
+    {
+      "selector": "[class*=\"state\"]",
+      "text": "Schedules"
+    }
+  ],
+  "screenshots": [
+    "/tmp/dokploy-screenshots/01-login-page.png",
+    "/tmp/dokploy-screenshots/04-login-form-filled.png",
+    "/tmp/dokploy-screenshots/05-after-login.png",
+    "/tmp/dokploy-screenshots/06-project-list.png",
+    "/tmp/dokploy-screenshots/07-project-details.png",
+    "/tmp/dokploy-screenshots/08-final-state.png"
+  ]
+}

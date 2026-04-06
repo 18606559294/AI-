@@ -5,6 +5,7 @@ import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { MemoryRouter } from 'react-router-dom';
+import { HelmetProvider } from 'react-helmet-async';
 import HelpPage from './HelpPage';
 
 // Mock UIComponents
@@ -13,24 +14,29 @@ vi.mock('../components/UIComponents', () => ({
   Orb: () => null,
 }));
 
-describe('HelpPage', () => {
-  it('渲染帮助中心页面', () => {
-    render(
-      <MemoryRouter>
-        <HelpPage />
-      </MemoryRouter>
-    );
+// Mock SEO component
+vi.mock('../components/SEO', () => ({
+  SEO: () => null,
+}));
 
-    expect(screen.getByText('帮助中心')).toBeInTheDocument();
+describe('HelpPage', () => {
+  const wrapper = ({ children }: { children: React.ReactNode }) => (
+    <HelmetProvider>
+      <MemoryRouter>
+        {children}
+      </MemoryRouter>
+    </HelmetProvider>
+  );
+
+  it('渲染帮助中心页面', () => {
+    render(<HelpPage />, { wrapper });
+
+    expect(screen.getByText(/帮助中心/)).toBeInTheDocument();
     expect(screen.getByText('常见问题解答和使用指南')).toBeInTheDocument();
   });
 
   it('显示快速导航卡片', () => {
-    render(
-      <MemoryRouter>
-        <HelpPage />
-      </MemoryRouter>
-    );
+    render(<HelpPage />, { wrapper });
 
     expect(screen.getByText('新用户注册')).toBeInTheDocument();
     expect(screen.getByText('模板库')).toBeInTheDocument();
@@ -38,11 +44,7 @@ describe('HelpPage', () => {
   });
 
   it('显示所有 FAQ 问题', () => {
-    render(
-      <MemoryRouter>
-        <HelpPage />
-      </MemoryRouter>
-    );
+    render(<HelpPage />, { wrapper });
 
     const expectedQuestions = [
       '如何创建一份新简历？',
@@ -59,11 +61,7 @@ describe('HelpPage', () => {
   });
 
   it('显示使用指南', () => {
-    render(
-      <MemoryRouter>
-        <HelpPage />
-      </MemoryRouter>
-    );
+    render(<HelpPage />, { wrapper });
 
     expect(screen.getByText('使用指南')).toBeInTheDocument();
     expect(screen.getByText('1. 创建账号')).toBeInTheDocument();
@@ -73,11 +71,7 @@ describe('HelpPage', () => {
   });
 
   it('有返回登录链接', () => {
-    render(
-      <MemoryRouter>
-        <HelpPage />
-      </MemoryRouter>
-    );
+    render(<HelpPage />, { wrapper });
 
     expect(screen.getByText('返回登录')).toBeInTheDocument();
   });

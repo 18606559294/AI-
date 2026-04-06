@@ -1,0 +1,26 @@
+{
+  "timestamp": "2026-04-05T20:46:14.417Z",
+  "summary": {
+    "loginSuccess": true,
+    "projectFound": true,
+    "projectName": "AI智能体简历",
+    "canAddService": false,
+    "addServiceMethod": null
+  },
+  "serviceDetails": {
+    "name": "AI智能体简历/production",
+    "type": "service",
+    "status": null,
+    "url": null,
+    "ports": [],
+    "environment": {},
+    "createdAt": null
+  },
+  "capabilities": {
+    "canViewConfig": true,
+    "canViewLogs": true,
+    "canAddService": false,
+    "canModifyService": null
+  },
+  "recommendations": []
+}

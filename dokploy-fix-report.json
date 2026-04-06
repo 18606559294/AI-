@@ -1,0 +1,21 @@
+{
+  "timestamp": "2026-04-05T20:34:28.189Z",
+  "steps": [],
+  "services": {
+    "redis": {
+      "action": "restart",
+      "status": "pending"
+    },
+    "backend": {
+      "action": "restart",
+      "status": "pending"
+    },
+    "mysql": {
+      "action": "check",
+      "status": "pending"
+    }
+  },
+  "errors": [],
+  "logs": [],
+  "finalStatus": {}
+}

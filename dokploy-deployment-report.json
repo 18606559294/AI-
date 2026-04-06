@@ -1,0 +1,95 @@
+{
+  "timestamp": "2026-04-05T20:29:07.574Z",
+  "appName": "ai-resume-platform",
+  "deployment": {
+    "status": "unknown",
+    "lastDeployment": null,
+    "logs": []
+  },
+  "services": {
+    "backend": {
+      "name": "Backend",
+      "status": "unknown",
+      "port": 8000,
+      "url": null
+    },
+    "frontend": {
+      "name": "Frontend",
+      "status": "unknown",
+      "port": 3000,
+      "url": null
+    },
+    "redis": {
+      "name": "Redis",
+      "status": "unknown",
+      "port": 6379,
+      "url": null
+    }
+  },
+  "domains": [
+    "http://www.w3.org",
+    "http://www.w3.org",
+    "http://www.w3.org",
+    "http://www.w3.org",
+    "http://www.w3.org",
+    "http://www.w3.org",
+    "http://www.w3.org",
+    "http://www.w3.org",
+    "http://www.w3.org",
+    "http://www.w3.org",
+    "http://www.w3.org",
+    "http://www.w3.org",
+    "http://www.w3.org",
+    "http://www.w3.org",
+    "http://www.w3.org",
+    "http://www.w3.org",
+    "http://www.w3.org",
+    "http://www.w3.org",
+    "http://www.w3.org",
+    "http://www.w3.org",
+    "http://www.w3.org",
+    "http://www.w3.org",
+    "http://www.w3.org",
+    "http://www.w3.org",
+    "http://www.w3.org",
+    "http://www.w3.org",
+    "http://www.w3.org",
+    "https://docs.dokploy.com",
+    "http://www.w3.org",
+    "https://discord.gg",
+    "http://www.w3.org",
+    "http://www.w3.org",
+    "http://www.w3.org",
+    "http://www.w3.org",
+    "http://www.w3.org",
+    "http://www.w3.org",
+    "http://www.w3.org",
+    "http://www.w3.org",
+    "http://www.w3.org",
+    "http://www.w3.org",
+    "http://www.w3.org",
+    "http://www.w3.org",
+    "http://www.w3.org",
+    "http://www.w3.org"
+  ],
+  "healthChecks": [
+    {
+      "service": "Backend",
+      "url": "http://113.45.64.145:8000/health",
+      "status": "unreachable",
+      "error": "page.goto: Timeout 10000ms exceeded.\nCall log:\n  - navigating to \"http://113.45.64.145:8000/health\", waiting until \"domcontentloaded\"\n"
+    },
+    {
+      "service": "Frontend",
+      "url": "http://113.45.64.145:3000/",
+      "status": "unreachable",
+      "error": "healthPage.status is not a function"
+    },
+    {
+      "service": "Redis",
+      "url": "http://113.45.64.145:6379",
+      "status": "unreachable",
+      "error": "page.goto: Timeout 10000ms exceeded.\nCall log:\n  - navigating to \"http://113.45.64.145:6379/\", waiting until \"domcontentloaded\"\n"
+    }
+  ]
+}

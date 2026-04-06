@@ -1,0 +1,118 @@
+[
+  {
+    "text": "Projects",
+    "href": "/dashboard/projects"
+  },
+  {
+    "text": "Deployments",
+    "href": "/dashboard/deployments"
+  },
+  {
+    "text": "Monitoring",
+    "href": "/dashboard/monitoring"
+  },
+  {
+    "text": "Schedules",
+    "href": "/dashboard/schedules"
+  },
+  {
+    "text": "Traefik File System",
+    "href": "/dashboard/traefik"
+  },
+  {
+    "text": "Docker",
+    "href": "/dashboard/docker"
+  },
+  {
+    "text": "Swarm",
+    "href": "/dashboard/swarm"
+  },
+  {
+    "text": "Requests",
+    "href": "/dashboard/requests"
+  },
+  {
+    "text": "Web Server",
+    "href": "/dashboard/settings/server"
+  },
+  {
+    "text": "Profile",
+    "href": "/dashboard/settings/profile"
+  },
+  {
+    "text": "Remote Servers",
+    "href": "/dashboard/settings/servers"
+  },
+  {
+    "text": "Users",
+    "href": "/dashboard/settings/users"
+  },
+  {
+    "text": "Audit Logs",
+    "href": "/dashboard/settings/audit-logs"
+  },
+  {
+    "text": "SSH Keys",
+    "href": "/dashboard/settings/ssh-keys"
+  },
+  {
+    "text": "AI",
+    "href": "/dashboard/settings/ai"
+  },
+  {
+    "text": "Git",
+    "href": "/dashboard/settings/git-providers"
+  },
+  {
+    "text": "Registry",
+    "href": "/dashboard/settings/registry"
+  },
+  {
+    "text": "S3 Destinations",
+    "href": "/dashboard/settings/destinations"
+  },
+  {
+    "text": "Certificates",
+    "href": "/dashboard/settings/certificates"
+  },
+  {
+    "text": "Cluster",
+    "href": "/dashboard/settings/cluster"
+  },
+  {
+    "text": "Notifications",
+    "href": "/dashboard/settings/notifications"
+  },
+  {
+    "text": "License",
+    "href": "/dashboard/settings/license"
+  },
+  {
+    "text": "SSO",
+    "href": "/dashboard/settings/sso"
+  },
+  {
+    "text": "Whitelabeling",
+    "href": "/dashboard/settings/whitelabeling"
+  },
+  {
+    "text": "Documentation",
+    "href": "https://docs.dokploy.com/docs/core"
+  },
+  {
+    "text": "Support",
+    "href": "https://discord.gg/2tBnJ3jDJc"
+  },
+  {
+    "text": "Projects",
+    "href": "/dashboard/projects"
+  },
+  {
+    "text": "ai-resume-platformAI Resume Platform - 智能简历生成系统Created 26 minutes ago0 services",
+    "href": "/dashboard/project/Fy_InxhROfT3c2taAJTmd/environment/gm180XpRlg-8sv7UPbzQH"
+  },
+  {
+    "text": "AI智能体简历AI智能体简历Created 2 days ago1 service",
+    "href": "/dashboard/project/hKHDNMV9pJ9GDVhXMJUSX/environment/knUE3WmJdtKEkJqX8rff0"
+  }
+]

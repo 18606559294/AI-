@@ -1,0 +1,122 @@
+[
+  {
+    "keyword": "service",
+    "text": "Toggle SidebarProjectsai-resume-platformproductionServer Time:20:42:37UTC | UTC+00:00ai-resume-platform/productionProduction environmentProject EnvironmentCreate ServiceSelect All Bulk ActionsRecently deployedSelect types...No services added yet. Click on Create Service.",
+    "tagName": "MAIN",
+    "className": "relative flex min-h-svh overflow-auto w-full flex-col bg-background peer-data-[variant=inset]:min-h-[calc(100svh-theme(spacing.4))] md:peer-data-[variant=inset]:m-2 md:peer-data-[state=collapsed]:peer-data-[variant=inset]:ml-2 md:peer-data-[variant=inset]:ml-0 md:peer-data-[variant=inset]:rounded-xl md:peer-data-[variant=inset]:shadow"
+  },
+  {
+    "keyword": "service",
+    "text": "Toggle SidebarProjectsai-resume-platformproductionServer Time:20:42:37UTC | UTC+00:00ai-resume-platform/productionProduction environmentProject EnvironmentCreate ServiceSelect All Bulk ActionsRecently deployedSelect types...No services added yet. Click on Create Service.",
+    "tagName": "DIV",
+    "className": "flex flex-col w-full p-4 pt-0"
+  },
+  {
+    "keyword": "service",
+    "text": "Toggle SidebarProjectsai-resume-platformproductionServer Time:20:42:37UTC | UTC+00:00ai-resume-platform/productionProduction environmentProject EnvironmentCreate ServiceSelect All Bulk ActionsRecently deployedSelect types...No services added yet. Click on Create Service.",
+    "tagName": "DIV",
+    "className": ""
+  },
+  {
+    "keyword": "service",
+    "text": "ai-resume-platform/productionProduction environmentProject EnvironmentCreate ServiceSelect All Bulk ActionsRecently deployedSelect types...No services added yet. Click on Create Service.",
+    "tagName": "DIV",
+    "className": "w-full"
+  },
+  {
+    "keyword": "service",
+    "text": "ai-resume-platform/productionProduction environmentProject EnvironmentCreate ServiceSelect All Bulk ActionsRecently deployedSelect types...No services added yet. Click on Create Service.",
+    "tagName": "DIV",
+    "className": "border text-card-foreground shadow-sm h-full bg-sidebar p-2.5 rounded-xl"
+  },
+  {
+    "keyword": "service",
+    "text": "ai-resume-platform/productionProduction environmentProject EnvironmentCreate ServiceSelect All Bulk ActionsRecently deployedSelect types...No services added yet. Click on Create Service.",
+    "tagName": "DIV",
+    "className": "rounded-xl bg-background shadow-md"
+  },
+  {
+    "keyword": "service",
+    "text": "ai-resume-platform/productionProduction environmentProject EnvironmentCreate Service",
+    "tagName": "DIV",
+    "className": "flex justify-between gap-4 w-full items-center flex-wrap p-6"
+  },
+  {
+    "keyword": "service",
+    "text": "Project EnvironmentCreate Service",
+    "tagName": "DIV",
+    "className": "flex flex-row gap-4 flex-wrap justify-between items-center"
+  },
+  {
+    "keyword": "service",
+    "text": "Project EnvironmentCreate Service",
+    "tagName": "DIV",
+    "className": "flex flex-row gap-4 flex-wrap"
+  },
+  {
+    "keyword": "service",
+    "text": "Create Service",
+    "tagName": "BUTTON",
+    "className": "items-center justify-center whitespace-nowrap select-none rounded-lg transition-all will-change-transform active:hover:scale-[0.98] active:hover:transform text-sm font-medium ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2 flex gap-2"
+  },
+  {
+    "keyword": "service",
+    "text": "Select All Bulk ActionsRecently deployedSelect types...No services added yet. Click on Create Service.",
+    "tagName": "DIV",
+    "className": "p-6 space-y-2 py-8 border-t gap-4 flex flex-col min-h-[60vh]"
+  },
+  {
+    "keyword": "service",
+    "text": "No services added yet. Click on Create Service.",
+    "tagName": "DIV",
+    "className": "flex w-full gap-8"
+  },
+  {
+    "keyword": "service",
+    "text": "No services added yet. Click on Create Service.",
+    "tagName": "DIV",
+    "className": "flex h-[70vh] w-full flex-col items-center justify-center"
+  },
+  {
+    "keyword": "service",
+    "text": "No services added yet. Click on Create Service.",
+    "tagName": "SPAN",
+    "className": "text-center font-medium text-muted-foreground"
+  },
+  {
+    "keyword": "deployment",
+    "text": "HomeProjectsDeploymentsMonitoringSchedulesTraefik File SystemDockerSwarmRequestsSettingsWeb ServerProfileRemote ServersUsersAudit LogsSSH KeysAIGitRegistryS3 DestinationsCertificatesClusterNotificationsLicenseSSOWhitelabelingExtraDocumentationSupport",
+    "tagName": "DIV",
+    "className": "flex min-h-0 flex-1 flex-col gap-2 overflow-auto group-data-[collapsible=icon]:overflow-y-auto"
+  },
+  {
+    "keyword": "deployment",
+    "text": "HomeProjectsDeploymentsMonitoringSchedulesTraefik File SystemDockerSwarmRequests",
+    "tagName": "DIV",
+    "className": "relative flex w-full min-w-0 flex-col p-2"
+  },
+  {
+    "keyword": "deployment",
+    "text": "ProjectsDeploymentsMonitoringSchedulesTraefik File SystemDockerSwarmRequests",
+    "tagName": "UL",
+    "className": "flex w-full min-w-0 flex-col gap-1"
+  },
+  {
+    "keyword": "deployment",
+    "text": "Deployments",
+    "tagName": "LI",
+    "className": "group/menu-item relative group/collapsible"
+  },
+  {
+    "keyword": "deployment",
+    "text": "Deployments",
+    "tagName": "A",
+    "className": "focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring focus-visible:ring-offset-1 peer/menu-button flex w-full items-center gap-2 overflow-hidden rounded-md p-2 text-left outline-none ring-sidebar-ring transition-[width,height,padding] focus-visible:ring-2 active:bg-sidebar-accent active:text-sidebar-accent-foreground disabled:pointer-events-none disabled:opacity-50 group-has-[[data-sidebar=menu-action]]/menu-item:pr-8 aria-disabled:pointer-events-none aria-disabled:opacity-50 data-[active=true]:bg-sidebar-accent data-[active=true]:font-medium data-[active=true]:text-sidebar-accent-foreground data-[state=open]:hover:bg-sidebar-accent data-[state=open]:hover:text-sidebar-accent-foreground group-data-[collapsible=icon]:!size-8 group-data-[collapsible=icon]:!p-2 [&>span:last-child]:truncate [&>svg]:size-4 [&>svg]:shrink-0 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground h-8 text-sm flex w-full items-center gap-2"
+  },
+  {
+    "keyword": "deployment",
+    "text": "Deployments",
+    "tagName": "SPAN",
+    "className": ""
+  }
+]

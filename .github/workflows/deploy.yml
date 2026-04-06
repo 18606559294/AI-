@@ -1,0 +1,454 @@
+# GitHub Actions CI/CD 工作流配置
+# 用于AI智能体简历平台的自动化构建、测试和部署
+
+name: AI Resume Platform CI/CD
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+  workflow_dispatch:  # 允许手动触发
+
+env:
+  NODE_VERSION: '18.x'
+  PYTHON_VERSION: '3.11.x'
+  DOCKER_REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  # ============================================
+  # 代码质量检查
+  # ============================================
+  code-quality:
+    name: 代码质量检查
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # 完整历史用于分析
+
+      - name: 设置Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: 安装依赖
+        run: npm ci
+
+      - name: ESLint检查
+        run: npm run lint --if-present
+
+      - name: TypeScript类型检查
+        run: npm run type-check --if-present
+
+      - name: Prettier格式检查
+        run: npm run format:check --if-present
+
+      - name: 安全漏洞扫描
+        run: npm audit --audit-level=high
+        continue-on-error: true
+
+  # ============================================
+  # 前端测试
+  # ============================================
+  frontend-tests:
+    name: 前端测试
+    runs-on: ubuntu-latest
+    needs: code-quality
+
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+
+      - name: 设置Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: 安装依赖
+        run: |
+          cd frontend
+          npm ci
+
+      - name: 单元测试
+        run: |
+          cd frontend
+          npm run test:unit --if-present
+        env:
+          CI: true
+
+      - name: 构建测试
+        run: |
+          cd frontend
+          npm run build
+        env:
+          VITE_API_URL: http://localhost:8000
+
+      - name: E2E测试
+        run: npm run test:e2e --if-present
+        continue-on-error: true
+
+  # ============================================
+  # 后端测试
+  # ============================================
+  backend-tests:
+    name: 后端测试
+    runs-on: ubuntu-latest
+    needs: code-quality
+
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: test_password
+          MYSQL_DATABASE: airesume_test
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=3
+
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd="redis-cli ping"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=3
+
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+
+      - name: 设置Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: 'pip'
+
+      - name: 安装依赖
+        run: |
+          cd backend
+          pip install -r requirements.txt
+          pip install -r requirements-dev.txt
+
+      - name: 代码风格检查
+        run: |
+          cd backend
+          flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+          black --check .
+          isort --check-only .
+
+      - name: 单元测试
+        run: |
+          cd backend
+          pytest tests/unit -v --cov=. --cov-report=xml
+        env:
+          DATABASE_URL: mysql://root:test_password@localhost:3306/airesume_test
+          REDIS_URL: redis://localhost:6379/0
+          SECRET_KEY: test_secret_key_for_ci
+
+      - name: 集成测试
+        run: |
+          cd backend
+          pytest tests/integration -v
+        env:
+          DATABASE_URL: mysql://root:test_password@localhost:3306/airesume_test
+          REDIS_URL: redis://localhost:6379/0
+          SECRET_KEY: test_secret_key_for_ci
+
+      - name: 安全扫描
+        run: |
+          cd backend
+          bandit -r . -f json -o bandit-report.json
+        continue-on-error: true
+
+      - name: 上传测试覆盖率
+        uses: codecov/codecov-action@v3
+        with:
+          files: ./backend/coverage.xml
+          flags: backend
+          name: backend-coverage
+
+  # ============================================
+  # Docker镜像构建
+  # ============================================
+  build-images:
+    name: 构建Docker镜像
+    runs-on: ubuntu-latest
+    needs: [frontend-tests, backend-tests]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+
+    permissions:
+      contents: read
+      packages: write
+
+    strategy:
+      matrix:
+        service: [backend, frontend]
+
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+
+      - name: 设置Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: 登录到容器 registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.DOCKER_REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: 提取镜像元数据
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.DOCKER_REGISTRY }}/${{ env.IMAGE_NAME }}-${{ matrix.service }}
+          tags: |
+            type=ref,event=branch
+            type=ref,event=pr
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=sha,prefix={{branch}}-
+            type=raw,value=latest,enable={{is_default_branch}}
+
+      - name: 构建并推送镜像
+        uses: docker/build-push-action@v5
+        with:
+          context: ./${{ matrix.service }}
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          build-args: |
+            BUILD_DATE=${{ steps.meta.outputs.created }}
+            VERSION=${{ steps.meta.outputs.version }}
+
+  # ============================================
+  # 部署到生产环境
+  # ============================================
+  deploy-production:
+    name: 部署到生产环境
+    runs-on: ubuntu-latest
+    needs: build-images
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    environment:
+      name: production
+      url: http://113.45.64.145:3000
+
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+
+      - name: 部署到Dokploy
+        run: |
+          # 通过SSH连接到服务器并触发部署
+          echo "部署到生产环境..."
+          # 这里需要配置SSH密钥和Dokploy API
+          # 或者使用Dokploy的webhook功能
+
+      - name: 健康检查
+        run: |
+          # 等待服务启动
+          sleep 30
+
+          # 检查Frontend
+          curl -f http://113.45.64.145:3000 || exit 1
+
+          # 检查Backend
+          curl -f http://113.45.64.145:8000/health || exit 1
+
+          echo "部署健康检查通过"
+
+      - name: 通知部署结果
+        if: always()
+        run: |
+          if [ ${{ job.status }} == 'success' ]; then
+            echo "部署成功！"
+            # 这里可以添加Slack/企业微信通知
+          else
+            echo "部署失败！"
+            # 发送失败通知
+          fi
+
+  # ============================================
+  # 数据库迁移
+  # ============================================
+  database-migration:
+    name: 数据库迁移
+    runs-on: ubuntu-latest
+    needs: deploy-production
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+
+      - name: 设置Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: 安装依赖
+        run: |
+          pip install alembic psycopg2-binary
+
+      - name: 运行数据库迁移
+        run: |
+          # 通过SSH连接到生产服务器
+          # 执行数据库迁移
+          echo "执行数据库迁移..."
+          # alembic upgrade head
+
+      - name: 验证迁移结果
+        run: |
+          echo "验证数据库版本..."
+          # alembic current
+
+  # ============================================
+  # 性能测试
+  # ============================================
+  performance-test:
+    name: 性能测试
+    runs-on: ubuntu-latest
+    needs: deploy-production
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+
+      - name: 安装k6
+        run: |
+          sudo gpg -k
+          sudo gpg --no-default-keyring --keyring /usr/share/keyrings/k6-archive-keyring.gpg --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys C5AD17C747E3415A3642D57D77C6C491D6AC1D69
+          echo "deb [signed-by=/usr/share/keyrings/k6-archive-keyring.gpg] https://dl.k6.io/deb stable main" | sudo tee /etc/apt/sources.list.d/k6.list
+          sudo apt-get update
+          sudo apt-get install k6
+
+      - name: 运行性能测试
+        run: |
+          k6 run - <<EOF
+          import http from 'k6/http';
+          import { check, sleep } from 'k6';
+
+          export let options = {
+            stages: [
+              { duration: '1m', target: 10 },
+              { duration: '2m', target: 50 },
+              { duration: '1m', target: 0 },
+            ],
+            thresholds: {
+              http_req_duration: ['p(95)<500'],
+              http_req_failed: ['rate<0.01'],
+            },
+          };
+
+          export default function() {
+            let res = http.get('http://113.45.64.145:8000/health');
+            check(res, {
+              'status was 200': (r) => r.status == 200,
+              'response time < 500ms': (r) => r.timings.duration < 500,
+            });
+            sleep(1);
+          }
+          EOF
+
+      - name: 上传性能测试结果
+        uses: actions/upload-artifact@v3
+        with:
+          name: performance-test-results
+          path: performance-results.json
+
+  # ============================================
+  # 安全扫描
+  # ============================================
+  security-scan:
+    name: 安全扫描
+    runs-on: ubuntu-latest
+    needs: build-images
+    if: github.event_name == 'push'
+
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+
+      - name: 运行Trivy漏洞扫描
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'fs'
+          scan-ref: '.'
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+
+      - name: 上传扫描结果到GitHub Security
+        uses: github/codeql-action/upload-sarif@v2
+        with:
+          sarif_file: 'trivy-results.sarif'
+
+  # ============================================
+  # 通知和报告
+  # ============================================
+  notify:
+    name: 发送通知
+    runs-on: ubuntu-latest
+    needs: [deploy-production, database-migration]
+    if: always()
+
+    steps:
+      - name: 发送Slack通知
+        uses: slackapi/slack-github-action@v1.24.0
+        with:
+          payload: |
+            {
+              "text": "AI Resume Platform 部署状态更新",
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "*部署状态*: ${{ needs.deploy-production.result }}\n*数据库迁移*: ${{ needs.database-migration.result }}\n*提交*: ${{ github.sha }}\n*作者*: ${{ github.actor }}"
+                  }
+                }
+              ]
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        if: success() || failure()
+
+  # ============================================
+  # 回滚任务 (手动触发)
+  # ============================================
+  rollback:
+    name: 回滚到上一版本
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch'
+
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: 回滚到上一个稳定版本
+        run: |
+          echo "执行回滚操作..."
+          # 这里需要实现具体的回滚逻辑
+          # 可能包括：恢复数据库、切换Docker镜像等
+
+      - name: 验证回滚结果
+        run: |
+          curl -f http://113.45.64.145:3000 || exit 1
+          curl -f http://113.45.64.145:8000/health || exit 1

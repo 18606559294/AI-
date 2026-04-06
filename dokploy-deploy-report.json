@@ -1,0 +1,36 @@
+{
+  "timestamp": "2026-04-05T20:21:30.691Z",
+  "success": false,
+  "duration": 64,
+  "services": {
+    "backend": {
+      "status": "unknown",
+      "port": 8000
+    },
+    "frontend": {
+      "status": "unknown",
+      "port": 3000
+    },
+    "redis": {
+      "status": "unknown"
+    }
+  },
+  "screenshots": [
+    "dokploy-01-login-page.png",
+    "dokploy-02-form-filled.png",
+    "dokploy-03-after-login.png",
+    "dokploy-05-app-page.png",
+    "dokploy-06-deploy-started.png",
+    "dokploy-07-final-status.png",
+    "dokploy-1-landing.png",
+    "dokploy-2-before-login.png",
+    "dokploy-3-after-login.png",
+    "dokploy-4-settings.png",
+    "dokploy-5-ssh-keys.png",
+    "dokploy-6-add-ssh-modal.png",
+    "dokploy-7-ssh-key-entered.png",
+    "dokploy-8-after-save.png",
+    "dokploy-deploy-progress-1775420490627.png",
+    "dokploy-error.png"
+  ]
+}
