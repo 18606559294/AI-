@@ -18,12 +18,12 @@ getApiClient().setBaseURL(API_BASE_URL);
 // 获取 basename（用于子路径部署）
 const basename = import.meta.env.BASE_URL === '/' ? undefined : import.meta.env.BASE_URL?.replace(/\/$/, '');
 
-// 初始化性能监控 (仅在web-vitals安装完成后启用)
-// if (import.meta.env.PROD) {
-//   import('./utils/performance').then(({ initPerformanceMonitoring }) => {
-//     initPerformanceMonitoring().catch(console.error);
-//   });
-// }
+// 初始化性能监控 (生产环境启用)
+if (import.meta.env.PROD) {
+  import('./utils/performance').then(({ initPerformanceMonitoring }) => {
+    initPerformanceMonitoring().catch(console.error);
+  });
+}
 
 const queryClient = new QueryClient({
   defaultOptions: {
