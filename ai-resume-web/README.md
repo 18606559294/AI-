@@ -264,10 +264,10 @@ npm run type-check
 - ✅ AboutPage
 - ✅ HelpPage
 - ✅ LandingPage
+- ✅ TermsPage
+- ✅ PrivacyPage
 
-**待测试页面**：
-- ⏳ TermsPage
-- ⏳ PrivacyPage
+**测试覆盖率**: 100% (14/14 页面已测试) ✅
 
 ## 环境变量
 
