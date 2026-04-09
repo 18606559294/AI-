@@ -90,7 +90,7 @@ describe('AboutPage', () => {
       </MemoryRouter>
     );
 
-    expect(screen.getByText('AI 简历')).toBeInTheDocument();
+    expect(screen.getByText('AI简历')).toBeInTheDocument();
     expect(screen.getByText('我的简历')).toBeInTheDocument();
     expect(screen.getByText('模板库')).toBeInTheDocument();
   });
