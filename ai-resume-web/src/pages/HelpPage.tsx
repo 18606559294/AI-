@@ -53,7 +53,7 @@ export default function HelpPage() {
         <header className="border-b border-slate-800/50 backdrop-blur-sm">
           <div className="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">
             <Link to="/" className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-sky-400 to-accent-500 flex items-center justify-center shadow-neon-blue">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-400 to-emerald-500 flex items-center justify-center shadow-neon-blue">
                 <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                 </svg>
@@ -78,9 +78,9 @@ export default function HelpPage() {
 
             {/* 快速导航 */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-              <Link to="/register" className="p-4 rounded-lg bg-slate-800/50 border border-slate-700/50 hover:border-sky-500/50 transition-colors">
-                <div className="w-10 h-10 rounded-lg bg-sky-500/20 flex items-center justify-center mb-3">
-                  <svg className="w-5 h-5 text-sky-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <Link to="/register" className="p-4 rounded-lg bg-slate-800/50 border border-slate-700/50 hover:border-amber-500/50 transition-colors">
+                <div className="w-10 h-10 rounded-lg bg-amber-500/20 flex items-center justify-center mb-3">
+                  <svg className="w-5 h-5 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
                   </svg>
                 </div>
@@ -88,9 +88,9 @@ export default function HelpPage() {
                 <p className="text-slate-400 text-xs">创建账号开始使用</p>
               </Link>
 
-              <Link to="/templates" className="p-4 rounded-lg bg-slate-800/50 border border-slate-700/50 hover:border-sky-500/50 transition-colors">
-                <div className="w-10 h-10 rounded-lg bg-accent-500/20 flex items-center justify-center mb-3">
-                  <svg className="w-5 h-5 text-accent-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <Link to="/templates" className="p-4 rounded-lg bg-slate-800/50 border border-slate-700/50 hover:border-amber-500/50 transition-colors">
+                <div className="w-10 h-10 rounded-lg bg-emerald-500/20 flex items-center justify-center mb-3">
+                  <svg className="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z" />
                   </svg>
                 </div>
@@ -98,7 +98,7 @@ export default function HelpPage() {
                 <p className="text-slate-400 text-xs">浏览50+专业模板</p>
               </Link>
 
-              <a href="mailto:support@airesume.com" className="p-4 rounded-lg bg-slate-800/50 border border-slate-700/50 hover:border-sky-500/50 transition-colors">
+              <a href="mailto:support@airesume.com" className="p-4 rounded-lg bg-slate-800/50 border border-slate-700/50 hover:border-amber-500/50 transition-colors">
                 <div className="w-10 h-10 rounded-lg bg-pink-500/20 flex items-center justify-center mb-3">
                   <svg className="w-5 h-5 text-pink-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
@@ -114,7 +114,7 @@ export default function HelpPage() {
             <div className="space-y-4">
               {faqs.map((faq) => (
                 <details key={faq.question} className="group">
-                  <summary className="flex items-center justify-between p-4 rounded-lg bg-slate-800/50 border border-slate-700/50 cursor-pointer hover:border-sky-500/50 transition-colors">
+                  <summary className="flex items-center justify-between p-4 rounded-lg bg-slate-800/50 border border-slate-700/50 cursor-pointer hover:border-amber-500/50 transition-colors">
                     <span className="text-white font-medium">{faq.question}</span>
                     <svg className="w-5 h-5 text-slate-400 group-open:rotate-180 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />

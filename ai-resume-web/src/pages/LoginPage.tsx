@@ -72,7 +72,7 @@ export default function LoginPage() {
           {/* Logo & Title */}
           <div className="text-center mb-6">
             <Link to="/" className="inline-flex items-center justify-center gap-3 mb-4">
-              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-sky-400 to-accent-500 flex items-center justify-center shadow-neon-blue">
+              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-amber-400 to-emerald-500 flex items-center justify-center shadow-neon-blue">
                 <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                 </svg>
@@ -127,7 +127,7 @@ export default function LoginPage() {
                   <label htmlFor="password-input" className="block text-xs font-medium text-slate-300">
                     密码
                   </label>
-                  <Link to="/forgot-password" className="text-xs text-sky-400 hover:text-sky-300">
+                  <Link to="/forgot-password" className="text-xs text-amber-400 hover:text-amber-300">
                     忘记密码？
                   </Link>
                 </div>
@@ -154,7 +154,7 @@ export default function LoginPage() {
                   type="checkbox"
                   checked={rememberPassword}
                   onChange={(e) => setRememberPassword(e.target.checked)}
-                  className="w-4 h-4 rounded border-slate-600 text-sky-500 focus:ring-sky-500 focus:ring-offset-slate-900"
+                  className="w-4 h-4 rounded border-slate-600 text-amber-500 focus:ring-amber-500 focus:ring-offset-slate-900"
                   data-testid="remember-password"
                 />
                 <label htmlFor="remember-password" className="text-xs text-slate-300 cursor-pointer select-none">
@@ -200,7 +200,7 @@ export default function LoginPage() {
 
               <div className="text-center text-xs text-slate-400">
                 还没有账号？
-                <Link to="/register" className="text-sky-400 hover:text-sky-300 font-medium ml-1" data-testid="register-link">
+                <Link to="/register" className="text-amber-400 hover:text-amber-300 font-medium ml-1" data-testid="register-link">
                   立即注册
                 </Link>
               </div>

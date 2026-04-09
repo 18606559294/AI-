@@ -29,8 +29,9 @@ const platforms: Platform[] = [
   },
   {
     name: 'Android',
-    ver: 'Android 8+',
-    available: false,
+    ver: 'Android 8+ · v1.0.0',
+    available: true,
+    url: '/downloads/ai-resume-android.apk',
     icon: <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="28" height="28"><path d="M17.523 2.237l1.59-1.59a.5.5 0 0 0-.707-.707l-1.8 1.8A8.038 8.038 0 0 0 12 .727a8.038 8.038 0 0 0-4.606 1.413l-1.8-1.8a.5.5 0 0 0-.707.707l1.59 1.59A7.983 7.983 0 0 0 4 8.727h16a7.983 7.983 0 0 0-2.477-6.49zM9 6.727a.75.75 0 1 1 0-1.5.75.75 0 0 1 0 1.5zm6 0a.75.75 0 1 1 0-1.5.75.75 0 0 1 0 1.5zM4 9.727v8a2 2 0 0 0 2 2h1v3.5a1.5 1.5 0 0 0 3 0v-3.5h4v3.5a1.5 1.5 0 0 0 3 0v-3.5h1a2 2 0 0 0 2-2v-8H4zm-3 1.5a1.5 1.5 0 0 1 3 0v6a1.5 1.5 0 0 1-3 0v-6zm20 0a1.5 1.5 0 0 1 3 0v6a1.5 1.5 0 0 1-3 0v-6z" /></svg>,
   },
   {

@@ -56,10 +56,10 @@ function DraggableWorkItem({ work, index, onRemove, onUpdate }: {
 
   return (
     <div ref={setNodeRef} style={style} className="relative group">
-      <div className="card p-6 border-l-4 border-primary-500">
+      <div className="card p-6 border-l-4 border-amber-500">
         {/* 拖拽手柄 */}
         <div
-          className="absolute left-3 top-4 cursor-grab active:cursor-grabbing text-gray-400 hover:text-gray-600"
+          className="absolute left-3 top-4 cursor-grab active:cursor-grabbing text-slate-500 hover:text-slate-300"
           {...attributes}
           {...listeners}
         >
@@ -69,7 +69,7 @@ function DraggableWorkItem({ work, index, onRemove, onUpdate }: {
         {/* 移除按钮 */}
         <button
           onClick={() => onRemove(index)}
-          className="absolute right-4 top-4 text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
+          className="absolute right-4 top-4 text-slate-500 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity"
         >
           <Trash2 className="w-5 h-5" />
         </button>
@@ -77,34 +77,34 @@ function DraggableWorkItem({ work, index, onRemove, onUpdate }: {
         {/* 内容 */}
         <div className="pl-10 space-y-4">
           <div className="flex items-center gap-2 mb-2">
-            <span className="bg-primary-100 text-primary-700 text-xs font-medium px-2 py-1 rounded">
+            <span className="bg-amber-500/20 text-amber-400 text-xs font-medium px-2 py-1 rounded">
               {index + 1}
             </span>
           </div>
 
           <div className="grid md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">公司</label>
+              <label className="block text-sm font-medium text-slate-300 mb-1">公司</label>
               <input
                 type="text"
                 value={work.company || ''}
                 onChange={(e) => onUpdate(index, 'company', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                className="w-full px-3 py-2 border border-white/10 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">职位</label>
+              <label className="block text-sm font-medium text-slate-300 mb-1">职位</label>
               <input
                 type="text"
                 value={work.position || ''}
                 onChange={(e) => onUpdate(index, 'position', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                className="w-full px-3 py-2 border border-white/10 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500"
               />
             </div>
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">工作描述</label>
+            <label className="block text-sm font-medium text-slate-300 mb-1">工作描述</label>
             <RichTextEditor
               content={work.description || ''}
               onChange={(html) => onUpdate(index, 'description', html)}
@@ -137,10 +137,10 @@ function DraggableEduItem({ edu, index, onRemove, onUpdate }: {
 
   return (
     <div ref={setNodeRef} style={style} className="relative group">
-      <div className="card p-6 border-l-4 border-blue-500">
+      <div className="card p-6 border-l-4 border-emerald-500">
         {/* 拖拽手柄 */}
         <div
-          className="absolute left-3 top-4 cursor-grab active:cursor-grabbing text-gray-400 hover:text-gray-600"
+          className="absolute left-3 top-4 cursor-grab active:cursor-grabbing text-slate-500 hover:text-slate-300"
           {...attributes}
           {...listeners}
         >
@@ -150,7 +150,7 @@ function DraggableEduItem({ edu, index, onRemove, onUpdate }: {
         {/* 移除按钮 */}
         <button
           onClick={() => onRemove(index)}
-          className="absolute right-4 top-4 text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
+          className="absolute right-4 top-4 text-slate-500 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity"
         >
           <Trash2 className="w-5 h-5" />
         </button>
@@ -158,37 +158,37 @@ function DraggableEduItem({ edu, index, onRemove, onUpdate }: {
         {/* 内容 */}
         <div className="pl-10 space-y-4">
           <div className="flex items-center gap-2 mb-2">
-            <span className="bg-blue-100 text-blue-700 text-xs font-medium px-2 py-1 rounded">
+            <span className="bg-emerald-500/20 text-emerald-400 text-xs font-medium px-2 py-1 rounded">
               {index + 1}
             </span>
           </div>
 
           <div className="grid md:grid-cols-3 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">学校</label>
+              <label className="block text-sm font-medium text-slate-300 mb-1">学校</label>
               <input
                 type="text"
                 value={edu.school || ''}
                 onChange={(e) => onUpdate(index, 'school', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                className="w-full px-3 py-2 border border-white/10 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">学位</label>
+              <label className="block text-sm font-medium text-slate-300 mb-1">学位</label>
               <input
                 type="text"
                 value={edu.degree || ''}
                 onChange={(e) => onUpdate(index, 'degree', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                className="w-full px-3 py-2 border border-white/10 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">专业</label>
+              <label className="block text-sm font-medium text-slate-300 mb-1">专业</label>
               <input
                 type="text"
                 value={edu.major || ''}
                 onChange={(e) => onUpdate(index, 'major', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                className="w-full px-3 py-2 border border-white/10 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500"
               />
             </div>
           </div>
@@ -217,10 +217,10 @@ function DraggableProjectItem({ project, index, onRemove, onUpdate }: {
 
   return (
     <div ref={setNodeRef} style={style} className="relative group">
-      <div className="card p-6 border-l-4 border-purple-500">
+      <div className="card p-6 border-l-4 border-emerald-500">
         {/* 拖拽手柄 */}
         <div
-          className="absolute left-3 top-4 cursor-grab active:cursor-grabbing text-gray-400 hover:text-gray-600"
+          className="absolute left-3 top-4 cursor-grab active:cursor-grabbing text-slate-500 hover:text-slate-300"
           {...attributes}
           {...listeners}
         >
@@ -230,7 +230,7 @@ function DraggableProjectItem({ project, index, onRemove, onUpdate }: {
         {/* 移除按钮 */}
         <button
           onClick={() => onRemove(index)}
-          className="absolute right-4 top-4 text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
+          className="absolute right-4 top-4 text-slate-500 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity"
         >
           <Trash2 className="w-5 h-5" />
         </button>
@@ -238,34 +238,34 @@ function DraggableProjectItem({ project, index, onRemove, onUpdate }: {
         {/* 内容 */}
         <div className="pl-10 space-y-4">
           <div className="flex items-center gap-2 mb-2">
-            <span className="bg-purple-100 text-purple-700 text-xs font-medium px-2 py-1 rounded">
+            <span className="bg-emerald-500/20 text-emerald-400 text-xs font-medium px-2 py-1 rounded">
               {index + 1}
             </span>
           </div>
 
           <div className="grid md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">项目名称</label>
+              <label className="block text-sm font-medium text-slate-300 mb-1">项目名称</label>
               <input
                 type="text"
                 value={project.name || ''}
                 onChange={(e) => onUpdate(index, 'name', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                className="w-full px-3 py-2 border border-white/10 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">担任角色</label>
+              <label className="block text-sm font-medium text-slate-300 mb-1">担任角色</label>
               <input
                 type="text"
                 value={project.role || ''}
                 onChange={(e) => onUpdate(index, 'role', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                className="w-full px-3 py-2 border border-white/10 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500"
               />
             </div>
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">项目描述</label>
+            <label className="block text-sm font-medium text-slate-300 mb-1">项目描述</label>
             <RichTextEditor
               content={project.description || ''}
               onChange={(html) => onUpdate(index, 'description', html)}
@@ -519,18 +519,18 @@ export default function ResumeEditorPage() {
   if (isLoading && !isNew) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="w-8 h-8 border-4 border-primary-200 border-t-primary-600 rounded-full animate-spin" />
+        <div className="w-8 h-8 border-4 border-amber-200 border-t-amber-500 rounded-full animate-spin" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
+    <div className="min-h-screen bg-slate-950 flex flex-col">
       {/* 顶部栏 */}
-      <header className="bg-white border-b sticky top-0 z-10">
+      <header className="bg-slate-900/80 backdrop-blur-sm border-b border-white/10 sticky top-0 z-10">
         <div className="max-w-7xl mx-auto px-4 py-3">
           <div className="flex items-center justify-between">
-            <Link to="/dashboard" className="text-xl font-bold text-primary-600">
+            <Link to="/dashboard" className="text-xl font-bold text-amber-400">
               AI 简历
             </Link>
 
@@ -539,7 +539,7 @@ export default function ResumeEditorPage() {
                 type="text"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
-                className="text-center font-medium text-lg border-b-2 border-transparent hover:border-gray-300 focus:border-primary-500 focus:outline-none px-2 py-1"
+                className="text-center font-medium text-lg border-b-2 border-transparent hover:border-white/10 focus:border-amber-500 focus:outline-none px-2 py-1"
               />
             </div>
 
@@ -614,13 +614,13 @@ export default function ResumeEditorPage() {
 
       {/* 预览模式 */}
       {showPreview ? (
-        <main className="flex-1 overflow-auto bg-gray-100 p-8">
+        <main className="flex-1 overflow-auto bg-slate-900 p-8">
           <ResumePreview content={content} template={previewTemplate} />
         </main>
       ) : (
         <>
           {/* 标签页导航 */}
-          <div className="bg-white border-b">
+          <div className="bg-slate-900/80 border-b border-white/10">
             <div className="max-w-7xl mx-auto px-4">
               <div className="flex gap-1">
                 {tabs.map((tab) => (
@@ -629,8 +629,8 @@ export default function ResumeEditorPage() {
                     onClick={() => setActiveTab(tabs.indexOf(tab))}
                     className={`px-6 py-3 font-medium transition-colors ${
                       activeTab === tabs.indexOf(tab)
-                        ? 'text-primary-600 border-b-2 border-primary-600'
-                        : 'text-gray-600 hover:text-gray-900'
+                        ? 'text-amber-400 border-b-2 border-amber-500'
+                        : 'text-slate-400 hover:text-slate-200'
                     }`}
                   >
                     <span className="mr-1">{tab.icon}</span>
@@ -646,11 +646,11 @@ export default function ResumeEditorPage() {
             <div className="max-w-4xl mx-auto px-4 py-8">
               {activeTab === 0 && (
                 <div className="space-y-6">
-                  <h2 className="text-xl font-semibold mb-4">基本信息</h2>
+                  <h2 className="text-xl font-semibold text-slate-100 mb-4">基本信息</h2>
                   <div className="card p-6 space-y-4">
                     <div className="grid md:grid-cols-2 gap-4">
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">姓名</label>
+                        <label className="block text-sm font-medium text-slate-300 mb-1">姓名</label>
                         <input
                           type="text"
                           value={content.basic_info?.name || ''}
@@ -658,11 +658,11 @@ export default function ResumeEditorPage() {
                             ...content,
                             basic_info: { ...content.basic_info, name: e.target.value },
                           })}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                          className="w-full px-3 py-2 border border-white/10 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500"
                         />
                       </div>
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">邮箱</label>
+                        <label className="block text-sm font-medium text-slate-300 mb-1">邮箱</label>
                         <input
                           type="email"
                           value={content.basic_info?.email || ''}
@@ -670,11 +670,11 @@ export default function ResumeEditorPage() {
                             ...content,
                             basic_info: { ...content.basic_info, email: e.target.value },
                           })}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                          className="w-full px-3 py-2 border border-white/10 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500"
                         />
                       </div>
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">电话</label>
+                        <label className="block text-sm font-medium text-slate-300 mb-1">电话</label>
                         <input
                           type="tel"
                           value={content.basic_info?.phone || ''}
@@ -682,11 +682,11 @@ export default function ResumeEditorPage() {
                             ...content,
                             basic_info: { ...content.basic_info, phone: e.target.value },
                           })}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                          className="w-full px-3 py-2 border border-white/10 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500"
                         />
                       </div>
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">地点</label>
+                        <label className="block text-sm font-medium text-slate-300 mb-1">地点</label>
                         <input
                           type="text"
                           value={content.basic_info?.location || ''}
@@ -694,11 +694,11 @@ export default function ResumeEditorPage() {
                             ...content,
                             basic_info: { ...content.basic_info, location: e.target.value },
                           })}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                          className="w-full px-3 py-2 border border-white/10 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500"
                         />
                       </div>
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">职位</label>
+                        <label className="block text-sm font-medium text-slate-300 mb-1">职位</label>
                         <input
                           type="text"
                           value={content.basic_info?.title || ''}
@@ -706,11 +706,11 @@ export default function ResumeEditorPage() {
                             ...content,
                             basic_info: { ...content.basic_info, title: e.target.value },
                           })}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                          className="w-full px-3 py-2 border border-white/10 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500"
                         />
                       </div>
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">求职意向</label>
+                        <label className="block text-sm font-medium text-slate-300 mb-1">求职意向</label>
                         <input
                           type="text"
                           value={content.basic_info?.job_intention || ''}
@@ -718,12 +718,12 @@ export default function ResumeEditorPage() {
                             ...content,
                             basic_info: { ...content.basic_info, job_intention: e.target.value },
                           })}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                          className="w-full px-3 py-2 border border-white/10 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500"
                         />
                       </div>
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">个人简介</label>
+                      <label className="block text-sm font-medium text-slate-300 mb-1">个人简介</label>
                       <RichTextEditor
                         content={content.basic_info?.summary || ''}
                         onChange={(html) => setContent({
@@ -735,7 +735,7 @@ export default function ResumeEditorPage() {
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">自我介绍</label>
+                      <label className="block text-sm font-medium text-slate-300 mb-1">自我介绍</label>
                       <RichTextEditor
                         content={content.basic_info?.self_introduction || ''}
                         onChange={(html) => setContent({
@@ -753,7 +753,7 @@ export default function ResumeEditorPage() {
               {activeTab === 1 && (
                 <div className="space-y-6">
                   <div className="flex justify-between items-center mb-4">
-                    <h2 className="text-xl font-semibold">教育经历</h2>
+                    <h2 className="text-xl font-semibold text-slate-100">教育经历</h2>
                     <button onClick={addEducation} className="btn btn-primary flex items-center gap-2">
                       <Plus className="w-4 h-4" /> 添加
                     </button>
@@ -787,7 +787,7 @@ export default function ResumeEditorPage() {
               {activeTab === 2 && (
                 <div className="space-y-6">
                   <div className="flex justify-between items-center mb-4">
-                    <h2 className="text-xl font-semibold">工作经历</h2>
+                    <h2 className="text-xl font-semibold text-slate-100">工作经历</h2>
                     <button onClick={addWork} className="btn btn-primary flex items-center gap-2">
                       <Plus className="w-4 h-4" /> 添加
                     </button>
@@ -821,7 +821,7 @@ export default function ResumeEditorPage() {
               {activeTab === 3 && (
                 <div className="space-y-6">
                   <div className="flex justify-between items-center mb-4">
-                    <h2 className="text-xl font-semibold">项目经历</h2>
+                    <h2 className="text-xl font-semibold text-slate-100">项目经历</h2>
                     <button onClick={addProject} className="btn btn-primary flex items-center gap-2">
                       <Plus className="w-4 h-4" /> 添加
                     </button>
@@ -855,7 +855,7 @@ export default function ResumeEditorPage() {
               {activeTab === 4 && (
                 <div className="space-y-6">
                   <div className="flex justify-between items-center mb-4">
-                    <h2 className="text-xl font-semibold">技能特长</h2>
+                    <h2 className="text-xl font-semibold text-slate-100">技能特长</h2>
                     <button onClick={addSkill} className="btn btn-primary flex items-center gap-2">
                       <Plus className="w-4 h-4" /> 添加
                     </button>
@@ -865,7 +865,7 @@ export default function ResumeEditorPage() {
                       {content.skills?.map((skill, index) => (
                         <span
                           key={`skill-${index}-${skill.name || ''}`}
-                          className="bg-primary-100 text-primary-800 px-3 py-1 rounded-full text-sm font-medium flex items-center gap-2"
+                          className="bg-amber-500/20 text-amber-300 px-3 py-1 rounded-full text-sm font-medium flex items-center gap-2"
                         >
                           {skill.name}
                           <button
@@ -877,7 +877,7 @@ export default function ResumeEditorPage() {
                         </span>
                       ))}
                       {(!content.skills || content.skills.length === 0) && (
-                        <p className="text-gray-500">暂无技能，点击上方按钮添加</p>
+                        <p className="text-slate-500">暂无技能，点击上方按钮添加</p>
                       )}
                     </div>
                   </div>

@@ -124,7 +124,7 @@ export default function RegisterPage() {
           {/* Logo & Title - 桌面端优化：缩小尺寸 */}
           <div className="text-center mb-6 animate-fade-in">
             <Link to="/" className="inline-flex items-center justify-center gap-2 mb-4">
-              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-sky-400 to-accent-500 flex items-center justify-center shadow-neon-blue animate-pulse-glow">
+              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-amber-400 to-emerald-500 flex items-center justify-center shadow-neon-blue animate-pulse-glow">
                 <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                 </svg>
@@ -288,16 +288,16 @@ export default function RegisterPage() {
                   checked={agreedToTerms}
                   onChange={(e) => setAgreedToTerms(e.target.checked)}
                   required
-                  className="mt-0.5 w-4 h-4 rounded border-slate-600 text-sky-500 focus:ring-sky-500 focus:ring-offset-slate-900"
+                  className="mt-0.5 w-4 h-4 rounded border-slate-600 text-amber-500 focus:ring-amber-500 focus:ring-offset-slate-900"
                   data-testid="terms-checkbox"
                 />
                 <label htmlFor="terms-checkbox" className="text-xs text-slate-300 flex-1">
                   我已阅读并同意{' '}
-                  <Link to="/terms" className="text-sky-400 hover:text-sky-300">
+                  <Link to="/terms" className="text-amber-400 hover:text-amber-300">
                     《用户协议》
                   </Link>
                   {' 和 '}
-                  <Link to="/privacy" className="text-sky-400 hover:text-sky-300">
+                  <Link to="/privacy" className="text-amber-400 hover:text-amber-300">
                     《隐私政策》
                   </Link>
                 </label>
@@ -321,7 +321,7 @@ export default function RegisterPage() {
 
               <div className="text-center text-xs text-slate-400 mt-4">
                 已有账号？{' '}
-                <Link to="/login" className="text-sky-400 hover:text-sky-300 font-medium" data-testid="login-link">
+                <Link to="/login" className="text-amber-400 hover:text-amber-300 font-medium" data-testid="login-link">
                   立即登录
                 </Link>
               </div>
@@ -330,8 +330,8 @@ export default function RegisterPage() {
 
           {/* Tech Decorative Elements */}
           <div className="mt-4 flex justify-center gap-2">
-            <div className="w-1.5 h-1.5 rounded-full bg-sky-500 animate-pulse"></div>
-            <div className="w-1.5 h-1.5 rounded-full bg-accent-500 animate-pulse [animation-delay:0.2s]"></div>
+            <div className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></div>
+            <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse [animation-delay:0.2s]"></div>
             <div className="w-1.5 h-1.5 rounded-full bg-pink-500 animate-pulse [animation-delay:0.4s]"></div>
           </div>
         </div>

@@ -40,7 +40,7 @@ export default function HomePage() {
           <div className="flex items-center gap-8">
             <Link to="/dashboard" className="flex items-center gap-3">
               <div
-                className="w-10 h-10 rounded-xl bg-gradient-to-br from-sky-400 to-accent-500 flex items-center justify-center shadow-neon-blue"
+                className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-400 to-emerald-500 flex items-center justify-center shadow-neon-blue"
                 style={{ width: '40px', height: '40px' }}
               >
                 <svg
@@ -74,7 +74,7 @@ export default function HomePage() {
 
           <div className="flex items-center gap-4">
             <div className="hidden sm:flex items-center gap-3 px-4 py-2 rounded-xl glass-effect">
-              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-sky-400 to-accent-500 flex items-center justify-center text-white text-sm font-bold">
+              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-amber-400 to-emerald-500 flex items-center justify-center text-white text-sm font-bold">
                 {displayName.charAt(0).toUpperCase()}
               </div>
               <span className="text-sm text-slate-300">{displayName}</span>
@@ -167,8 +167,8 @@ export default function HomePage() {
       <section className="relative pt-32 pb-20 px-4">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16 animate-fade-in">
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass-effect text-sky-400 text-sm mb-6">
-              <span className="w-2 h-2 rounded-full bg-sky-400 animate-pulse"></span>
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass-effect text-amber-400 text-sm mb-6">
+              <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span>
               AI 驱动的智能简历平台
             </div>
 
@@ -195,7 +195,7 @@ export default function HomePage() {
             <div className="flex flex-wrap justify-center gap-4">
               <Link
                 to="/resumes/new"
-                className="inline-flex items-center justify-center gap-2 px-8 py-4 font-semibold rounded-xl transition-all duration-300 cursor-pointer bg-gradient-to-r from-sky-500 to-accent-500 text-white hover:scale-105 shadow-lg shadow-sky-500/30 text-lg"
+                className="inline-flex items-center justify-center gap-2 px-8 py-4 font-semibold rounded-xl transition-all duration-300 cursor-pointer bg-gradient-to-r from-amber-500 to-emerald-500 text-white hover:scale-105 shadow-lg shadow-amber-500/30 text-lg"
                 data-testid="create-resume-link"
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -226,7 +226,7 @@ export default function HomePage() {
               { label: '用户数量', value: '10K+', icon: 'M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a1 1 0 001-1.857V7a3 3 0 013-3h3a1 1 0 001 1v7a3 3 0 01-1 1.857' },
             ].map((stat) => (
               <Card key={stat.label} variant="glass" className="text-center group hover:scale-105 transition-transform">
-                <svg className="w-8 h-8 mx-auto mb-3 text-sky-400 group-hover:text-sky-300 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-8 h-8 mx-auto mb-3 text-amber-400 group-hover:text-amber-300 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={stat.icon} />
                 </svg>
                 <div className="text-2xl font-bold text-gradient-primary">{stat.value}</div>
@@ -303,7 +303,7 @@ export default function HomePage() {
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={feature.icon} />
                     </svg>
                   </IconWrapper>
-                  <h3 className="text-xl font-semibold text-white mb-2 group-hover:text-sky-400 transition-colors">
+                  <h3 className="text-xl font-semibold text-white mb-2 group-hover:text-amber-400 transition-colors">
                     {feature.title}
                   </h3>
                   <p className="text-slate-400">{feature.description}</p>
@@ -322,7 +322,7 @@ export default function HomePage() {
               <h2 className="text-title font-bold text-white mb-2">最近编辑</h2>
               <p className="text-slate-400">继续编辑你的简历</p>
             </div>
-            <Link to="/resumes" className="text-sky-400 hover:text-sky-300 transition-colors flex items-center gap-2">
+            <Link to="/resumes" className="text-amber-400 hover:text-amber-300 transition-colors flex items-center gap-2">
               查看全部
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
@@ -343,7 +343,7 @@ export default function HomePage() {
             </p>
             <Link
               to="/resumes/new"
-              className="inline-flex items-center justify-center gap-2 px-6 py-3 font-semibold rounded-xl transition-all duration-300 cursor-pointer bg-gradient-to-r from-sky-500 to-accent-500 text-white hover:scale-105 shadow-lg shadow-sky-500/30"
+              className="inline-flex items-center justify-center gap-2 px-6 py-3 font-semibold rounded-xl transition-all duration-300 cursor-pointer bg-gradient-to-r from-amber-500 to-emerald-500 text-white hover:scale-105 shadow-lg shadow-amber-500/30"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -359,7 +359,7 @@ export default function HomePage() {
         <div className="max-w-4xl mx-auto">
           <div className="relative rounded-3xl p-12 text-center overflow-hidden">
             {/* Background Gradient */}
-            <div className="absolute inset-0 bg-gradient-to-r from-sky-600 via-accent-500 to-pink-500 opacity-90"></div>
+            <div className="absolute inset-0 bg-gradient-to-r from-amber-600 via-emerald-500 to-pink-500 opacity-90"></div>
             <div className="absolute inset-0 bg-grid opacity-20"></div>
 
             {/* Content */}

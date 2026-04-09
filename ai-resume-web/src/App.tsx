@@ -6,6 +6,7 @@ import { Spinner } from './components/UIComponents';
 
 // 懒加载页面组件 - 代码分割优化
 const LandingPage = lazy(() => import('./pages/LandingPage'));
+const TraePage = lazy(() => import('./pages/TraePage'));
 const LoginPage = lazy(() => import('./pages/LoginPage'));
 const RegisterPage = lazy(() => import('./pages/RegisterPage'));
 const ForgotPasswordPage = lazy(() => import('./pages/ForgotPasswordPage'));
@@ -68,6 +69,16 @@ function App() {
           element={
             <PageLoader>
               <LandingPage />
+            </PageLoader>
+          }
+        />
+
+        {/* Trae.ai 推广页 */}
+        <Route
+          path="/trae"
+          element={
+            <PageLoader>
+              <TraePage />
             </PageLoader>
           }
         />

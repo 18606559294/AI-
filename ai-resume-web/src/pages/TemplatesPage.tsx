@@ -67,19 +67,19 @@ export default function TemplatesPage() {
         description="50+免费专业简历模板，涵盖应届生、校招、互联网、金融、教育等行业。AI智能填写，一键导出PDF，在线制作更高效。"
         keywords="简历模板,应届生简历模板,校招简历模板,免费简历模板,简历模板下载,行业简历模板"
       />
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-slate-950">
       {/* 顶部导航栏 */}
-      <header className="bg-white shadow-sm sticky top-0 z-10">
+      <header className="bg-slate-900/80 backdrop-blur-sm border-b border-white/10 sticky top-0 z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
-            <Link to="/dashboard" className="text-xl font-bold text-primary-600">
+            <Link to="/dashboard" className="text-xl font-bold text-amber-400">
               AI 简历
             </Link>
             <div className="flex items-center gap-4">
-              <Link to="/resumes" className="text-gray-700 hover:text-primary-600">
+              <Link to="/resumes" className="text-slate-300 hover:text-amber-400">
                 我的简历
               </Link>
-              <Link to="/profile" className="text-gray-700 hover:text-primary-600">
+              <Link to="/profile" className="text-slate-300 hover:text-amber-400">
                 个人中心
               </Link>
             </div>
@@ -88,7 +88,7 @@ export default function TemplatesPage() {
       </header>
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <h1 className="text-2xl font-bold mb-6">免费简历模板 - 应届生·校招·行业 50+精美模板</h1>
+        <h1 className="text-2xl font-bold mb-6 text-slate-100">免费简历模板 - 应届生·校招·行业 50+精美模板</h1>
 
         {/* 搜索和筛选 */}
         <div className="card p-4 mb-6">
@@ -108,7 +108,7 @@ export default function TemplatesPage() {
 
           {/* 分类筛选 */}
           <div className="mt-4">
-            <h3 className="text-sm font-medium text-gray-700 mb-2">行业分类</h3>
+            <h3 className="text-sm font-medium text-slate-300 mb-2">行业分类</h3>
             <div className="flex flex-wrap gap-2">
               {categories.map((category) => (
                 <button
@@ -119,8 +119,8 @@ export default function TemplatesPage() {
                   }}
                   className={`px-4 py-2 rounded-lg text-sm transition-colors ${
                     selectedCategory === category
-                      ? 'bg-primary-600 text-white'
-                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                      ? 'bg-amber-500 text-white'
+                      : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
                   }`}
                 >
                   {category}
@@ -131,7 +131,7 @@ export default function TemplatesPage() {
 
           {/* 职级筛选 */}
           <div className="mt-4">
-            <h3 className="text-sm font-medium text-gray-700 mb-2">经验水平</h3>
+            <h3 className="text-sm font-medium text-slate-300 mb-2">经验水平</h3>
             <div className="flex flex-wrap gap-2">
               {levels.map((level) => (
                 <button
@@ -142,8 +142,8 @@ export default function TemplatesPage() {
                   }}
                   className={`px-4 py-2 rounded-lg text-sm transition-colors ${
                     selectedLevel === level
-                      ? 'bg-primary-600 text-white'
-                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                      ? 'bg-amber-500 text-white'
+                      : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
                   }`}
                 >
                   {level}
@@ -156,18 +156,18 @@ export default function TemplatesPage() {
         {/* 模板网格 */}
         {isLoading ? (
           <div className="text-center py-12">
-            <div className="inline-block w-8 h-8 border-4 border-primary-200 border-t-primary-600 rounded-full animate-spin" />
+            <div className="inline-block w-8 h-8 border-4 border-amber-200 border-t-amber-500 rounded-full animate-spin" />
           </div>
         ) : templates.length === 0 ? (
           <div className="card p-12 text-center">
-            <p className="text-gray-500">暂无模板</p>
+            <p className="text-slate-400">暂无模板</p>
           </div>
         ) : (
           <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {templates.map((template) => (
               <div key={template.id} className="card overflow-hidden group">
                 {/* 缩略图 */}
-                <div className="aspect-[3/4] bg-gray-100 relative">
+                <div className="aspect-[3/4] bg-slate-800 relative">
                   {template.thumbnail_url ? (
                     <img
                       src={template.thumbnail_url}
@@ -176,7 +176,7 @@ export default function TemplatesPage() {
                     />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center">
-                      <svg className="w-16 h-16 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg className="w-16 h-16 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                       </svg>
                     </div>
@@ -191,7 +191,7 @@ export default function TemplatesPage() {
                 {/* 信息 */}
                 <div className="p-4">
                   <h3 className="font-semibold mb-1 truncate">{template.name}</h3>
-                  <p className="text-sm text-gray-500 mb-3">
+                  <p className="text-sm text-slate-400 mb-3">
                     {template.use_count} 人使用
                   </p>
 
