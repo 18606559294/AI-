@@ -70,9 +70,9 @@ describe('HelpPage', () => {
     expect(screen.getByText('4. 导出简历')).toBeInTheDocument();
   });
 
-  it('有返回登录链接', () => {
+  it('有登录链接', () => {
     render(<HelpPage />, { wrapper });
 
-    expect(screen.getByText('返回登录')).toBeInTheDocument();
+    expect(screen.getByText('登录')).toBeInTheDocument();
   });
 });

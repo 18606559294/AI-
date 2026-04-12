@@ -62,7 +62,7 @@ describe('PrivacyPage', () => {
       </MemoryRouter>
     );
 
-    expect(screen.getByText('返回登录')).toBeInTheDocument();
+    expect(screen.getByText('登录')).toBeInTheDocument();
   });
 
   it('包含AI服务说明', () => {

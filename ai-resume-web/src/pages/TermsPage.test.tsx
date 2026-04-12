@@ -52,7 +52,7 @@ describe('TermsPage', () => {
       </MemoryRouter>
     );
 
-    expect(screen.getByText('返回登录')).toBeInTheDocument();
+    expect(screen.getByText('登录')).toBeInTheDocument();
   });
 
   it('显示平台Logo', () => {
@@ -62,6 +62,6 @@ describe('TermsPage', () => {
       </MemoryRouter>
     );
 
-    expect(screen.getByText('AI简历')).toBeInTheDocument();
+    expect(screen.getByText('AI 简历')).toBeInTheDocument();
   });
 });
