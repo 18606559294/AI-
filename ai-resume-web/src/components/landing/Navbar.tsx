@@ -21,6 +21,7 @@ export default function Navbar() {
           </Link>
 
           <div className="lp-nav-menu">
+            <Link to="/career" className="lp-nav-link">职业智能</Link>
             <Link to="/about" className="lp-nav-link">关于</Link>
             <Link to="/help" className="lp-nav-link">帮助</Link>
             <Link to="/trae" className="lp-nav-link">Trae AI</Link>
@@ -41,6 +42,7 @@ export default function Navbar() {
       </nav>
 
       <div className={`lp-mobile-menu${menuOpen ? ' open' : ''}`}>
+        <Link to="/career" className="lp-nav-link" onClick={() => setMenuOpen(false)}>职业智能</Link>
         <Link to="/about" className="lp-nav-link" onClick={() => setMenuOpen(false)}>关于</Link>
         <Link to="/help" className="lp-nav-link" onClick={() => setMenuOpen(false)}>帮助</Link>
         <Link to="/trae" className="lp-nav-link" onClick={() => setMenuOpen(false)}>Trae AI</Link>

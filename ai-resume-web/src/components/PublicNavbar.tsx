@@ -3,6 +3,7 @@ import { Link, useLocation } from 'react-router-dom';
 
 const NAV_ITEMS = [
   { path: '/', label: '首页' },
+  { path: '/career', label: '职业智能' },
   { path: '/about', label: '关于' },
   { path: '/help', label: '帮助' },
   { path: '/trae', label: 'Trae AI' },

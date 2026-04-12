@@ -8,6 +8,7 @@ import PublicLayout from './components/PublicLayout';
 // 懒加载页面组件 - 代码分割优化
 const LandingPage = lazy(() => import('./pages/LandingPage'));
 const TraePage = lazy(() => import('./pages/TraePage'));
+const CareerPage = lazy(() => import('./pages/CareerPage'));
 const LoginPage = lazy(() => import('./pages/LoginPage'));
 const RegisterPage = lazy(() => import('./pages/RegisterPage'));
 const ForgotPasswordPage = lazy(() => import('./pages/ForgotPasswordPage'));
@@ -75,6 +76,14 @@ function App() {
         />
 
         {/* 公开页面（统一全局导航） */}
+        <Route
+          path="/career"
+          element={
+            <PageLoader>
+              <CareerPage />
+            </PageLoader>
+          }
+        />
         <Route
           path="/trae"
           element={
