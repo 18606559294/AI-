@@ -15,6 +15,7 @@ from app.api.v1.email_verification import router as email_verification_router
 from app.api.v1.ai_config import router as ai_config_router
 from app.api.v1.ai_usage import router as ai_usage_router
 from app.api.v1.search import router as search_router
+from app.api.v1.career import router as career_router
 
 router = APIRouter()
 
@@ -32,3 +33,4 @@ router.include_router(email_verification_router)
 router.include_router(ai_config_router)
 router.include_router(ai_usage_router)
 router.include_router(search_router)
+router.include_router(career_router)    # 职业智能 (/career/*)

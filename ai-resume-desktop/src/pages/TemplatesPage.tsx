@@ -18,7 +18,7 @@ export default function TemplatesPage() {
     queryFn: () => api.template.getTemplates(filter),
   });
 
-  const templates = data?.items ?? [];
+  const templates = data?.data ?? [];
 
   const handleSearch = () => {
     setFilter({

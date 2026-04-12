@@ -14,7 +14,7 @@ export default function ResumeListPage() {
     queryFn: () => api.resume.getResumes(filter),
   });
 
-  const resumes = data?.items ?? [];
+  const resumes = data?.data ?? [];
 
   const handleDelete = async (id: number) => {
     if (!confirm('确定要删除这份简历吗？此操作无法撤销。')) return;
