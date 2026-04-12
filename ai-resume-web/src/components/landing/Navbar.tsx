@@ -21,10 +21,11 @@ export default function Navbar() {
           </Link>
 
           <div className="lp-nav-menu">
-            <Link to="/login" className="lp-nav-link">AI 简历</Link>
-            <Link to="/templates" className="lp-nav-link">模板</Link>
             <Link to="/about" className="lp-nav-link">关于</Link>
-            <a href="/resources/" className="lp-nav-link">资源工具</a>
+            <Link to="/help" className="lp-nav-link">帮助</Link>
+            <Link to="/trae" className="lp-nav-link">Trae AI</Link>
+            <Link to="/terms" className="lp-nav-link">条款</Link>
+            <Link to="/privacy" className="lp-nav-link">隐私</Link>
             <Link to="/login" className="lp-nav-link lp-nav-login">登录</Link>
             <Link to="/register" className="lp-nav-cta">免费注册</Link>
           </div>
@@ -40,10 +41,11 @@ export default function Navbar() {
       </nav>
 
       <div className={`lp-mobile-menu${menuOpen ? ' open' : ''}`}>
-        <Link to="/login" className="lp-nav-link" onClick={() => setMenuOpen(false)}>AI 简历</Link>
-        <Link to="/templates" className="lp-nav-link" onClick={() => setMenuOpen(false)}>模板</Link>
         <Link to="/about" className="lp-nav-link" onClick={() => setMenuOpen(false)}>关于</Link>
-        <a href="/resources/" className="lp-nav-link">资源工具</a>
+        <Link to="/help" className="lp-nav-link" onClick={() => setMenuOpen(false)}>帮助</Link>
+        <Link to="/trae" className="lp-nav-link" onClick={() => setMenuOpen(false)}>Trae AI</Link>
+        <Link to="/terms" className="lp-nav-link" onClick={() => setMenuOpen(false)}>条款</Link>
+        <Link to="/privacy" className="lp-nav-link" onClick={() => setMenuOpen(false)}>隐私</Link>
         <Link to="/login" className="lp-nav-link" onClick={() => setMenuOpen(false)}>登录</Link>
         <Link to="/register" className="lp-nav-cta" onClick={() => setMenuOpen(false)}>免费注册</Link>
       </div>

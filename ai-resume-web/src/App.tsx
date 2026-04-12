@@ -3,6 +3,7 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import { useAuthStore } from './store/auth';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { Spinner } from './components/UIComponents';
+import PublicLayout from './components/PublicLayout';
 
 // 懒加载页面组件 - 代码分割优化
 const LandingPage = lazy(() => import('./pages/LandingPage'));
@@ -63,7 +64,7 @@ function App() {
   return (
     <ErrorBoundary>
       <Routes>
-        {/* 公开首页 - Landing Page */}
+        {/* 公开首页 - Landing Page（独立导航） */}
         <Route
           path="/"
           element={
@@ -73,22 +74,28 @@ function App() {
           }
         />
 
-        {/* Trae.ai 推广页 */}
+        {/* 公开页面（统一全局导航） */}
         <Route
           path="/trae"
           element={
             <PageLoader>
-              <TraePage />
+              <PublicLayout fullPage>
+                <TraePage />
+              </PublicLayout>
             </PageLoader>
           }
         />
-
-        {/* 公开路由 */}
         <Route
           path="/login"
           element={
             <PageLoader>
-              {!isAuthenticated ? <LoginPage /> : <Navigate to="/dashboard" replace />}
+              {!isAuthenticated ? (
+                <PublicLayout>
+                  <LoginPage />
+                </PublicLayout>
+              ) : (
+                <Navigate to="/dashboard" replace />
+              )}
             </PageLoader>
           }
         />
@@ -96,7 +103,13 @@ function App() {
           path="/register"
           element={
             <PageLoader>
-              {!isAuthenticated ? <RegisterPage /> : <Navigate to="/dashboard" replace />}
+              {!isAuthenticated ? (
+                <PublicLayout>
+                  <RegisterPage />
+                </PublicLayout>
+              ) : (
+                <Navigate to="/dashboard" replace />
+              )}
             </PageLoader>
           }
         />
@@ -104,7 +117,9 @@ function App() {
           path="/forgot-password"
           element={
             <PageLoader>
-              <ForgotPasswordPage />
+              <PublicLayout>
+                <ForgotPasswordPage />
+              </PublicLayout>
             </PageLoader>
           }
         />

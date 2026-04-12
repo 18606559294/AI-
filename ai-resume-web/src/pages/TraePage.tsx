@@ -11,22 +11,8 @@ export default function TraePage() {
         title="AI简历生成器 - 免费在线智能简历制作工具 | ndtool"
         description="免费AI简历生成器，一键生成专业简历。50+精美模板，AI智能优化，支持PDF/Word导出。应届生、职场转型首选在线简历工具。"
       />
-      <div className="trae-page">
-        {/* Navigation */}
-        <nav className="lp-nav">
-          <div className="lp-nav-inner">
-            <Link to="/" className="lp-logo">ndtool</Link>
-            <div className="lp-nav-links">
-              <Link to="/login" className="lp-nav-link">AI 简历</Link>
-              <a href="/resources/" className="lp-nav-link">资源工具</a>
-              <a href="/blog/ai-resume-guide.html" className="lp-nav-link">简历攻略</a>
-              <a href={TRAE_URL} target="_blank" rel="noopener" className="lp-cta-btn">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" width="16" height="16"><path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" /></svg>
-                立即体验
-              </a>
-            </div>
-          </div>
-        </nav>
+      <div className="trae-page" style={{ paddingTop: '64px' }}>
+        {/* Navigation replaced by global PublicNavbar via PublicLayout */}
 
         {/* Hero */}
         <section className="lp-hero">

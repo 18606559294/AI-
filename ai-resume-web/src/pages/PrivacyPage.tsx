@@ -1,11 +1,11 @@
-import { Link } from 'react-router-dom';
 import { GradientText, Orb } from '../components/UIComponents';
+import PublicLayout from '../components/PublicLayout';
 
 export default function PrivacyPage() {
   const effectiveDate = '2024年1月1日';
 
   return (
-    <div className="min-h-screen relative overflow-x-hidden bg-slate-950">
+    <PublicLayout>
       {/* Background Orbs */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden">
         <Orb color="primary" size={200} className="top-0 left-0 -translate-x-1/2 -translate-y-1/2 opacity-20" />
@@ -17,24 +17,6 @@ export default function PrivacyPage() {
 
       {/* Main Content */}
       <div className="relative z-10">
-        {/* Header */}
-        <header className="border-b border-slate-800/50 backdrop-blur-sm">
-          <div className="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">
-            <Link to="/" className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-400 to-emerald-500 flex items-center justify-center shadow-neon-blue">
-                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                </svg>
-              </div>
-              <span className="text-white font-semibold">AI简历</span>
-            </Link>
-            <Link to="/login" className="text-sm text-slate-400 hover:text-slate-300 transition-colors">
-              返回登录
-            </Link>
-          </div>
-        </header>
-
-        {/* Content */}
         <main className="max-w-4xl mx-auto px-4 py-12">
           <div className="card-glass">
             <h1 className="text-3xl font-bold mb-2">
@@ -201,6 +183,6 @@ export default function PrivacyPage() {
           </div>
         </main>
       </div>
-    </div>
+    </PublicLayout>
   );
 }
