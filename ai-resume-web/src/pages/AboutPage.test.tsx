@@ -5,14 +5,24 @@ import { describe, it, expect } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { MemoryRouter } from 'react-router-dom';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import AboutPage from './AboutPage';
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: { retry: false },
+    mutations: { retry: false },
+  },
+});
 
 describe('AboutPage', () => {
   it('渲染关于我们页面', () => {
     render(
-      <MemoryRouter>
-        <AboutPage />
-      </MemoryRouter>
+      <QueryClientProvider client={queryClient}>
+        <MemoryRouter>
+          <AboutPage />
+        </MemoryRouter>
+      </QueryClientProvider>
     );
 
     expect(screen.getByText('关于我们')).toBeInTheDocument();

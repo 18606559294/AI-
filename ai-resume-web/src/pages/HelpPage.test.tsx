@@ -6,6 +6,7 @@ import { render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { MemoryRouter } from 'react-router-dom';
 import { HelmetProvider } from 'react-helmet-async';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import HelpPage from './HelpPage';
 
 // Mock UIComponents
@@ -19,13 +20,22 @@ vi.mock('../components/SEO', () => ({
   SEO: () => null,
 }));
 
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: { retry: false },
+    mutations: { retry: false },
+  },
+});
+
 describe('HelpPage', () => {
   const wrapper = ({ children }: { children: React.ReactNode }) => (
-    <HelmetProvider>
-      <MemoryRouter>
-        {children}
-      </MemoryRouter>
-    </HelmetProvider>
+    <QueryClientProvider client={queryClient}>
+      <HelmetProvider>
+        <MemoryRouter>
+          {children}
+        </MemoryRouter>
+      </HelmetProvider>
+    </QueryClientProvider>
   );
 
   it('渲染帮助中心页面', () => {

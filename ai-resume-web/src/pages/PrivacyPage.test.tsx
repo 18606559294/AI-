@@ -5,14 +5,24 @@ import { describe, it, expect } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { MemoryRouter } from 'react-router-dom';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import PrivacyPage from './PrivacyPage';
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: { retry: false },
+    mutations: { retry: false },
+  },
+});
 
 describe('PrivacyPage', () => {
   it('渲染隐私政策页面', () => {
     render(
-      <MemoryRouter>
-        <PrivacyPage />
-      </MemoryRouter>
+      <QueryClientProvider client={queryClient}>
+        <MemoryRouter>
+          <PrivacyPage />
+        </MemoryRouter>
+      </QueryClientProvider>
     );
 
     expect(screen.getByText('隐私政策')).toBeInTheDocument();
